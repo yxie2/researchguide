@@ -15,7 +15,20 @@ const provider = http.createServer(async (req, res) => {
   res.end(
     JSON.stringify({
       choices: [
-        { message: { content: 'Mock guidance: explain the limitation.' }, finish_reason: 'stop' },
+        {
+          message: {
+            content: calls.at(-1).body.messages[0].content.includes('actively guiding')
+              ? JSON.stringify({
+                  reply: 'We can work with the information you have.',
+                  question: 'Does this draft reflect your intended population?',
+                  gaps: ['Dataset access remains undecided'],
+                  draft:
+                    'Research question: Describe the distribution of course grades in an available undergraduate cohort. AI use is not measured, so no inference about AI effects is possible. Confirm dataset access before analysis.',
+                })
+              : 'Mock guidance: explain the limitation.',
+          },
+          finish_reason: 'stop',
+        },
       ],
     }),
   );
@@ -67,6 +80,31 @@ try {
   await page.getByRole('button', { name: /Ask the research team/ }).click();
   await page.getByText('Guidance saved in your project history.', { exact: true }).waitFor();
   assert.equal(calls.length, 4);
+  await page.getByRole('button', { name: 'Guided conversation', exact: true }).click();
+  await page.getByRole('button', { name: 'Start guiding me', exact: true }).click();
+  await page.getByText('Your guide has responded.', { exact: true }).waitFor();
+  await page
+    .locator('#conversation-answer')
+    .fill('I have undergraduate grades but no AI-use measure.');
+  await page.getByRole('button', { name: 'Continue conversation', exact: true }).click();
+  await page.getByText('Your guide has responded.', { exact: true }).waitFor();
+  assert.equal(JSON.parse(calls.at(-1).body.messages[1].content).conversation.length, 1);
+  await page.getByRole('button', { name: 'Accept draft into notebook', exact: true }).click();
+  await page
+    .getByText('Draft saved. Open Your workspace to explain your reasoning and request review.', {
+      exact: true,
+    })
+    .waitFor();
+  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
+  assert.match(await page.locator('#artifact').inputValue(), /AI use is not measured/);
+  await page.reload();
+  await page
+    .getByText('Does this draft reflect your intended population?', { exact: true })
+    .first()
+    .waitFor();
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await page.screenshot({ path: 'docs/images/conversation.png', fullPage: true });
   await page.getByRole('button', { name: 'LLM settings', exact: true }).click();
   await page.locator('#llm-provider').selectOption('ollama');
   await page.locator('#model-name').fill('installed-model');

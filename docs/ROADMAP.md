@@ -15,6 +15,12 @@
 - Separate local key storage, masked reads, connection testing, and endpoint change protection.
 - Configurable output limits and environment defaults.
 
+## v0.3 — Conversational guidance (implemented)
+
+- Conversation first entry into all milestones, with persistent answers and follow-up questions.
+- Model-generated artifact proposals with explicit acceptance, stale-version protection, and normal review invalidation.
+- Conversation export and mocked integration/browser checks. Initial live DeepSeek verification used synthetic context; educational effectiveness remains unvalidated.
+
 ## Next — A real pilot in one discipline
 
 Recruit beginning PhD students and supervisors before increasing scope. Review the templates with a domain-methods specialist. Choose a licensed public dataset and a narrow, answerable question.

@@ -24,6 +24,7 @@ try {
       'How is feedback frequency associated with end-of-term scores among first-year students?',
     );
   await page.getByRole('button', { name: 'Create research notebook' }).click();
+  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
   await page
     .getByLabel('Research brief')
     .fill(
@@ -78,6 +79,7 @@ try {
   const download = await downloadPromise;
   assert.equal(download.suggestedFilename(), 'researchguide-project.md');
   await page.getByRole('button', { name: '✓ Question' }).click();
+  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
   await page
     .getByLabel('Research brief')
     .fill(
@@ -86,6 +88,7 @@ try {
   await page.getByRole('button', { name: 'Save your work', exact: true }).click();
   await page.getByText('Saved on this computer', { exact: true }).waitFor();
   await page.reload();
+  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
   await page.getByLabel('Research brief').waitFor();
   assert.match(await page.getByLabel('Research brief').inputValue(), /Updated research question/);
   await page.setViewportSize({ width: 390, height: 844 });

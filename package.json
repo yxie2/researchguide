@@ -1,6 +1,6 @@
 {
   "name": "researchguide",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "A guided research workspace for beginning PhD students and their supervisors.",
@@ -11,6 +11,6 @@
     "start": "node --env-file-if-exists=.env server.mjs",
     "dev": "node --watch --env-file-if-exists=.env server.mjs",
     "test": "node --test",
-    "check": "node --check server.mjs && node --check lib/workflow.mjs && node --check lib/guide.mjs && node --check public/app.js && node --check lib/llm.mjs"
+    "check": "node --check server.mjs && node --check lib/workflow.mjs && node --check lib/guide.mjs && node --check public/app.js && node --check lib/llm.mjs && node --check lib/conversation.mjs"
   }
 }

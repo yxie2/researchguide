@@ -7,7 +7,7 @@ let project,
   modelSettings,
   settingsDraft,
   selected = 'question',
-  tab = 'workspace',
+  tab = 'conversation',
   draft,
   busy = false,
   newProject = false,
@@ -123,7 +123,7 @@ function navigate(id) {
     return;
   selected = id;
   draft = null;
-  tab = 'workspace';
+  tab = 'conversation';
   newProject = false;
   render();
 }
@@ -404,6 +404,155 @@ function workspace() {
 function updateSaveLabel() {
   const label = $('#save-label');
   if (label) label.textContent = isDirty() ? 'Unsaved changes' : 'Saved on this computer';
+}
+function conversationPanel() {
+  const turns = current().conversation || [];
+  const latest = turns.at(-1);
+  const send = (message) =>
+    perform(async () => {
+      if (isDirty()) await saveDraft();
+      const response = await api('/api/conversation', {
+        stageId: selected,
+        question: message,
+        revision: project.revision,
+        settingsRevision: modelSettings.revision,
+      });
+      project = response.project;
+    }, 'Your guide has responded.');
+  return el(
+    'div',
+    { className: 'columns' },
+    el(
+      'section',
+      {},
+      el('h2', {}, 'Let’s work it out together.'),
+      el(
+        'p',
+        { className: 'muted' },
+        'Start with what you know. Your guide asks one question at a time and helps build a draft from your answers.',
+      ),
+      mode === 'demo' &&
+        el(
+          'div',
+          { className: 'note' },
+          'Conversational guidance needs a model. Open LLM settings and choose Ollama or an API. The demo is available under Research team.',
+        ),
+      !turns.length &&
+        el(
+          'div',
+          { className: 'empty' },
+          el(
+            'p',
+            {},
+            `We’ll begin with “${project.question || project.title}”. You do not need to complete the notebook first.`,
+          ),
+          button(
+            'Start guiding me',
+            () =>
+              send(
+                'Help me begin this milestone. Start from my project interest and ask me the most useful first question.',
+              ),
+            '',
+            { disabled: busy || mode === 'demo' },
+          ),
+        ),
+      el(
+        'div',
+        { className: 'conversation-log', 'aria-label': 'Guidance conversation' },
+        turns.map((t) =>
+          el(
+            'article',
+            { className: 'conversation-turn' },
+            el('p', { className: 'eyebrow' }, 'You'),
+            el('p', { className: 'prewrap' }, t.message),
+            el('p', { className: 'eyebrow' }, `Research guide · ${t.model} · ${date(t.at)}`),
+            el('p', { className: 'prewrap' }, t.reply),
+            el('p', { className: 'next-question' }, t.question),
+          ),
+        ),
+      ),
+      el(
+        'form',
+        {
+          onSubmit: (e) => {
+            e.preventDefault();
+            send($('#conversation-answer').value);
+          },
+        },
+        field(
+          'conversation-answer',
+          'Your answer or question',
+          'An incomplete answer is fine. Tell the guide when you need an explanation.',
+          '',
+          true,
+          { required: true, maxlength: 2000, placeholder: 'Here is what I know so far…' },
+        ),
+        el(
+          'button',
+          { type: 'submit', className: 'button', disabled: busy || mode === 'demo' },
+          busy ? 'Thinking…' : 'Continue conversation',
+        ),
+      ),
+      el(
+        'p',
+        { className: 'small muted' },
+        mode === 'demo'
+          ? 'No model is connected.'
+          : `Each turn sends saved research context and this milestone’s conversation to ${modelSettings.baseUrl}.`,
+      ),
+    ),
+    el(
+      'aside',
+      { className: 'guide-aside' },
+      el('p', { className: 'eyebrow' }, 'Your developing notebook'),
+      el('h2', {}, latest?.draft ? 'Review the proposed draft.' : 'Build understanding first.'),
+      latest?.gaps.length > 0 && [
+        el('h3', {}, 'Still to resolve'),
+        el(
+          'ul',
+          {},
+          latest.gaps.map((g) => el('li', {}, g)),
+        ),
+      ],
+      latest?.draft
+        ? [
+            el(
+              'p',
+              { className: 'small' },
+              'Check that this reflects your decisions. Accepting replaces this milestone’s artifact and preserves your own explanation.',
+            ),
+            el('div', { className: 'prewrap proposed-draft' }, latest.draft),
+            button(
+              latest.accepted ? 'Draft accepted' : 'Accept draft into notebook',
+              () =>
+                perform(async () => {
+                  if (isDirty()) await saveDraft();
+                  await mutate({ type: 'accept_draft', stageId: selected, turnId: latest.id });
+                  draft = { artifact: current().artifact, explanation: current().explanation };
+                }, 'Draft saved. Open Your workspace to explain your reasoning and request review.'),
+              '',
+              { disabled: busy || latest.accepted || latest.artifactVersion !== current().version },
+            ),
+            latest.artifactVersion !== current().version &&
+              !latest.accepted &&
+              el(
+                'p',
+                { className: 'small' },
+                'Your artifact changed. Ask the guide to revise its draft before accepting.',
+              ),
+          ]
+        : el(
+            'p',
+            {},
+            'The guide will propose a draft when your answers provide enough information. You can also ask it to draft what is known and mark unresolved decisions.',
+          ),
+      el(
+        'p',
+        { className: 'small muted' },
+        'You provide your own explanation in Your workspace. Supervisor reviews still control progression. The guide cannot search papers, execute analyses, or certify research quality.',
+      ),
+    ),
+  );
 }
 function guidePanel() {
   const runs = current().guideRuns,
@@ -784,7 +933,7 @@ function onboardPanel() {
             const response = await api('/api/new', { ...values, revision: project.revision });
             project = response.project;
             selected = 'question';
-            tab = 'workspace';
+            tab = 'conversation';
             draft = null;
             newProject = false;
           }, 'Your research notebook is ready.');
@@ -1059,6 +1208,7 @@ function render() {
   if (!draft) draft = { artifact: current().artifact, explanation: current().explanation };
   const panels = {
     workspace,
+    conversation: conversationPanel,
     guide: guidePanel,
     sources: sourcesPanel,
     review: reviewPanel,
@@ -1067,6 +1217,7 @@ function render() {
     settings: settingsPanel,
   };
   const tabs = [
+    ['conversation', 'Guided conversation'],
     ['workspace', 'Your workspace'],
     ['guide', 'Research team'],
     ['sources', 'Sources'],

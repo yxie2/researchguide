@@ -18,6 +18,18 @@ Open **http://127.0.0.1:3000**. The default demo works without an account, API k
 
 This application intentionally listens on loopback only. It is a single-user local prototype, not a public web service. Publishing the source repository does not deploy the application.
 
+## Start with a conversation
+
+New projects and milestones now open **Guided conversation**. Configure Ollama or a hosted API, then click **Start guiding me**, or type what you know. You do not need to fill in an artifact first.
+
+The guide uses your project, saved work, sources, and earlier answers to choose a focused follow-up question. It explains gaps and can propose a complete milestone draft. Ask it to revise anything inaccurate, then click **Accept draft into notebook** when it reflects your decisions. Acceptance saves a versioned artifact; it preserves your own explanation and renews affected review requirements. Outdated proposals cannot overwrite newer artifacts.
+
+Open **Your workspace** to explain the reasoning in your own words and request supervisor review. The conversational guide is available across all seven milestones; the original three-role feedback remains under **Research team**. Each conversational turn uses one model call with a validated structured response. It does not independently search, execute analyses, approve work, or certify rigor.
+
+Conversations persist and are included in JSON and Markdown exports. Each milestone supports up to 60 turns; the full saved conversation for that milestone is sent to the configured provider on subsequent turns. Demo mode does not simulate adaptive conversation. Existing notebooks work without migration.
+
+Example: tell the guide, “I want to study AI use and learning, but I only have course grades.” Explain whether AI use was measured. The guide should help determine whether the question is feasible, identify missing measures, and propose a revised brief for your review. Model suggestions still require critical assessment.
+
 ## Try the complete workflow
 
 1. Choose **New project** and describe what you want to investigate.
@@ -63,7 +75,7 @@ Project text and up to 20 source records are sent to your configured endpoint. H
 
 ## Implemented versus planned
 
-| Available in v0.2                                       | Planned, not implemented                              |
+| Available in v0.3                                       | Planned, not implemented                              |
 | ------------------------------------------------------- | ----------------------------------------------------- |
 | Seven milestone templates and worked examples           | Validated adaptive teaching and competence assessment |
 | Student explanations and supervisor checkpoints         | Authenticated roles and remote collaboration          |
@@ -90,6 +102,7 @@ Node HTTP server (loopback only)
 ```
 
 - `lib/workflow.mjs`: milestone definitions, transitions, approval gates, invalidation, and export.
+- `lib/conversation.mjs`: persistent conversational guidance and validated artifact proposals.
 - `lib/guide.mjs`: transparent guidance traces and optional model orchestration.
 - `lib/llm.mjs`: provider adapters, configuration validation, and masked settings.
 - `server.mjs`: request validation, concurrency controls, persistence, and static serving.

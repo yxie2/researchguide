@@ -695,3 +695,18 @@ details p {
     scroll-behavior: auto !important;
   }
 }
+.conversation-turn {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.next-question {
+  font-weight: 600;
+}
+.proposed-draft {
+  max-height: 34rem;
+  overflow: auto;
+  padding-bottom: 1.5rem;
+}
+.conversation-log {
+  margin-bottom: 2rem;
+}

@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { converse, appendConversation } from './lib/conversation.mjs';
 import { readFile, writeFile, mkdir, rename, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -159,7 +160,7 @@ export async function createApp({
             writing = false;
           }
         }
-        if (pathname === '/api/guide') {
+        if (pathname === '/api/guide' || pathname === '/api/conversation') {
           if (guiding || writing)
             throw new WorkflowError(
               'A run or save is already in progress. Try again shortly.',
@@ -177,7 +178,13 @@ export async function createApp({
           guiding = true;
           const snapshot = structuredClone(project);
           try {
-            const run = await guide(snapshot, payload.stageId, question, { ...settings });
+            const conversational = pathname === '/api/conversation';
+            const run = await (conversational ? converse : guide)(
+              snapshot,
+              payload.stageId,
+              question,
+              { ...settings },
+            );
             // A result may not be attached to a project/version changed during generation.
             if (project.id !== snapshot.id || project.revision !== snapshot.revision)
               throw new WorkflowError(
@@ -186,7 +193,11 @@ export async function createApp({
               );
             writing = true;
             try {
-              await persist(appendGuide(project, payload.stageId, run));
+              await persist(
+                conversational
+                  ? appendConversation(project, payload.stageId, run)
+                  : appendGuide(project, payload.stageId, run),
+              );
             } finally {
               writing = false;
             }
