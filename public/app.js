@@ -4,6 +4,8 @@ let project,
   stages = [],
   mode = 'demo',
   model = null,
+  modelSettings,
+  settingsDraft,
   selected = 'question',
   tab = 'workspace',
   draft,
@@ -231,11 +233,27 @@ function topbar() {
     el(
       'span',
       { className: 'mode' },
-      mode === 'demo' ? '◌ Demo guide · No AI calls' : `● Local AI · ${model}`,
+      mode === 'demo'
+        ? '◌ Demo guide · No AI calls'
+        : `● ${mode === 'ollama' ? 'Ollama' : 'LLM API'} · ${model}`,
     ),
     el(
       'div',
       { className: 'toolbar' },
+      button(
+        'LLM settings',
+        () =>
+          perform(async () => {
+            const data = await api('/api/settings');
+            modelSettings = data.settings;
+            mode = modelSettings.provider;
+            model = modelSettings.model;
+            settingsDraft = null;
+            tab = 'settings';
+            newProject = false;
+          }),
+        'quiet',
+      ),
       button(
         'New project',
         () => {
@@ -402,6 +420,7 @@ function guidePanel() {
             stageId: selected,
             question,
             revision: project.revision,
+            settingsRevision: modelSettings.revision,
           });
           project = response.project;
         }, 'Guidance saved in your project history.');
@@ -411,8 +430,8 @@ function guidePanel() {
       'guide-question',
       'Where are you getting stuck?',
       mode === 'demo'
-        ? 'The demo returns a milestone-specific worked example. Connect Ollama for answers to your question.'
-        : 'The local model will use your saved artifact, sources, and student explanation.',
+        ? 'The demo returns a milestone-specific worked example. Choose a model in LLM settings for answers to your question.'
+        : `Your saved artifact, sources, earlier milestones, and explanation will be sent to ${modelSettings.baseUrl}. Each guide run makes three model calls.`,
       '',
       true,
       {
@@ -447,7 +466,7 @@ function guidePanel() {
         el(
           'div',
           { className: 'note' },
-          `${latest.mode === 'demo' ? 'Deterministic demo' : `Model: ${latest.model}`} · Artifact v${latest.artifactVersion} · ${date(latest.finishedAt)}${latest.artifactVersion !== current().version ? ' · Your artifact has changed since this run.' : ''}`,
+          `${latest.mode === 'demo' ? 'Deterministic demo' : `${latest.mode} · ${latest.model}${latest.endpoint ? ` · ${latest.endpoint}` : ''}`} · Artifact v${latest.artifactVersion} · ${date(latest.finishedAt)}${latest.artifactVersion !== current().version ? ' · Your artifact has changed since this run.' : ''}`,
         ),
       latest
         ? el(
@@ -722,7 +741,7 @@ function aboutPanel() {
     el(
       'p',
       {},
-      'Seven guided milestones, editable artifacts, understanding prompts, source records, version history, local review decisions, dependency invalidation, Markdown and JSON exports, and an optional local-model mentor/reviewer/coordinator sequence.',
+      'Seven guided milestones, editable artifacts, understanding prompts, source records, version history, local review decisions, dependency invalidation, exports, and an optional mentor/reviewer/coordinator sequence using Ollama or an OpenAI-compatible API.',
     ),
     el('h3', {}, 'What is still ahead'),
     el(
@@ -730,17 +749,17 @@ function aboutPanel() {
       {},
       'Authenticated collaboration, literature retrieval, citation verification, dataset inspection, sandboxed R execution, and validated assessments of research competence. The analysis milestone currently records work you perform in your own analysis environment.',
     ),
-    el('h3', {}, 'Connect a local model'),
+    el('h3', {}, 'Choose your model'),
     el(
       'p',
       {},
-      'Install Ollama and a model, copy .env.example to .env, set OLLAMA_MODEL to the installed model name, then restart the server. The guide makes three sequential model calls. Demo mode never sends your project to a model.',
+      'Open LLM settings to choose Demo, Ollama, or an OpenAI-compatible API. Configure the endpoint, model name, and API key if required. Saved settings apply immediately. The guide makes three sequential model calls. Demo mode never sends your project to a model.',
     ),
-    el('h3', {}, 'Your project stays on this computer'),
+    el('h3', {}, 'Storage and model processing'),
     el(
       'p',
       {},
-      'The server saves files in its data directory, excluded from Git. Export a JSON copy for backup. Creating a new project archives the previous one on disk. This prototype serves one local project at a time and has no multi-user security boundary.',
+      'The server saves project files and model settings in its data directory, excluded from Git. API mode sends project context to your configured provider. API keys are saved separately from project exports and are not returned by settings reads. This prototype serves one local project at a time and has no multi-user security boundary.',
     ),
   );
 }
@@ -809,6 +828,232 @@ function onboardPanel() {
     ),
   );
 }
+function settingsPanel() {
+  if (!settingsDraft) settingsDraft = { ...modelSettings, apiKey: '', clearApiKey: false };
+  const d = settingsDraft;
+  const providerSelect = el(
+    'select',
+    {
+      id: 'llm-provider',
+      disabled: busy,
+      onChange: (e) => {
+        d.provider = e.target.value;
+        d.apiKey = '';
+        d.clearApiKey = false;
+        d.baseUrl =
+          d.provider === modelSettings.provider
+            ? modelSettings.baseUrl
+            : d.provider === 'ollama'
+              ? 'http://127.0.0.1:11434'
+              : 'https://api.openai.com/v1';
+        d.model = d.provider === modelSettings.provider ? modelSettings.model : '';
+        render();
+      },
+    },
+    el('option', { value: 'demo' }, 'Demo — no model calls'),
+    el('option', { value: 'ollama' }, 'Ollama — installed model'),
+    el('option', { value: 'openai-compatible' }, 'OpenAI-compatible API'),
+  );
+  providerSelect.value = d.provider;
+  const keepKey =
+    modelSettings.hasApiKey &&
+    d.provider === modelSettings.provider &&
+    d.baseUrl.replace(/\/+$/, '') === modelSettings.baseUrl;
+  const tokenSelect = el(
+    'select',
+    {
+      id: 'token-parameter',
+      disabled: busy,
+      onChange: (e) => {
+        d.tokenParameter = e.target.value;
+      },
+    },
+    el('option', { value: 'max_completion_tokens' }, 'max_completion_tokens (OpenAI)'),
+    el('option', { value: 'max_tokens' }, 'max_tokens (other compatible APIs)'),
+  );
+  tokenSelect.value = d.tokenParameter;
+  return el(
+    'div',
+    { className: 'columns' },
+    el(
+      'section',
+      {},
+      el('h2', {}, 'Your choice of model.'),
+      el(
+        'p',
+        { className: 'muted' },
+        'Keep the demo, run a model with Ollama, or connect a hosted API. Saving these settings does not send a model request.',
+      ),
+      el(
+        'form',
+        {
+          onSubmit: (e) => {
+            e.preventDefault();
+            const values = { ...d, revision: modelSettings.revision };
+            perform(async () => {
+              const response = await api('/api/settings', values);
+              modelSettings = response.settings;
+              mode = modelSettings.provider;
+              model = modelSettings.model;
+              settingsDraft = null;
+            }, 'Model settings saved. Your next guide run will use this provider.');
+          },
+        },
+        el(
+          'div',
+          { className: 'form-row' },
+          el('label', { className: 'field', for: 'llm-provider' }, 'Provider'),
+          providerSelect,
+        ),
+        d.provider !== 'demo' && [
+          field(
+            'base-url',
+            'API base URL',
+            d.provider === 'ollama'
+              ? 'For example, http://127.0.0.1:11434. Do not append /api/chat.'
+              : 'For OpenAI, https://api.openai.com/v1. For other providers, use their compatible base URL, without /chat/completions.',
+            d.baseUrl,
+            false,
+            {
+              type: 'url',
+              required: true,
+              maxlength: 2000,
+              onInput: (e) => {
+                d.baseUrl = e.target.value;
+              },
+            },
+          ),
+          field(
+            'model-name',
+            'Model name',
+            'Enter the exact model ID available in your provider account or installed in Ollama.',
+            d.model,
+            false,
+            {
+              required: true,
+              maxlength: 200,
+              onInput: (e) => {
+                d.model = e.target.value;
+              },
+            },
+          ),
+          field(
+            'api-key',
+            'API key',
+            `${keepKey ? 'A key is saved. Leave blank to retain it for this same endpoint.' : 'Enter your provider key, or leave blank if this endpoint does not require one.'} Changing endpoint never transfers a saved key.`,
+            d.apiKey,
+            false,
+            {
+              type: 'password',
+              autocomplete: 'new-password',
+              maxlength: 4096,
+              onInput: (e) => {
+                d.apiKey = e.target.value;
+              },
+            },
+          ),
+          el(
+            'label',
+            { className: 'checkbox-label' },
+            el('input', {
+              type: 'checkbox',
+              checked: d.clearApiKey,
+              disabled: busy,
+              onChange: (e) => {
+                d.clearApiKey = e.target.checked;
+              },
+            }),
+            'Remove the saved API key when saving',
+          ),
+          field(
+            'output-tokens',
+            'Output token limit per call',
+            '128–16384. Reasoning models may need a larger limit. A guidance run makes three calls.',
+            d.maxOutputTokens,
+            false,
+            {
+              type: 'number',
+              min: 128,
+              max: 16384,
+              required: true,
+              onInput: (e) => {
+                d.maxOutputTokens = Number(e.target.value);
+              },
+            },
+          ),
+          d.provider === 'openai-compatible' &&
+            el(
+              'div',
+              { className: 'form-row' },
+              el(
+                'label',
+                { className: 'field', for: 'token-parameter' },
+                'Output limit parameter',
+                el(
+                  'span',
+                  { className: 'help' },
+                  'Select the parameter supported by your provider. Native Anthropic and Responses-only endpoints are not supported.',
+                ),
+              ),
+              tokenSelect,
+            ),
+        ],
+        el(
+          'div',
+          { className: 'form-actions' },
+          el(
+            'button',
+            { type: 'submit', className: 'button', disabled: busy },
+            'Save model settings',
+          ),
+          button(
+            'Test saved connection',
+            () =>
+              perform(async () => {
+                const response = await api('/api/settings/test', {
+                  revision: modelSettings.revision,
+                });
+                notice(response.message);
+              }),
+            'quiet',
+            { disabled: busy || modelSettings.provider === 'demo' },
+          ),
+        ),
+      ),
+      el(
+        'p',
+        { className: 'small muted' },
+        'The connection test uses the saved configuration and sends only a short test prompt. It may incur a small API charge. Unsaved form edits are not tested.',
+      ),
+    ),
+    el(
+      'aside',
+      { className: 'guide-aside' },
+      el('p', { className: 'eyebrow' }, 'Before you connect'),
+      el('h2', {}, 'Know where your work goes.'),
+      el(
+        'p',
+        { className: 'small' },
+        'Demo mode sends nothing. Model guidance sends your saved artifact, explanation, source passages, earlier milestones, and question to the configured endpoint.',
+      ),
+      el(
+        'p',
+        { className: 'small' },
+        'Keys are stored in a separate local settings file, excluded from Git and project exports. This file is not encrypted; protect access to this computer. A saved key is never sent back to the browser.',
+      ),
+      el(
+        'p',
+        { className: 'small' },
+        'Saved UI settings override .env defaults and apply without restarting. Switching to Demo removes the key from the active saved settings.',
+      ),
+      el(
+        'p',
+        { className: 'small' },
+        'Use HTTPS for remote APIs. Plain HTTP is accepted only on localhost. Model output remains guidance, not supervisor approval.',
+      ),
+    ),
+  );
+}
 function render() {
   if (!project) return;
   if (!draft) draft = { artifact: current().artifact, explanation: current().explanation };
@@ -819,6 +1064,7 @@ function render() {
     review: reviewPanel,
     activity: activityPanel,
     about: aboutPanel,
+    settings: settingsPanel,
   };
   const tabs = [
     ['workspace', 'Your workspace'],
@@ -842,7 +1088,14 @@ function render() {
           newProject
             ? onboardPanel()
             : [
-                heading(),
+                tab === 'settings'
+                  ? el(
+                      'header',
+                      { className: 'headline' },
+                      el('p', { className: 'eyebrow' }, 'ResearchGuide / Configuration'),
+                      el('h1', {}, 'LLM settings'),
+                    )
+                  : heading(),
                 el(
                   'nav',
                   { className: 'tabs', 'aria-label': 'Milestone views' },
@@ -868,7 +1121,7 @@ function render() {
                     'p',
                     { role: 'status', className: 'small muted' },
                     el('span', { className: 'busy' }),
-                    ' Working… Local-model guidance can take a few minutes.',
+                    ' Working… Model guidance can take a few minutes.',
                   ),
                 panels[tab](),
               ],
@@ -887,6 +1140,7 @@ async function load() {
   try {
     const data = await api('/api/project');
     ({ project, stages, mode, model } = data);
+    modelSettings = data.settings;
     selected = project.milestones.find((m) => m.status !== 'approved')?.id || 'writing';
     render();
   } catch (error) {

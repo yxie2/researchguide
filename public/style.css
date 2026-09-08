@@ -52,6 +52,7 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
+select:focus-visible,
 summary:focus-visible {
   outline: 3px solid #b78436;
   outline-offset: 4px;
@@ -325,7 +326,8 @@ p {
   margin: 7px 0;
 }
 textarea,
-input {
+input,
+select {
   width: 100%;
   border: 1px solid #b9c7b7;
   border-radius: 3px;
@@ -343,6 +345,20 @@ textarea.artifact {
 }
 input {
   min-height: 44px;
+}
+.checkbox-label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.8rem;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.checkbox-label input {
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  accent-color: var(--green);
 }
 .form-row {
   margin-bottom: 24px;

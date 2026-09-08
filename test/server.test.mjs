@@ -79,7 +79,12 @@ test('guidance blocks concurrent edits and only persists on success', async (t) 
       throw new Error('Deliberate provider failure');
     },
   });
-  const run = post('/api/guide', { revision: 0, stageId: 'question', question: 'Help' });
+  const run = post('/api/guide', {
+    settingsRevision: 0,
+    revision: 0,
+    stageId: 'question',
+    question: 'Help',
+  });
   await entered;
   assert.equal(
     (
@@ -102,6 +107,7 @@ test('guidance blocks concurrent edits and only persists on success', async (t) 
 test('demo guidance endpoint returns a saved trace', async (t) => {
   const { post } = await setup(t);
   const response = await post('/api/guide', {
+    settingsRevision: 0,
     revision: 0,
     stageId: 'question',
     question: 'Help me think',
@@ -110,4 +116,56 @@ test('demo guidance endpoint returns a saved trace', async (t) => {
   const data = await response.json();
   assert.equal(data.run.trace.length, 4);
   assert.equal(data.project.revision, 1);
+});
+
+test('settings persist separately, mask keys, and reject stale provider selection', async (t) => {
+  const { post, url, dataDir } = await setup(t);
+  const config = {
+    revision: 0,
+    provider: 'openai-compatible',
+    baseUrl: 'https://example.com/v1',
+    model: 'test',
+    apiKey: 'fake-only-secret',
+  };
+  const saved = await post('/api/settings', config);
+  assert.equal(saved.status, 200);
+  assert.equal((await saved.json()).settings.hasApiKey, true);
+  assert.equal((await post('/api/settings', config)).status, 409);
+  assert.equal(
+    (
+      await post('/api/guide', {
+        revision: 0,
+        settingsRevision: 0,
+        stageId: 'question',
+        question: 'Help',
+      })
+    ).status,
+    409,
+  );
+  for (const route of [
+    '/api/settings',
+    '/api/project',
+    '/api/export?format=json',
+    '/api/export?format=md',
+  ])
+    assert.equal((await (await fetch(url + route)).text()).includes(config.apiKey), false);
+  assert.equal((await fetch(url + '/data/model-settings.json')).status, 404);
+  const app2 = await createApp({ dataDir });
+  await new Promise((r) => app2.listen(0, '127.0.0.1', r));
+  try {
+    const restored = await (
+      await fetch(`http://127.0.0.1:${app2.address().port}/api/settings`)
+    ).json();
+    assert.equal(restored.settings.hasApiKey, true);
+    assert.equal(restored.settings.revision, 1);
+  } finally {
+    await new Promise((r) => app2.close(r));
+  }
+  const cleared = await post('/api/settings', {
+    ...config,
+    revision: 1,
+    apiKey: '',
+    baseUrl: 'https://other.example/v1',
+  });
+  assert.equal((await cleared.json()).settings.hasApiKey, false);
 });

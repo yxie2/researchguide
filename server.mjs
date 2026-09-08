@@ -13,15 +13,31 @@ import {
   WorkflowError,
 } from './lib/workflow.mjs';
 import { runGuide } from './lib/guide.mjs';
+import { normalizeSettings, settingsFromEnv, publicSettings, callModel } from './lib/llm.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 export async function createApp({
   dataDir = path.join(root, 'data'),
   model = '',
   modelUrl = 'http://127.0.0.1:11434',
+  llmSettings,
   guide = runGuide,
 } = {}) {
   await mkdir(dataDir, { recursive: true });
+  const settingsFile = path.join(dataDir, 'model-settings.json');
+  let settings =
+    llmSettings ||
+    normalizeSettings({ provider: model ? 'ollama' : 'demo', model, baseUrl: modelUrl });
+  let settingsRevision = 0;
+  try {
+    const saved = JSON.parse(await readFile(settingsFile, 'utf8'));
+    settings = normalizeSettings(saved.settings);
+    settingsRevision = saved.revision;
+    if (!Number.isSafeInteger(settingsRevision) || settingsRevision < 0)
+      throw new Error('Invalid saved model settings revision.');
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
   const projectFile = path.join(dataDir, 'project.json');
   let project;
   try {
@@ -78,9 +94,12 @@ export async function createApp({
         return send(200, {
           project,
           stages,
-          mode: model ? 'ollama' : 'demo',
-          model: model || null,
+          mode: settings.provider,
+          model: settings.model || null,
+          settings: publicSettings(settings, settingsRevision),
         });
+      if (pathname === '/api/settings' && req.method === 'GET')
+        return send(200, { settings: publicSettings(settings, settingsRevision) });
       if (pathname === '/api/export' && req.method === 'GET') {
         const format = new URL(req.url, `http://${host}`).searchParams.get('format');
         const json = format === 'json';
@@ -97,6 +116,49 @@ export async function createApp({
         const payload = await body(req);
         if (!payload || typeof payload !== 'object' || Array.isArray(payload))
           throw new WorkflowError('Request must be a JSON object.');
+        if (pathname === '/api/settings' || pathname === '/api/settings/test') {
+          if (guiding || writing)
+            throw new WorkflowError(
+              'Wait for the current operation before changing or testing model settings.',
+              409,
+            );
+          if (payload.revision !== settingsRevision)
+            throw new WorkflowError(
+              'Model settings changed in another tab. Reopen LLM settings before continuing.',
+              409,
+            );
+          if (pathname === '/api/settings/test') {
+            guiding = true;
+            try {
+              await callModel(
+                'You are testing a model connection. Respond briefly.',
+                'Reply with OK.',
+                settings,
+              );
+              return send(200, {
+                message:
+                  'Connection successful. The configured model returned text. No research project was sent.',
+              });
+            } finally {
+              guiding = false;
+            }
+          }
+          const next = normalizeSettings(payload, settings);
+          writing = true;
+          try {
+            await writeFile(
+              `${settingsFile}.tmp`,
+              JSON.stringify({ revision: settingsRevision + 1, settings: next }, null, 2),
+              { mode: 0o600 },
+            );
+            await rename(`${settingsFile}.tmp`, settingsFile);
+            settings = next;
+            settingsRevision += 1;
+            return send(200, { settings: publicSettings(settings, settingsRevision) });
+          } finally {
+            writing = false;
+          }
+        }
         if (pathname === '/api/guide') {
           if (guiding || writing)
             throw new WorkflowError(
@@ -104,13 +166,18 @@ export async function createApp({
               409,
             );
           milestone(project, payload.stageId);
+          if (payload.settingsRevision !== settingsRevision)
+            throw new WorkflowError(
+              'Model settings changed. Reload to review the active provider before sending your project.',
+              409,
+            );
           if (payload.revision !== project.revision)
             throw new WorkflowError('Project changed. Reload before requesting guidance.', 409);
           const question = text(payload.question, 'Question', 2000);
           guiding = true;
           const snapshot = structuredClone(project);
           try {
-            const run = await guide(snapshot, payload.stageId, question, { model, url: modelUrl });
+            const run = await guide(snapshot, payload.stageId, question, { ...settings });
             // A result may not be attached to a project/version changed during generation.
             if (project.id !== snapshot.id || project.revision !== snapshot.revision)
               throw new WorkflowError(
@@ -192,12 +259,11 @@ export async function createApp({
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const app = await createApp({
     dataDir: process.env.RESEARCHGUIDE_DATA_DIR || path.join(root, 'data'),
-    model: process.env.OLLAMA_MODEL || '',
-    modelUrl: process.env.OLLAMA_URL || 'http://127.0.0.1:11434',
+    llmSettings: settingsFromEnv(process.env),
   });
   app.listen(Number(process.env.PORT || 3000), '127.0.0.1', () =>
     console.log(
-      `ResearchGuide: http://127.0.0.1:${process.env.PORT || 3000}\nMode: ${process.env.OLLAMA_MODEL ? `Ollama (${process.env.OLLAMA_MODEL})` : 'Demo (no model calls)'}\nLocal prototype; supervisor reviews are not authenticated.`,
+      `ResearchGuide: http://127.0.0.1:${process.env.PORT || 3000}\nChoose Demo, Ollama, or an LLM API in LLM settings.\nLocal prototype; supervisor reviews are not authenticated.`,
     ),
   );
 }

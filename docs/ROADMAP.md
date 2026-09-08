@@ -9,7 +9,13 @@
 - Deterministic demo or optional three-call Ollama guidance sequence.
 - Local atomic persistence and automated transition/API tests.
 
-## v0.2 — A real pilot in one discipline
+## v0.2 — Configurable models (implemented)
+
+- UI settings for Demo, Ollama, and OpenAI-compatible APIs.
+- Separate local key storage, masked reads, connection testing, and endpoint change protection.
+- Configurable output limits and environment defaults.
+
+## Next — A real pilot in one discipline
 
 Recruit beginning PhD students and supervisors before increasing scope. Review the templates with a domain-methods specialist. Choose a licensed public dataset and a narrow, answerable question.
 
@@ -19,7 +25,7 @@ Recruit beginning PhD students and supervisors before increasing scope. Review t
 - Define evidence and output references that can be checked, not just pasted.
 - Add provider capabilities, cancellation, streamed run events, and explicit retry budgets.
 
-## v0.3 — Tool-using research execution
+## Later — Tool-using research execution
 
 - Retrieve authorized literature and record source provenance and scope limits.
 - Profile a supported public dataset without treating its contents as instructions.

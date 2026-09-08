@@ -30,29 +30,40 @@ This application intentionally listens on loopback only. It is a single-user loc
 
 You can draft ahead, but submitting a milestone requires approvals on all preceding milestones. Changing an earlier artifact invalidates its approval and affected downstream statuses while preserving historical reviews. Adding evidence also triggers renewed review of the evidence milestone and its dependents.
 
-## Use a real local model
+## Choose a local model or hosted API
 
-Install [Ollama](https://ollama.com/) and download a model appropriate for your computer. Copy `.env.example` to `.env`, set `OLLAMA_MODEL` to the exact installed model name, and restart ResearchGuide:
+Open **LLM settings** in the top bar. Choose:
+
+- **Demo**: offline template guidance, no model required.
+- **Ollama**: enter your installed model name and base URL (normally `http://127.0.0.1:11434`).
+- **OpenAI-compatible API**: enter the provider's base URL, exact model ID, and API key. For OpenAI the base URL is `https://api.openai.com/v1`.
+
+Click **Save model settings**, then **Test saved connection**. Changes apply immediately. The test sends only a short test prompt, without project content, and may incur a small provider charge. Saved keys are not returned to the browser; leaving the key blank retains it only for the same provider and endpoint. Use the removal checkbox to clear it.
+
+The API adapter uses [Chat Completions](https://developers.openai.com/api/reference/resources/chat). Select `max_completion_tokens` for OpenAI or `max_tokens` if required by another compatible provider. Native Anthropic and Responses-only endpoints are not supported. API compatibility and model access depend on your provider. Ollama uses its [`/api/chat` endpoint](https://docs.ollama.com/api/chat).
+
+Alternatively, copy `.env.example` to `.env` and configure startup defaults:
 
 ```dotenv
-OLLAMA_MODEL=your-installed-model-name
-OLLAMA_URL=http://127.0.0.1:11434
-PORT=3000
+LLM_PROVIDER=openai-compatible
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_MODEL=your-model-id
+LLM_API_KEY=your-api-key
+LLM_MAX_OUTPUT_TOKENS=4096
+LLM_TOKEN_PARAMETER=max_completion_tokens
 ```
 
-The optional adapter uses Ollama's documented [`/api/chat` endpoint](https://docs.ollama.com/api/chat). Each run makes three sequential model calls:
+For Ollama, set `LLM_PROVIDER=ollama`, `LLM_BASE_URL=http://127.0.0.1:11434`, and `LLM_MODEL` to your installed model name. Existing configurations using `OLLAMA_MODEL` and `OLLAMA_URL` still work when `LLM_PROVIDER` is unset.
 
-1. A milestone specialist receives the saved project context and student's question.
-2. A critical reviewer examines the specialist's response and artifact.
-3. A coordinator returns a bounded next task and points out decisions needing human review.
+Settings saved in the UI override environment defaults on restart. They are stored in `data/model-settings.json`, separately from project exports and excluded from Git. This local file is **not encrypted**. To return to environment defaults, stop the server and remove that settings file. Switching to Demo clears the active saved key, but does not modify environment files or backups.
 
-Each call has a 90-second timeout and an output-token limit. A failed provider call is reported as a failure; it never silently becomes demo output. Model guidance is saved only after the entire sequence completes. Writes are blocked during a run to keep results tied to the version examined.
+Each guidance run makes three sequential calls: a milestone specialist examines the saved context, a reviewer critiques its response, and a coordinator proposes the next task. Each call has a 90-second timeout and a configurable output limit. Failed or truncated responses are reported; a run is saved only after all calls succeed.
 
-Project text and up to 20 source records are included in model context. Keep the configured endpoint local if you intend local processing; changing `OLLAMA_URL` changes where that content is sent. The application does not provision, download, or train models.
+Project text and up to 20 source records are sent to your configured endpoint. Hosted API mode therefore processes research content with that provider. Remote endpoints require HTTPS; HTTP is accepted only on localhost. Endpoint redirects are not followed. Changing settings in another tab blocks guidance until the active provider is reviewed. The application does not provision, download, or train models.
 
 ## Implemented versus planned
 
-| Available in v0.1                                       | Planned, not implemented                              |
+| Available in v0.2                                       | Planned, not implemented                              |
 | ------------------------------------------------------- | ----------------------------------------------------- |
 | Seven milestone templates and worked examples           | Validated adaptive teaching and competence assessment |
 | Student explanations and supervisor checkpoints         | Authenticated roles and remote collaboration          |
@@ -74,12 +85,13 @@ Browser workspace
             │ same-origin JSON requests
 Node HTTP server (loopback only)
   ├── workflow state machine → atomic JSON persistence
-  ├── guide runner → deterministic demo OR Ollama role sequence
+  ├── guide runner → deterministic demo OR Ollama / compatible API role sequence
   └── versioned notebook export
 ```
 
 - `lib/workflow.mjs`: milestone definitions, transitions, approval gates, invalidation, and export.
-- `lib/guide.mjs`: transparent guidance traces and optional local-model orchestration.
+- `lib/guide.mjs`: transparent guidance traces and optional model orchestration.
+- `lib/llm.mjs`: provider adapters, configuration validation, and masked settings.
 - `server.mjs`: request validation, concurrency controls, persistence, and static serving.
 - `public/`: responsive, accessible browser interface with no framework dependency.
 - `test/`: workflow, server, persistence, concurrency, and mocked-provider tests.
@@ -110,9 +122,10 @@ The optional browser smoke test requires Playwright and Chromium:
 npm install --no-save --package-lock=false playwright
 npx playwright install chromium
 node scripts/browser-smoke.mjs
+node scripts/settings-smoke.mjs
 ```
 
-It uses temporary data, walks project creation through review, checks export and revision invalidation, verifies mobile overflow, and regenerates the screenshots. Browser checks are not currently included in CI. `PLAYWRIGHT_MODULE` can point to an existing Playwright module URL instead of installing it here.
+It uses temporary data, walks project creation through review, checks export and revision invalidation, verifies mobile overflow, and regenerates the screenshots. The settings smoke test checks provider configuration, masked keys, connection testing, and guidance against a mock API; no real API credentials are required. Browser checks are not currently included in CI. `PLAYWRIGHT_MODULE` can point to an existing Playwright module URL instead of installing it here.
 
 ## Contributing
 
