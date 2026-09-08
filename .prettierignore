@@ -1,0 +1,6 @@
+data/
+.env
+.env.*
+docs/images/
+node_modules/
+.git/
