@@ -74,7 +74,7 @@ The claim ledger is included in research guidance and Markdown/JSON exports. Cit
 
 PDF parsing is local and uses a worker with a 30-second timeout and a 256 MB JavaScript heap limit; this is not an operating-system sandbox. Limits are 10 papers, 500,000 extracted characters per paper, and two million per notebook. Each claim supports 20 assessment records, with 20 researcher decisions per assessment. Extraction uses [Mozilla PDF.js](https://mozilla.github.io/pdf.js/api/draft/module-pdfjsLib.html).
 
-Original PDFs live in `data/papers/`, named by SHA-256. JSON exports include extracted pages and provenance, but not original PDF bytes. Back up `data/papers/` with the notebook to retain originals; creating a new project preserves files needed by archived notebooks. Uploaded papers are not automatically sent to an LLM. Selected excerpts are sent during claim assessment; guidance receives source records and the first 30 claim records.
+Original PDFs live in `data/papers/`, named by SHA-256. **Export project → Download project backup** includes available originals, extracted pages and provenance. The legacy notebook-only JSON omits PDF bytes. Creating or opening a project preserves files needed by other saved projects. Uploaded papers are not automatically sent to an LLM. Selected excerpts are sent during claim assessment; guidance receives source records and the first 30 claim records.
 
 ## Check consistency across the study
 
@@ -136,7 +136,7 @@ Project text and up to 20 source records are sent to your configured endpoint. H
 
 ## Implemented versus planned
 
-| Available in v0.7                                            | Planned, not implemented                              |
+| Available in v0.8                                            | Planned, not implemented                              |
 | ------------------------------------------------------------ | ----------------------------------------------------- |
 | Seven milestone templates and worked examples                | Validated adaptive teaching and competence assessment |
 | Student explanations and supervisor checkpoints              | Authenticated roles and remote collaboration          |
@@ -177,11 +177,22 @@ No arbitrary code execution or automatic external publication is implemented. Br
 
 ## Data and backup
 
-The active project is stored in `data/project.json`. Creating a new project archives the previous one in the same directory; the interface currently opens only the active project. `data/` and `.env` are excluded from Git. This local storage is not encrypted and its activity log is not tamper-proof.
+Use the four project actions in the toolbar:
 
-Use **JSON export** to back up your project. To restore, stop the server, back up the current file, replace `data/project.json` with an unmodified export from this version, and restart. Do not load arbitrary or edited project files. A browser-based import flow and migrations are future work. The server fails on unreadable or unsupported saved data instead of overwriting it.
+| Action             | What it does                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Open project**   | Lists projects saved on this computer, including earlier archives. Open the latest saved version of a project while retaining the current one.               |
+| **New project**    | Creates a blank research notebook and keeps the previous saved project available under Open project.                                                         |
+| **Export project** | Downloads either a restorable JSON backup (including available original PDFs) or a readable Markdown report. Model settings and API keys are excluded.       |
+| **Import project** | Validates a ResearchGuide JSON backup, creates a separate copy with a new project ID, and opens it. Existing projects and model configuration remain intact. |
 
-Set `RESEARCHGUIDE_DATA_DIR` to an absolute directory path to store projects elsewhere. Backups, archives, and model-server records are outside the UI's lifecycle; manage them on your computer. Do not use this release for restricted participant data or authenticated institutional review.
+Unsaved milestone edits can be saved before export. Switching projects asks before discarding unsaved milestone edits. Only one project is open at a time; revisions increase across switches to reject stale writes from another tab.
+
+The active project is stored in `data/project.json`; previous projects are retained as versioned JSON archives in the same directory. `data/` and `.env` are excluded from Git. This local storage is not encrypted and its activity log is not tamper-proof.
+
+Choose **Import project**, select the backup, review the project title, then click **Import and open project**. Legacy notebook JSON exports also work, but may lack original PDF files; extracted text is retained. Demo reproduction bundles, CSV datasets and Markdown reports are not project backups. The maximum portable backup size is 63 MB. Invalid files are rejected without replacing the active notebook. Imported review records are retained as local, unauthenticated decisions, not verified approvals.
+
+Set `RESEARCHGUIDE_DATA_DIR` to an absolute directory path to store projects elsewhere. Unreadable or unsupported archives remain on disk and are omitted from the project list; repair them from a known-good backup. Project deletion, archive cleanup and schema migrations are not provided. Do not use this release for restricted participant data or authenticated institutional review.
 
 ## Development and verification
 

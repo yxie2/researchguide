@@ -1,4 +1,11 @@
 import http from 'node:http';
+import {
+  BACKUP_LIMIT,
+  parseBackup,
+  projectSummary,
+  savedProjects,
+  switchProject,
+} from './lib/projects.mjs';
 import { proposeAnalysis, executeAnalysis } from './lib/analysis.mjs';
 import { reviewConsistency, appendConsistency } from './lib/consistency.mjs';
 import { extractPaper, assessClaim } from './lib/evidence.mjs';
@@ -61,16 +68,22 @@ export async function createApp({
     await rename(`${projectFile}.tmp`, projectFile);
     project = next;
   }
+  async function archiveCurrent() {
+    await writeFile(
+      path.join(dataDir, `${project.id}-r${project.revision}.json`),
+      JSON.stringify(project, null, 2),
+    );
+  }
   async function body(req, limit = 128 * 1024) {
-    let content = '',
-      length = 0;
+    const chunks = [];
+    let length = 0;
     for await (const chunk of req) {
       length += chunk.length;
       if (length > limit) throw new WorkflowError('Request exceeds the permitted size.', 413);
-      content += chunk;
+      chunks.push(chunk);
     }
     try {
-      return JSON.parse(content);
+      return JSON.parse(Buffer.concat(chunks).toString('utf8'));
     } catch {
       throw new WorkflowError('Request must contain valid JSON.');
     }
@@ -122,6 +135,11 @@ export async function createApp({
           );
         }
         const filename = parts[1];
+        if (filename === 'figure.svg')
+          res.setHeader(
+            'Content-Security-Policy',
+            "sandbox; default-src 'none'; style-src 'unsafe-inline'",
+          );
         const content =
           filename === 'analysis.R'
             ? run.script
@@ -184,8 +202,55 @@ export async function createApp({
         });
       if (pathname === '/api/settings' && req.method === 'GET')
         return send(200, { settings: publicSettings(settings, settingsRevision) });
+      if (pathname === '/api/projects' && req.method === 'GET') {
+        const saved = await savedProjects(dataDir, project);
+        return send(200, {
+          projects: [...saved.values()].map((p) => projectSummary(p.project, p.active)),
+        });
+      }
       if (pathname === '/api/export' && req.method === 'GET') {
         const format = new URL(req.url, `http://${host}`).searchParams.get('format');
+        if (format === 'backup') {
+          const snapshot = structuredClone(project);
+          const attachments = [],
+            missingAttachments = [];
+          let size = Buffer.byteLength(JSON.stringify(snapshot));
+          if (size > BACKUP_LIMIT - 1024 * 1024)
+            throw new WorkflowError(
+              'Backup exceeds 63 MB. Use the legacy JSON export and copy the data/papers folder separately.',
+              413,
+            );
+          for (const paper of snapshot.papers || []) {
+            if (attachments.some((a) => a.sha256 === paper.sha256)) continue;
+            try {
+              const bytes = await readFile(path.join(dataDir, 'papers', `${paper.sha256}.pdf`));
+              const base64 = bytes.toString('base64');
+              size += base64.length;
+              if (size > BACKUP_LIMIT - 1024 * 1024)
+                throw new WorkflowError(
+                  'Backup exceeds 63 MB. Use the legacy JSON export and copy the data/papers folder separately.',
+                  413,
+                );
+              attachments.push({ sha256: paper.sha256, base64 });
+            } catch (error) {
+              if (error.code !== 'ENOENT') throw error;
+              missingAttachments.push(paper.id);
+            }
+          }
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Content-Disposition': 'attachment; filename="researchguide-backup.json"',
+            'Cache-Control': 'no-store',
+          });
+          return res.end(
+            JSON.stringify({
+              backupVersion: 1,
+              project: snapshot,
+              attachments,
+              missingAttachments,
+            }),
+          );
+        }
         const json = format === 'json';
         res.writeHead(200, {
           'Content-Type': json ? 'application/json' : 'text/markdown; charset=utf-8',
@@ -199,14 +264,47 @@ export async function createApp({
           throw new WorkflowError('Content-Type must be application/json.', 415);
         const payload = await body(
           req,
-          pathname === '/api/papers'
-            ? 7 * 1024 * 1024 + 4096
-            : pathname === '/api/analysis/datasets'
-              ? 3 * 1024 * 1024
-              : 128 * 1024,
+          pathname === '/api/projects/import'
+            ? BACKUP_LIMIT
+            : pathname === '/api/papers'
+              ? 7 * 1024 * 1024 + 4096
+              : pathname === '/api/analysis/datasets'
+                ? 3 * 1024 * 1024
+                : 128 * 1024,
         );
         if (!payload || typeof payload !== 'object' || Array.isArray(payload))
           throw new WorkflowError('Request must be a JSON object.');
+        if (['/api/projects/open', '/api/projects/import'].includes(pathname)) {
+          if (writing || guiding)
+            throw new WorkflowError('Wait for the current operation to finish.', 409);
+          if (payload.revision !== project.revision)
+            throw new WorkflowError('Project changed. Reload before switching projects.', 409);
+          writing = true;
+          try {
+            let next,
+              files = [];
+            const imported = pathname.endsWith('/import');
+            if (imported) ({ project: next, files } = parseBackup(payload.backup));
+            else {
+              const saved = await savedProjects(dataDir, project);
+              next = saved.get(payload.id)?.project;
+              if (!next)
+                throw new WorkflowError('Saved project not found. Refresh the project list.', 404);
+              if (next.id === project.id) return send(200, { project });
+            }
+            if (files.length) {
+              await mkdir(path.join(dataDir, 'papers'), { recursive: true });
+              for (const file of files)
+                await writeFile(path.join(dataDir, 'papers', `${file.sha256}.pdf`), file.bytes);
+            }
+            const opened = switchProject(next, project, imported);
+            await archiveCurrent();
+            await persist(opened);
+            return send(200, { project });
+          } finally {
+            writing = false;
+          }
+        }
         if (
           ['/api/analysis/datasets', '/api/analysis/propose', '/api/analysis/run'].includes(
             pathname,
@@ -415,12 +513,11 @@ export async function createApp({
                 'Project changed. Reload before creating a new project.',
                 409,
               );
-            // Preserve every previous project in a local archive.
-            await writeFile(
-              path.join(dataDir, `${project.id}-r${project.revision}.json`),
-              JSON.stringify(project, null, 2),
-            );
-            await persist(createProject(payload.title, payload.question));
+            const next = createProject(payload.title, payload.question);
+            // Keep revisions increasing across switches so another tab cannot edit the wrong project.
+            next.revision = project.revision + 1;
+            await archiveCurrent();
+            await persist(next);
           } else await persist(applyAction(project, payload));
           return send(200, { project });
         } finally {

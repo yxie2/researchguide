@@ -1,5 +1,7 @@
 # Security and data boundaries
 
+Project backups contain saved research data and available original PDFs, with a 63 MB portable-backup limit. Import validates notebook structure, source URL schemes, dataset hashes and attachment hashes, then opens a separate project; model settings and API keys are not restored. Import validation checks file compatibility and integrity, not scientific truth or authenticated approval. Existing analysis execution checks still require the exact fixed template and plan integrity. SVG run downloads have an additional sandboxed content security policy. Saved projects are retained when switching, and increasing revisions reject stale-tab writes.
+
 This release is for a single person running ResearchGuide on their own computer. It binds to 127.0.0.1, rejects non-local Host headers, restricts request origins, and serves only explicitly allowed public files. Do not put it behind a public reverse proxy or treat it as an authenticated service.
 
 Supervisor review is a local demonstration. A typed name is not an identity check. Anyone with access to the computer or data files can view or alter them. Files are not encrypted; the log is not tamper-proof. The software cannot certify research quality or permissions.

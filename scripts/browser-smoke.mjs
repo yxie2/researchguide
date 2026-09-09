@@ -75,7 +75,8 @@ try {
   await page.getByRole('button', { name: 'Add source', exact: true }).click();
   await page.getByRole('heading', { name: 'Illustrative source record' }).waitFor();
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('link', { name: 'Export notebook' }).click();
+  await page.getByRole('button', { name: 'Export project', exact: true }).click();
+  await page.getByRole('link', { name: 'Download readable report (.md)' }).click();
   const download = await downloadPromise;
   assert.equal(download.suggestedFilename(), 'researchguide-project.md');
   await page.getByRole('button', { name: '✓ Question' }).click();

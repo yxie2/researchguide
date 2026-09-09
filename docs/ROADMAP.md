@@ -1,5 +1,12 @@
 # From prototype to research pilot
 
+## v0.8 — Clear project management (implemented)
+
+- Explicit Open, New, Export and Import project actions.
+- Latest saved projects discoverable from existing archives; current work retained on switches.
+- Portable JSON backups with available original PDFs, legacy notebook imports and separate-copy restoration.
+- Readable reports distinguished from restorable backups; unsaved-edit protection and stale-tab rejection.
+
 ## v0.7 — Complete fictional teaching case (implemented)
 
 - v0.7.1 adds a business-school case on training and sales, a case selector, separate progress, an uncertain regression result, and aligned academic/executive reports.

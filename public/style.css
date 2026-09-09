@@ -13,6 +13,44 @@
   background: var(--paper);
   font-synthesis: none;
 }
+.project-manager {
+  max-width: 960px;
+}
+.saved-project {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.saved-project > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.saved-project h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.saved-project .button {
+  flex-shrink: 0;
+  max-width: 45%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.project-manager > h2,
+.import-preview {
+  margin-top: 2rem;
+}
+@media (max-width: 600px) {
+  .saved-project {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .saved-project .button {
+    max-width: 100%;
+  }
+}
 * {
   box-sizing: border-box;
 }

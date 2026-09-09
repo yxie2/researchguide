@@ -13,6 +13,10 @@ let project,
   newProject = false,
   noticeTimer;
 let selectedConsistencyId, analysisDatasetId, analysisPlanId;
+let projectView = null,
+  savedProjectList = [],
+  importBackup = null,
+  importFilename = '';
 let analysisManualOpen = false;
 let analysisDraft = { method: 'descriptive', outcome: null, predictor: null, rationale: '' };
 let selectedPaperId,
@@ -133,6 +137,7 @@ function navigate(id) {
   draft = null;
   tab = 'conversation';
   newProject = false;
+  projectView = null;
   render();
 }
 function field(id, title, hint, value = '', multiline = false, attrs = {}) {
@@ -220,6 +225,7 @@ function sidebar() {
         () => {
           tab = 'about';
           newProject = false;
+          projectView = null;
           render();
         },
         'quiet',
@@ -228,13 +234,6 @@ function sidebar() {
   );
 }
 function topbar() {
-  function exportClick(event) {
-    if (
-      isDirty() &&
-      !confirm('Export includes saved work only. Continue without your unsaved edits?')
-    )
-      event.preventDefault();
-  }
   return el(
     'div',
     { className: 'topbar' },
@@ -263,6 +262,7 @@ function topbar() {
             model = modelSettings.model;
             settingsDraft = null;
             tab = 'settings';
+            projectView = null;
             newProject = false;
             selectedPaperId = null;
             selectedPaperPage = 1;
@@ -275,19 +275,274 @@ function topbar() {
         () => {
           if (isDirty() && !confirm('Discard unsaved edits and open project setup?')) return;
           newProject = true;
+          projectView = null;
           render();
         },
         'quiet',
       ),
+      button(
+        'Open project',
+        () =>
+          perform(async () => {
+            const result = await api('/api/projects');
+            savedProjectList = result.projects;
+            projectView = 'open';
+            newProject = false;
+          }),
+        'quiet',
+      ),
+      button(
+        'Export project',
+        () => {
+          projectView = 'export';
+          newProject = false;
+          render();
+        },
+        'quiet',
+      ),
+      button(
+        'Import project',
+        () => {
+          projectView = 'import';
+          newProject = false;
+          render();
+        },
+        'quiet',
+      ),
+    ),
+  );
+}
+function adoptProject(next) {
+  project = next;
+  selected = project.milestones.find((m) => m.status !== 'approved')?.id || 'writing';
+  draft = null;
+  tab = 'conversation';
+  newProject = false;
+  projectView = null;
+  selectedPaperId = selectedConsistencyId = analysisDatasetId = analysisPlanId = undefined;
+  selectedPaperPage = 1;
+  claimEditor = { claim: '', sourceIds: [] };
+  analysisManualOpen = false;
+  analysisDraft = { method: 'descriptive', outcome: null, predictor: null, rationale: '' };
+  importBackup = null;
+  importFilename = '';
+}
+function projectPanel() {
+  const heading = { open: 'Open project', export: 'Export project', import: 'Import project' }[
+    projectView
+  ];
+  const discardUnsaved = () =>
+    !isDirty() ||
+    confirm(
+      'This milestone has unsaved edits. Discard those edits and switch projects? Your saved work will remain available under Open project.',
+    );
+  const exportSaved = (event) => {
+    if (
+      isDirty() &&
+      !confirm('This download includes saved work only. Continue without your unsaved edits?')
+    )
+      event.preventDefault();
+  };
+  const incoming = importBackup?.backupVersion === 1 ? importBackup.project : importBackup;
+  return el(
+    'section',
+    { className: 'onboard project-manager' },
+    el('p', { className: 'eyebrow' }, `Current project: ${project.title}`),
+    el('h1', {}, heading),
+    projectView === 'open' && [
       el(
-        'a',
-        { className: 'button quiet', href: '/api/export?format=md', onClick: exportClick },
-        'Export notebook ↓',
+        'p',
+        {},
+        'Continue a project saved on this computer. Opening another project keeps the current project’s saved work in this list.',
+      ),
+      el(
+        'div',
+        { className: 'project-list' },
+        savedProjectList.map((saved) =>
+          el(
+            'article',
+            { className: 'saved-project' },
+            el(
+              'div',
+              {},
+              el('h2', {}, saved.title),
+              el(
+                'p',
+                { className: 'small muted' },
+                `${saved.active ? 'Currently open · ' : ''}${saved.imported ? 'Imported copy · ' : ''}${saved.approved} of 7 milestones approved · Last activity ${date(saved.updatedAt)} · ID ${saved.id.slice(0, 8)}`,
+              ),
+            ),
+            button(
+              saved.active ? 'Currently open' : `Open ${saved.title}`,
+              () => {
+                if (!discardUnsaved()) return;
+                perform(async () => {
+                  const response = await api('/api/projects/open', {
+                    id: saved.id,
+                    revision: project.revision,
+                  });
+                  adoptProject(response.project);
+                }, 'Saved project opened.');
+              },
+              'quiet',
+              { disabled: busy || saved.active },
+            ),
+          ),
+        ),
+      ),
+      el(
+        'p',
+        { className: 'small muted' },
+        'This list includes earlier archived projects. A backup downloaded elsewhere can be added with Import project.',
+      ),
+    ],
+    projectView === 'export' && [
+      el(
+        'p',
+        {},
+        'Choose a format for the current project. Downloading does not remove or close it.',
+      ),
+      isDirty() &&
+        el(
+          'p',
+          { className: 'small' },
+          'You have unsaved milestone edits. ',
+          button(
+            'Save edits before exporting',
+            () => perform(saveDraft, 'Edits saved. You can now download the latest work.'),
+            'quiet',
+          ),
+        ),
+      el('h2', {}, 'Project backup · JSON'),
+      el(
+        'p',
+        {},
+        'Use this file with Import project to continue your work on another computer or restore a separate copy. Includes saved documents, conversations, sources, datasets, analysis results and available original PDFs. Model settings and API keys are excluded.',
       ),
       el(
         'a',
-        { className: 'button quiet', href: '/api/export?format=json', onClick: exportClick },
-        'JSON ↓',
+        { className: 'button', href: '/api/export?format=backup', onClick: exportSaved },
+        'Download project backup (.json)',
+      ),
+      el(
+        'p',
+        { className: 'small muted' },
+        'Backups may contain row-level research data. Missing original PDFs cannot be included; their extracted text remains in the notebook. Maximum backup size: 63 MB.',
+      ),
+      el('h2', {}, 'Readable report · Markdown'),
+      el(
+        'p',
+        {},
+        'Use this document to read or share your saved research notebook. It is a report, not a restorable project backup.',
+      ),
+      el(
+        'a',
+        { className: 'button quiet', href: '/api/export?format=md', onClick: exportSaved },
+        'Download readable report (.md)',
+      ),
+      el(
+        'details',
+        {},
+        el('summary', {}, 'Legacy notebook JSON'),
+        el(
+          'p',
+          { className: 'small' },
+          'This older format includes notebook records and extracted passages but no original PDF files. It can also be imported.',
+        ),
+        el(
+          'a',
+          { className: 'button quiet', href: '/api/export?format=json', onClick: exportSaved },
+          'Download notebook only (.json)',
+        ),
+      ),
+    ],
+    projectView === 'import' && [
+      el(
+        'p',
+        {},
+        'Choose a ResearchGuide project backup (.json). Import creates and opens a separate project; your existing projects stay available under Open project.',
+      ),
+      el('label', { className: 'field', for: 'project-backup' }, 'Project backup file'),
+      el('input', {
+        id: 'project-backup',
+        type: 'file',
+        accept: '.json,application/json',
+        disabled: busy,
+        onChange: async (event) => {
+          const file = event.target.files[0];
+          importBackup = null;
+          importFilename = '';
+          if (!file) return;
+          await perform(async () => {
+            if (file.size > 63 * 1024 * 1024)
+              throw new Error('Choose a backup smaller than 63 MB.');
+            let value;
+            try {
+              value = JSON.parse(await file.text());
+            } catch {
+              throw new Error(
+                'This file is not valid JSON. Choose a ResearchGuide project backup.',
+              );
+            }
+            const p = value?.backupVersion === 1 ? value.project : value;
+            if (
+              !p ||
+              p.schemaVersion !== 1 ||
+              typeof p.title !== 'string' ||
+              !Array.isArray(p.milestones) ||
+              p.milestones.length !== 7
+            )
+              throw new Error(
+                'Choose a ResearchGuide project backup. Demo reproduction bundles, CSV files and Markdown reports are not project backups.',
+              );
+            importBackup = value;
+            importFilename = file.name;
+          });
+        },
+      }),
+      incoming &&
+        el(
+          'section',
+          { className: 'import-preview' },
+          el('h2', {}, incoming.title),
+          el(
+            'p',
+            {},
+            `Selected file: ${importFilename}. Contains ${incoming.milestones.length} milestones.`,
+          ),
+          el(
+            'p',
+            { className: 'small muted' },
+            'The full backup is validated when you import. Recorded reviews remain local, unauthenticated decisions. Your model configuration stays as it is.',
+          ),
+          incoming.papers?.length > 0 &&
+            el(
+              'p',
+              { className: 'small' },
+              `${importBackup.attachments?.length || 0} original PDF attachments in this file; ${incoming.papers.length} paper records. Extracted text remains available even if an original PDF is missing.`,
+            ),
+          button('Import and open project', () => {
+            if (!discardUnsaved()) return;
+            perform(async () => {
+              const response = await api('/api/projects/import', {
+                revision: project.revision,
+                backup: importBackup,
+              });
+              adoptProject(response.project);
+            }, 'Backup imported as a separate project.');
+          }),
+        ),
+    ],
+    el(
+      'div',
+      { className: 'form-actions' },
+      button(
+        'Back to current project',
+        () => {
+          projectView = null;
+          render();
+        },
+        'quiet',
       ),
     ),
   );
@@ -2196,7 +2451,7 @@ function onboardPanel() {
           const values = Object.fromEntries(new FormData(e.currentTarget));
           perform(async () => {
             const response = await api('/api/new', { ...values, revision: project.revision });
-            project = response.project;
+            adoptProject(response.project);
             selectedPaperId = null;
             selectedPaperPage = 1;
             claimEditor = { claim: '', sourceIds: [] };
@@ -2241,7 +2496,7 @@ function onboardPanel() {
     el(
       'p',
       { className: 'small muted' },
-      'The previous project is archived on this computer. This release supports one active notebook at a time.',
+      'Creating a new project keeps your previous saved project. Choose Open project to return to it. One project is open at a time.',
     ),
   );
 }
@@ -2510,46 +2765,48 @@ function render() {
         el(
           'main',
           { id: 'main', className: 'workspace', 'aria-busy': busy },
-          newProject
-            ? onboardPanel()
-            : [
-                tab === 'settings'
-                  ? el(
-                      'header',
-                      { className: 'headline' },
-                      el('p', { className: 'eyebrow' }, 'ResearchGuide / Configuration'),
-                      el('h1', {}, 'LLM settings'),
-                    )
-                  : heading(),
-                el(
-                  'nav',
-                  { className: 'tabs', 'aria-label': 'Milestone views' },
-                  tabs.map(([id, label]) =>
-                    el(
-                      'button',
-                      {
-                        type: 'button',
-                        className: `tab ${tab === id ? 'active' : ''}`,
-                        disabled: busy,
-                        'aria-pressed': tab === id,
-                        onClick: () => {
-                          tab = id;
-                          render();
+          projectView
+            ? projectPanel()
+            : newProject
+              ? onboardPanel()
+              : [
+                  tab === 'settings'
+                    ? el(
+                        'header',
+                        { className: 'headline' },
+                        el('p', { className: 'eyebrow' }, 'ResearchGuide / Configuration'),
+                        el('h1', {}, 'LLM settings'),
+                      )
+                    : heading(),
+                  el(
+                    'nav',
+                    { className: 'tabs', 'aria-label': 'Milestone views' },
+                    tabs.map(([id, label]) =>
+                      el(
+                        'button',
+                        {
+                          type: 'button',
+                          className: `tab ${tab === id ? 'active' : ''}`,
+                          disabled: busy,
+                          'aria-pressed': tab === id,
+                          onClick: () => {
+                            tab = id;
+                            render();
+                          },
                         },
-                      },
-                      label,
+                        label,
+                      ),
                     ),
                   ),
-                ),
-                busy &&
-                  el(
-                    'p',
-                    { role: 'status', className: 'small muted' },
-                    el('span', { className: 'busy' }),
-                    ' Working… Model guidance can take a few minutes.',
-                  ),
-                panels[tab](),
-              ],
+                  busy &&
+                    el(
+                      'p',
+                      { role: 'status', className: 'small muted' },
+                      el('span', { className: 'busy' }),
+                      ' Working… Model guidance can take a few minutes.',
+                    ),
+                  panels[tab](),
+                ],
         ),
       ),
     ),
