@@ -2,7 +2,7 @@
 
 The open notebook forms a G, connecting learning with guidance. Forest green and a warm gold page complement the app's existing palette. The editorial serif wordmark suits university research across disciplines.
 
-`researchguide-logo.png` is the original generated raster asset with a transparent background, intended for light backgrounds. It is a design asset; the app header and favicon have not been replaced.
+`researchguide-logo.png` is the original generated raster asset with a transparent background, intended for light backgrounds. The app header uses a copy in `public/researchguide-logo.png`, displayed on a warm light background for contrast. The favicon remains unchanged.
 
 Generated with the built-in image-generation tool.
 

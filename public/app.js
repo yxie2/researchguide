@@ -204,7 +204,12 @@ function sidebar() {
   return el(
     'aside',
     { className: 'sidebar' },
-    el('div', { className: 'brand' }, 'ResearchGuide', el('small', {}, 'Learn through discovery')),
+    el(
+      'div',
+      { className: 'brand' },
+      el('img', { className: 'brand-logo', src: '/researchguide-logo.png', alt: 'ResearchGuide' }),
+      el('small', {}, 'Learn through discovery'),
+    ),
     el(
       'div',
       { className: 'project-block' },

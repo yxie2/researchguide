@@ -237,6 +237,14 @@ p {
   color: #f4f1e5;
   letter-spacing: -0.04em;
 }
+.brand-logo {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  padding: 6px;
+  background: var(--paper);
+}
 .brand small {
   display: block;
   font-family: 'Segoe UI', sans-serif;
@@ -757,8 +765,8 @@ details p {
     font-size: 1.5rem;
   }
   .brand small {
-    display: inline;
-    margin-left: 15px;
+    display: block;
+    margin-left: 0;
   }
   .sidebar .project-block,
   .side-foot {

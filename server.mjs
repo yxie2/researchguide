@@ -643,6 +643,7 @@ export async function createApp({
         '/workflow-flow.js': 'workflow-flow.js',
         '/style.css': 'style.css',
         '/favicon.svg': 'favicon.svg',
+        '/researchguide-logo.png': 'researchguide-logo.png',
       };
       if (!allowed[pathname]) throw new WorkflowError('Page not found.', 404);
       const file = path.join(root, 'public', allowed[pathname]);
@@ -652,6 +653,7 @@ export async function createApp({
         '.js': 'text/javascript; charset=utf-8',
         '.css': 'text/css; charset=utf-8',
         '.svg': 'image/svg+xml',
+        '.png': 'image/png',
       };
       res.writeHead(200, {
         'Content-Type': types[path.extname(file)],
