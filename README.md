@@ -21,6 +21,26 @@ This application intentionally listens on loopback only. It is a single-user loc
 
 ## Start with a conversation
 
+### One workflow page per research step
+
+The seven research steps are the main navigation. Each page now presents a vertical sequence of tasks, with one task expanded at a time; there is no separate row of tool tabs. Follow **Discuss → Write → Check → Review**, with specialized tasks embedded where needed:
+
+| Step             | Embedded work                                                                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Question         | Discuss, write the brief, get mentor feedback, request review                                                                             |
+| Evidence         | Discuss, inspect sources, check claims, write the evidence map, get feedback, request review                                              |
+| Design           | Discuss, write the protocol, get methods feedback, check alignment, request review                                                        |
+| Data             | Discuss, import/profile data if appropriate, document decisions, check alignment, request review                                          |
+| Analysis         | Discuss, review and approve the analysis plan, run and inspect results, document reasoning, get feedback, check alignment, request review |
+| Interpretation   | Discuss, write conclusions, inspect supporting claims, check alignment, get feedback, request review                                      |
+| Research package | Discuss, assemble the report, check alignment, request final review, export                                                               |
+
+**Your next action** explains a suggestion based on saved workflow state. These suggestions are deterministic navigation guidance; adaptive scientific conversation still comes from your configured model. **What carries forward** exposes saved documents from earlier steps. **Project materials** opens the shared source library, literature claim ledger, datasets and runs, consistency records, and project history without changing the selected research step.
+
+Opening a task does not mark it complete. Researcher draft acceptance, explicit execution approval, and supervisor review remain distinct. The **Continue to…** button appears after the step is approved locally; researchers may still draft ahead through the sidebar. Editing earlier work preserves the existing downstream review invalidation. Unsaved document edits and text entered into another task are retained when moving between tasks in the same step, but only saved work is backed up. File selections must be made again if their task is closed before upload.
+
+Run `node scripts/unified-smoke.mjs` with Playwright configured to check task navigation, retained edits, review and continuation, shared materials and mobile layout.
+
 ### Explore complete fictional cases
 
 Choose **Explore demo case ↗** in the toolbar or use the demo link under **New project**. The walkthrough opens in a separate tab and keeps your current notebook, unsaved edits and model settings intact. It needs no API key and makes no AI calls.
@@ -39,11 +59,11 @@ Maintainers can regenerate both checked-in computations with `npm run build:demo
 
 ### Work on your own project
 
-New projects and milestones now open **Guided conversation**. Configure Ollama or a hosted API, then click **Start guiding me**, or type what you know. You do not need to fill in an artifact first.
+New projects and milestones now open **Discuss this step with your guide**. Configure Ollama or a hosted API, then click **Start guiding me**, or type what you know. You do not need to fill in an artifact first.
 
-The guide uses your project, saved work, sources, and earlier answers to choose a focused follow-up question. Later milestones carry forward earlier artifacts, explanations, review status, and the most recent 12 conversation turns per earlier milestone. The saved research brief takes precedence over the original project interest. Open “Carried forward” to inspect the earlier artifacts, then choose “Continue from earlier work”. Accepting a draft makes it available downstream; it does not grant supervisor approval. It explains gaps and can propose a complete milestone draft. Ask it to revise anything inaccurate, then click **Accept draft into notebook** when it reflects your decisions. Acceptance saves a versioned artifact; it preserves your own explanation and renews affected review requirements. Outdated proposals cannot overwrite newer artifacts.
+The guide uses your project, saved work, sources, and earlier answers to choose a focused follow-up question. Later milestones carry forward earlier artifacts, explanations, review status, and the most recent 12 conversation turns per earlier milestone. The saved research brief takes precedence over the original project interest. Open “What carries forward into this step” to inspect the earlier artifacts, then choose “Continue from earlier work”. Accepting a draft makes it available downstream; it does not grant supervisor approval. It explains gaps and can propose a complete milestone draft. Ask it to revise anything inaccurate, then click **Accept draft into notebook** when it reflects your decisions. Acceptance saves a versioned artifact; it preserves your own explanation and renews affected review requirements. Outdated proposals cannot overwrite newer artifacts.
 
-Open **Your workspace** to explain the reasoning in your own words and request supervisor review. The conversational guide is available across all seven milestones; the original three-role feedback remains under **Research team**. Each conversational turn uses one model call with a validated structured response. It does not independently search, execute analyses, approve work, or certify rigor.
+Open **Write and explain your decisions** to explain the reasoning in your own words and request supervisor review. The conversational guide is available across all seven milestones; the original three-role feedback remains under **Get mentor feedback**. Each conversational turn uses one model call with a validated structured response. It does not independently search, execute analyses, approve work, or certify rigor.
 
 Conversations persist and are included in JSON and Markdown exports. Each milestone supports up to 60 turns; the full saved conversation for that milestone is sent to the configured provider on subsequent turns. Demo mode does not simulate adaptive conversation. Existing notebooks work without migration.
 
@@ -52,10 +72,10 @@ Example: tell the guide, “I want to study AI use and learning, but I only have
 ## Try the complete workflow
 
 1. Choose **New project** and describe what you want to investigate.
-2. In **Your workspace**, use the outline or write your own research brief. Explain your choices in your own words.
-3. Open **Research team** and run the demo guide. Inspect the coordinator, specialist, reviewer, and next-step messages.
+2. In **Write and explain your decisions**, use the outline or write your own research brief. Explain your choices in your own words.
+3. Open **Get mentor feedback** and run the demo guide. Inspect the coordinator, specialist, reviewer, and next-step messages.
 4. Save your work and request a supervisor review. The minimum lengths check completeness only, not rigor or understanding.
-5. In **Supervisor review**, enter a name and a substantive note to approve or request changes. This is an explicitly labeled local role demonstration, not an authenticated supervisor account.
+5. In **Supervisor checkpoint**, enter a name and a substantive note to approve or request changes. This is an explicitly labeled local role demonstration, not an authenticated supervisor account.
 6. Continue to the evidence milestone and add a source URL, location, and passage you inspected. Sources are user-provided and unverified.
 7. Work through design, data inspection, analysis, interpretation, and packaging. Export the saved notebook as Markdown or the complete record as JSON.
 
@@ -63,9 +83,9 @@ You can draft ahead, but submitting a milestone requires approvals on all preced
 
 ## Trace a claim back to evidence
 
-1. Open **Sources**. Upload a text-based PDF (up to 5 MB and 100 pages), or use the existing form to enter a source URL and an inspected passage. Source URLs are recorded, not automatically fetched.
+1. In Evidence, open **Inspect sources and save passages**. Upload a text-based PDF (up to 5 MB and 100 pages), or use the existing form to enter a source URL and an inspected passage. Source URLs are recorded, not automatically fetched.
 2. For a PDF, select an extracted page, compare it with the original, and copy a short exact passage. **Save page-linked passage** checks that the quotation occurs in the normalized extracted page text. File-page numbers may differ from printed labels. Multi-column extraction can change reading order; scans need OCR elsewhere.
-3. Open **Claims & evidence**. Write a specific claim and attach 1–8 source passages. Save the claim.
+3. Open **Check claims against source passages**. Write a specific claim and attach 1–8 source passages. Save the claim.
 4. Click **Assess linked evidence**. The configured model receives only that claim and its linked passages. It suggests whether those excerpts support, limit, or contradict the claim and may propose narrower wording. Responses containing unknown source IDs are rejected. A supported verdict is not full-paper verification or proof of scientific truth.
 5. Inspect the source context. Open **Record your inspection and decision**, explain your reasoning, and record agreement, disagreement, or unresolved status. This local researcher record is unauthenticated and does not grant supervisor approval.
 6. Revise the claim if needed and reassess. Editing a claim preserves history but makes earlier assessments outdated. Evidence changes renew affected milestone reviews.
@@ -78,7 +98,7 @@ Original PDFs live in `data/papers/`, named by SHA-256. **Export project → Dow
 
 ## Check consistency across the study
 
-Open **Consistency review** from any milestone and click **Run consistency review**. Save artifacts in at least two of the reviewed milestones first. The app compares the current research brief, design, data report, analysis record, interpretation (conclusions), and research package, including student explanations. It uses the saved research brief rather than the initial broad project interest. Unsaved workspace edits are saved before the request.
+Open **Check alignment with the study** in Design or later steps, or use **Project materials → Cross-step review records** and click **Run consistency review**. Save artifacts in at least two of the reviewed milestones first. The app compares the current research brief, design, data report, analysis record, interpretation (conclusions), and research package, including student explanations. It uses the saved research brief rather than the initial broad project interest. Unsaved workspace edits are saved before the request.
 
 The model looks for mismatched populations or measurements, causal claims unsupported by the design, unexplained analysis-plan deviations, conclusions that conflict with estimates or uncertainty, and overstated generalizability. It returns up to six priority findings. Each mismatch must quote at least two different milestones, and the server verifies every quotation against the exact saved text. Missing question, design, analysis, or interpretation artifacts are explicitly listed as a partial review. No findings means no issue was identified by the model, not that the study is scientifically sound.
 
@@ -88,7 +108,7 @@ Reports preserve the reviewed text and versions, model information, findings, an
 
 ## Run a reproducible analysis
 
-Open **Run analysis** from any milestone. No native R or Docker installation is required: the pinned [webR runtime](https://docs.r-wasm.org/webr/latest/) runs R locally.
+Use the Data or Analysis tasks, or **Project materials → Datasets and recorded analyses**, from any step. No native R or Docker installation is required: the pinned [webR runtime](https://docs.r-wasm.org/webr/latest/) runs R locally.
 
 1. Import a permitted CSV and describe its license, permission, or synthetic origin. Limits: 2 MB, 2–10,000 rows, 1–50 uniquely named columns, and five dataset versions. The app records a SHA-256 of the stored UTF-8 CSV and profiles numeric values and missingness.
 2. Ask the model to propose a plan, or choose one manually. Supported methods are descriptive statistics for one numeric outcome and unadjusted simple linear regression with one numeric predictor. Column profiles and the saved question/design/data text are sent for AI planning; row-level observations are not.
@@ -136,7 +156,7 @@ Project text and up to 20 source records are sent to your configured endpoint. H
 
 ## Implemented versus planned
 
-| Available in v0.8                                            | Planned, not implemented                              |
+| Available in v0.9                                            | Planned, not implemented                              |
 | ------------------------------------------------------------ | ----------------------------------------------------- |
 | Seven milestone templates and worked examples                | Validated adaptive teaching and competence assessment |
 | Student explanations and supervisor checkpoints              | Authenticated roles and remote collaboration          |

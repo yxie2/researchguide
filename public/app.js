@@ -1,3 +1,4 @@
+import { workflowFor, recommendTask } from './workflow-flow.js';
 const $ = (selector) => document.querySelector(selector);
 const root = $('#app');
 let project,
@@ -13,6 +14,8 @@ let project,
   newProject = false,
   noticeTimer;
 let selectedConsistencyId, analysisDatasetId, analysisPlanId;
+let materialsOpen = false;
+const taskFormMemory = new Map();
 let projectView = null,
   savedProjectList = [],
   importBackup = null,
@@ -313,6 +316,7 @@ function topbar() {
   );
 }
 function adoptProject(next) {
+  taskFormMemory.clear();
   project = next;
   selected = project.milestones.find((m) => m.status !== 'approved')?.id || 'writing';
   draft = null;
@@ -711,38 +715,7 @@ function conversationPanel() {
         el(
           'div',
           { className: 'note' },
-          'Conversational guidance needs a model. Open LLM settings and choose Ollama or an API. The demo is available under Research team.',
-        ),
-      carried.length > 0 &&
-        el(
-          'details',
-          { className: 'note' },
-          el(
-            'summary',
-            {},
-            `Carried forward from ${carried.length} earlier milestone${carried.length === 1 ? '' : 's'}`,
-          ),
-          el(
-            'p',
-            { className: 'small' },
-            'The guide receives saved artifacts, explanations, review status, and the latest 12 conversation turns from each earlier milestone. Saved drafts carry forward before supervisor approval.',
-          ),
-          carried.map((m) =>
-            el(
-              'section',
-              {},
-              el(
-                'h3',
-                {},
-                `${stages.find((s) => s.id === m.id).short} · v${m.version} · ${labels[m.status]}`,
-              ),
-              el(
-                'p',
-                { className: 'prewrap' },
-                m.artifact || 'No saved artifact yet; recent answers are available to the guide.',
-              ),
-            ),
-          ),
+          'Conversational guidance needs a model. Open LLM settings and choose Ollama or an API. Get mentor feedback offers a clearly labeled, scripted guide without a model.',
         ),
       !turns.length &&
         el(
@@ -840,7 +813,7 @@ function conversationPanel() {
                   if (isDirty()) await saveDraft();
                   await mutate({ type: 'accept_draft', stageId: selected, turnId: latest.id });
                   draft = { artifact: current().artifact, explanation: current().explanation };
-                }, 'Draft saved. Open Your workspace to explain your reasoning and request review.'),
+                }, 'Draft saved. Continue to Write and explain your decisions, then request review.'),
               '',
               { disabled: busy || latest.accepted || latest.artifactVersion !== current().version },
             ),
@@ -860,7 +833,7 @@ function conversationPanel() {
       el(
         'p',
         { className: 'small muted' },
-        'You provide your own explanation in Your workspace. Supervisor reviews still control progression. The guide cannot search papers, execute analyses, or certify research quality.',
+        'Continue to Write and explain your decisions to add your reasoning. Supervisor reviews still control progression. This conversation cannot search papers, execute analyses, or certify research quality.',
       ),
     ),
   );
@@ -1877,7 +1850,7 @@ function claimsPanel() {
         el(
           'p',
           { className: 'empty' },
-          'Begin in Sources: upload a PDF and select a passage, or paste a passage with a source link. Then add the claim you want to examine here.',
+          'First inspect a source and save a passage in the Evidence step, or open Source library under Project materials. Then add the claim you want to examine here.',
         ),
       claims.map((c) => {
         const assessment = c.assessments.at(-1),
@@ -2171,7 +2144,7 @@ function sourcesPanel() {
       el(
         'p',
         { className: 'muted' },
-        'Import a paper or record a passage from a source link. Cite its ID in your artifacts, then connect it to a claim in Claims & evidence. Source links are not fetched automatically.',
+        'Import a paper or record a passage from a source link. Cite its ID in your research document, then continue to Check claims against source passages. Source links are not fetched automatically.',
       ),
       paperLibrary(),
       project.sources.map((s) =>
@@ -2343,8 +2316,19 @@ function reviewPanel() {
             { className: 'note' },
             m.status === 'approved'
               ? 'This version has been approved locally. Editing it will require another review.'
-              : 'Save your work and request review from the workspace tab first.',
+              : 'Save your document and explanation, then request review below.',
           ),
+      !['awaiting_review', 'approved'].includes(m.status) &&
+        button(
+          'Request supervisor review',
+          () =>
+            perform(async () => {
+              if (isDirty()) await saveDraft();
+              await mutate({ type: 'submit', stageId: selected });
+            }, 'Submitted for local review.'),
+          'quiet',
+          { disabled: busy || !isUnlocked(selected) },
+        ),
     ),
   );
 }
@@ -2406,7 +2390,7 @@ function aboutPanel() {
     el(
       'p',
       {},
-      'Authenticated collaboration, literature retrieval, full-paper verification, OCR, advanced statistical models, unrestricted-code isolation, and validated assessments of research competence. Basic CSV profiling and reviewed R template execution are available under Run analysis.',
+      'Authenticated collaboration, literature retrieval, full-paper verification, OCR, advanced statistical models, unrestricted-code isolation, and validated assessments of research competence. CSV profiling and reviewed R execution are embedded in the Data and Analysis steps and accessible through Project materials.',
     ),
     el('h3', {}, 'Choose your model'),
     el(
@@ -2726,6 +2710,186 @@ function settingsPanel() {
     ),
   );
 }
+function unifiedWorkflow(panels) {
+  const tasks = workflowFor(selected);
+  const suggestion = recommendTask(project, selected, mode);
+  const prior = project.milestones.slice(
+    0,
+    stages.findIndex((s) => s.id === selected),
+  );
+  const shared = [
+    ['sources', 'Source library'],
+    ['claims', 'Literature claim ledger'],
+    ['execution', 'Datasets and recorded analyses'],
+    ['consistency', 'Cross-step review records'],
+    ['activity', 'Project history'],
+  ];
+  const selectTask = (id) => {
+    if (id === 'continue') {
+      navigate(stages[stages.findIndex((s) => s.id === selected) + 1].id);
+      return;
+    }
+    if (id === 'export') {
+      projectView = 'export';
+      render();
+      return;
+    }
+    const memoryKey = (task) => `${project.id}:${selected}:${task}`;
+    taskFormMemory.set(
+      memoryKey(tab),
+      [
+        ...document.querySelectorAll(
+          `#task-${tab} input[id], #task-${tab} textarea[id], #task-${tab} select[id]`,
+        ),
+      ]
+        .filter((node) => node.type !== 'file' && !['artifact', 'explanation'].includes(node.id))
+        .map((node) => ({
+          id: node.id,
+          value: node.value,
+          checked: node.type === 'checkbox' ? node.checked : null,
+        })),
+    );
+    tab = id;
+    render();
+    for (const saved of taskFormMemory.get(memoryKey(id)) || []) {
+      const node = document.getElementById(saved.id);
+      if (node) {
+        node.value = saved.value;
+        if (saved.checked !== null) node.checked = saved.checked;
+      }
+    }
+    document
+      .querySelector(`#task-${id} .workflow-task-heading button`)
+      ?.focus({ preventScroll: true });
+    document.getElementById(`task-${id}`)?.scrollIntoView({ block: 'start' });
+  };
+  const activeShared = !tasks.some(([id]) => id === tab) && shared.find(([id]) => id === tab);
+  const nextIndex = tasks.findIndex(([id]) => id === tab) + 1;
+  return [
+    el(
+      'section',
+      { className: 'workflow-direction' },
+      el('p', { className: 'eyebrow' }, 'Your next action'),
+      el(
+        'h2',
+        {},
+        suggestion.id === 'continue'
+          ? 'Continue to the next research step'
+          : tasks.find(([id]) => id === suggestion.id)?.[1],
+      ),
+      el('p', {}, suggestion.reason),
+      button('Go to suggested action', () => selectTask(suggestion.id), 'quiet'),
+      el(
+        'p',
+        { className: 'small muted' },
+        'Suggestions reflect saved workflow status. Choose the tasks your study needs; tool use is not scientific approval.',
+      ),
+    ),
+    prior.length > 0 &&
+      el(
+        'details',
+        { className: 'workflow-context' },
+        el('summary', {}, 'What carries forward into this step'),
+        el(
+          'p',
+          { className: 'small' },
+          'The guide receives saved documents, explanations, review status and the latest 12 conversation turns from each earlier step. Saved drafts carry forward before supervisor approval.',
+        ),
+        prior.map((m) =>
+          el(
+            'section',
+            {},
+            el(
+              'h3',
+              {},
+              `${stages.find((s) => s.id === m.id).short} · ${labels[m.status]} · v${m.version}`,
+            ),
+            el('p', { className: 'prewrap' }, m.artifact || 'No document saved yet.'),
+            m.explanation &&
+              el('p', { className: 'small prewrap' }, `Researcher’s reasoning: ${m.explanation}`),
+          ),
+        ),
+      ),
+    el(
+      'details',
+      { className: 'workflow-materials', open: materialsOpen },
+      el(
+        'summary',
+        {
+          onClick: () => {
+            materialsOpen = !materialsOpen;
+          },
+        },
+        'Project materials',
+      ),
+      el(
+        'p',
+        { className: 'small' },
+        'Shared across all seven steps. Opening a record here does not move or duplicate it.',
+      ),
+      el(
+        'div',
+        { className: 'toolbar' },
+        shared.map(([id, label]) => button(label, () => selectTask(id), 'quiet')),
+      ),
+    ),
+    el(
+      'div',
+      { className: 'workflow-sequence' },
+      tasks.map(([id, title, description], index) =>
+        el(
+          'section',
+          { className: `workflow-task ${tab === id ? 'expanded' : ''}`, id: `task-${id}` },
+          el(
+            'h2',
+            { className: 'workflow-task-heading' },
+            button(`${index + 1}. ${title}`, () => selectTask(id), 'quiet', {
+              'aria-expanded': tab === id,
+              'aria-controls': `task-body-${id}`,
+            }),
+          ),
+          el('p', { className: 'small muted' }, description),
+          el(
+            'div',
+            { id: `task-body-${id}`, hidden: tab !== id },
+            tab === id &&
+              id !== 'export' && [
+                panels[id](),
+                nextIndex < tasks.length &&
+                  el(
+                    'div',
+                    { className: 'workflow-task-next' },
+                    button(
+                      `Open next task: ${tasks[nextIndex][1]}`,
+                      () => selectTask(tasks[nextIndex][0]),
+                      'quiet',
+                    ),
+                  ),
+              ],
+          ),
+        ),
+      ),
+    ),
+    activeShared &&
+      el(
+        'section',
+        { className: 'workflow-shared', id: `task-${tab}` },
+        el('h2', {}, activeShared[1]),
+        panels[tab](),
+        button('Return to this step’s tasks', () => selectTask(tasks[0][0]), 'quiet'),
+      ),
+    current().status === 'approved' &&
+      selected !== 'writing' &&
+      el(
+        'div',
+        { className: 'workflow-finish' },
+        button(
+          `Continue to ${stages[stages.findIndex((s) => s.id === selected) + 1].short} →`,
+          () => selectTask('continue'),
+        ),
+      ),
+  ];
+}
 function render() {
   if (!project) return;
   if (!draft) draft = { artifact: current().artifact, explanation: current().explanation };
@@ -2742,17 +2906,6 @@ function render() {
     about: aboutPanel,
     settings: settingsPanel,
   };
-  const tabs = [
-    ['conversation', 'Guided conversation'],
-    ['workspace', 'Your workspace'],
-    ['guide', 'Research team'],
-    ['sources', 'Sources'],
-    ['claims', 'Claims & evidence'],
-    ['consistency', 'Consistency review'],
-    ['execution', 'Run analysis'],
-    ['review', 'Supervisor review'],
-    ['activity', 'History'],
-  ];
   root.replaceChildren(
     el(
       'div',
@@ -2778,26 +2931,6 @@ function render() {
                         el('h1', {}, 'LLM settings'),
                       )
                     : heading(),
-                  el(
-                    'nav',
-                    { className: 'tabs', 'aria-label': 'Milestone views' },
-                    tabs.map(([id, label]) =>
-                      el(
-                        'button',
-                        {
-                          type: 'button',
-                          className: `tab ${tab === id ? 'active' : ''}`,
-                          disabled: busy,
-                          'aria-pressed': tab === id,
-                          onClick: () => {
-                            tab = id;
-                            render();
-                          },
-                        },
-                        label,
-                      ),
-                    ),
-                  ),
                   busy &&
                     el(
                       'p',
@@ -2805,7 +2938,19 @@ function render() {
                       el('span', { className: 'busy' }),
                       ' Working… Model guidance can take a few minutes.',
                     ),
-                  panels[tab](),
+                  ['settings', 'about'].includes(tab)
+                    ? [
+                        panels[tab](),
+                        button(
+                          'Back to research workflow',
+                          () => {
+                            tab = 'conversation';
+                            render();
+                          },
+                          'quiet',
+                        ),
+                      ]
+                    : unifiedWorkflow(panels),
                 ],
         ),
       ),

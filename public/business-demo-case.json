@@ -11,7 +11,7 @@
     {
       "id": "question",
       "title": "Turn a business request into a research question",
-      "where": "Guided conversation → Your workspace → Supervisor review",
+      "where": "Discuss this step with your guide → Write and explain your decisions → Supervisor checkpoint",
       "input": "Northstar’s fictional sales director asks Alex whether a training program pays for itself. The available teaching data contain training hours and sales revenue, but no training costs or margins.",
       "turns": [
         [
@@ -49,7 +49,7 @@
     {
       "id": "evidence",
       "title": "Separate a plausible mechanism from evidence",
-      "where": "Sources → Claims & evidence → Your workspace",
+      "where": "Inspect sources and save passages → Check claims against source passages → Write and explain your decisions",
       "input": "The accepted question concerns training hours and later sales revenue. Alex considers skill development as a possible mechanism and manager selection as a competing explanation.",
       "turns": [
         [
@@ -95,7 +95,7 @@
     {
       "id": "design",
       "title": "Define the unit, timing and analysis",
-      "where": "Guided conversation → Your workspace → Supervisor review",
+      "where": "Discuss this step with your guide → Write and explain your decisions → Supervisor checkpoint",
       "input": "The question is about representatives, not monthly firm totals. The evidence map identifies selection and territory opportunity as unmeasured confounders.",
       "turns": [
         [
@@ -127,7 +127,7 @@
     {
       "id": "data",
       "title": "Audit the business measures",
-      "where": "Run analysis → Import a permitted CSV dataset → Your workspace",
+      "where": "Data / Analysis tasks → Import a permitted CSV dataset → Write and explain your decisions",
       "input": "The protocol requires training hours and subsequent revenue in kUSD, one row per representative.",
       "turns": [
         [
@@ -165,7 +165,7 @@
     {
       "id": "analysis",
       "title": "Run the approved model and retain uncertainty",
-      "where": "Run analysis → Propose a plan → Review script → Approve → Run",
+      "where": "Data / Analysis tasks → Propose a plan → Review script → Approve → Run",
       "input": "The saved protocol selects simple regression on complete cases, with revenue as the outcome and hours as the predictor.",
       "turns": [
         ["Alex · researcher", "Please propose the analysis that matches the protocol."],
@@ -198,7 +198,7 @@
     {
       "id": "interpretation",
       "title": "Keep the executive claim within the evidence",
-      "where": "Your workspace → Consistency review → Researcher response",
+      "where": "Write and explain your decisions → Consistency review → Researcher response",
       "input": "R1 provides an imprecise unadjusted association in kUSD. The protocol explicitly excludes causal and ROI claims.",
       "turns": [
         [
@@ -239,7 +239,7 @@
     {
       "id": "writing",
       "title": "Write the academic report and executive summary",
-      "where": "Your workspace → Supervisor review → Export project → Readable report or project backup; Run analysis → Download reproduction bundle",
+      "where": "Write and explain your decisions → Supervisor checkpoint → Export project → Readable report or project backup; Data / Analysis tasks → Download reproduction bundle",
       "input": "The research package combines the question, mechanism and rival explanation, protocol, audit, actual R results and corrected business claim.",
       "turns": [
         [

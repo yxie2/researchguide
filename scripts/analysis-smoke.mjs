@@ -1,3 +1,4 @@
+import { openTask } from './workflow-ui.mjs';
 import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import os from 'node:os';
@@ -54,7 +55,7 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   const url = `http://127.0.0.1:${app.address().port}`;
   await page.goto(url);
-  await page.getByRole('button', { name: 'Run analysis', exact: true }).click();
+  await openTask(page, 'execution');
   await page.locator('#dataset-name').fill('Synthetic study data');
   await page
     .locator('#analysis-csv')
@@ -119,7 +120,7 @@ try {
   assert.equal(bundle.run.status, 'succeeded');
   assert.match(bundle.run.files['coefficients.csv'], /1.942857/);
   assert.equal(bundle.dataset.csv, analysisCSV);
-  await page.getByRole('button', { name: 'Consistency review', exact: true }).click();
+  await openTask(page, 'consistency');
   await page.getByRole('button', { name: 'Run consistency review', exact: true }).click();
   await page
     .getByText('Consistency review saved. Inspect each finding against the quoted text.', {
@@ -128,7 +129,7 @@ try {
     .waitFor();
   assert.equal(JSON.parse(calls.at(-1).messages[1].content).milestones.at(-1).id, 'execution');
   await page.reload();
-  await page.getByRole('button', { name: 'Run analysis', exact: true }).click();
+  await openTask(page, 'execution');
   await page.getByRole('heading', { name: 'R1 · succeeded · P2 / D1', exact: true }).waitFor();
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(
@@ -148,7 +149,7 @@ try {
     },
   });
   await page.reload();
-  await page.getByRole('button', { name: 'Run analysis', exact: true }).click();
+  await openTask(page, 'execution');
   await page
     .getByText('Outdated — create a new plan after reviewing your changes', { exact: true })
     .waitFor();

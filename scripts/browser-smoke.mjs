@@ -1,3 +1,4 @@
+import { openTask } from './workflow-ui.mjs';
 // Optional UI smoke test. Install Playwright separately or set PLAYWRIGHT_MODULE to its module URL.
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, rm } from 'node:fs/promises';
@@ -24,7 +25,7 @@ try {
       'How is feedback frequency associated with end-of-term scores among first-year students?',
     );
   await page.getByRole('button', { name: 'Create research notebook' }).click();
-  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
+  await openTask(page, 'workspace');
   await page
     .getByLabel('Research brief')
     .fill(
@@ -43,14 +44,14 @@ try {
     node.textContent = '';
   });
   await page.screenshot({ path: 'docs/images/workspace.png', fullPage: true });
-  await page.getByRole('button', { name: 'Research team', exact: true }).click();
+  await openTask(page, 'guide');
   await page
     .getByLabel('Where are you getting stuck?')
     .fill('What does an observational design allow me to conclude?');
   await page.getByRole('button', { name: 'Run the demo guide' }).click();
   await page.getByText('Guidance saved in your project history.', { exact: true }).waitFor();
   assert.equal(await page.locator('.trace-step').count(), 4);
-  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
+  await openTask(page, 'workspace');
   await page.getByRole('button', { name: 'Request supervisor review' }).click();
   await page.getByLabel('Reviewer name').fill('Example supervisor');
   await page
@@ -63,7 +64,7 @@ try {
     .getByText('Local approval recorded. The next milestone is available.', { exact: true })
     .waitFor();
   await page.getByRole('button', { name: '02 Evidence' }).click();
-  await page.getByRole('button', { name: 'Sources', exact: true }).click();
+  await openTask(page, 'sources');
   await page.getByLabel('Paper or resource title').fill('Illustrative source record');
   await page.getByLabel('Source URL').fill('https://example.org/study');
   await page.getByLabel('Page or section').fill('Example section');
@@ -80,7 +81,7 @@ try {
   const download = await downloadPromise;
   assert.equal(download.suggestedFilename(), 'researchguide-project.md');
   await page.getByRole('button', { name: '✓ Question' }).click();
-  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
+  await openTask(page, 'workspace');
   await page
     .getByLabel('Research brief')
     .fill(
@@ -89,7 +90,7 @@ try {
   await page.getByRole('button', { name: 'Save your work', exact: true }).click();
   await page.getByText('Saved on this computer', { exact: true }).waitFor();
   await page.reload();
-  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
+  await openTask(page, 'workspace');
   await page.getByLabel('Research brief').waitFor();
   assert.match(await page.getByLabel('Research brief').inputValue(), /Updated research question/);
   await page.setViewportSize({ width: 390, height: 844 });

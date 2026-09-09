@@ -1,3 +1,4 @@
+import { openTask } from './workflow-ui.mjs';
 import assert from 'node:assert/strict';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import os from 'node:os';
@@ -36,7 +37,7 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   const url = `http://127.0.0.1:${app.address().port}`;
   await page.goto(url);
-  await page.getByRole('button', { name: 'Consistency review', exact: true }).click();
+  await openTask(page, 'consistency');
   await page.getByRole('button', { name: 'Run consistency review', exact: true }).click();
   await page
     .getByText('Consistency review saved. Inspect each finding against the quoted text.', {
@@ -63,7 +64,7 @@ try {
     .waitFor();
   await page.screenshot({ path: 'docs/images/consistency.png', fullPage: true });
   await page.reload();
-  await page.getByRole('button', { name: 'Consistency review', exact: true }).click();
+  await openTask(page, 'consistency');
   await page.getByText(/Example researcher · agree/).waitFor();
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(
@@ -82,7 +83,7 @@ try {
     );
   await page.getByRole('button', { name: 'Save your work', exact: true }).click();
   await page.getByText('Saved. Changed versions require fresh reviews.', { exact: true }).waitFor();
-  await page.getByRole('button', { name: 'Consistency review', exact: true }).click();
+  await openTask(page, 'consistency');
   await page.getByText(/Outdated or unsaved changes/).waitFor();
   assert.equal(await page.getByText('Respond to F1', { exact: true }).count(), 0);
   const md = await (await page.request.get(url + '/api/export?format=md')).text();

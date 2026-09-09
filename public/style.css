@@ -13,6 +13,81 @@
   background: var(--paper);
   font-synthesis: none;
 }
+.workflow-direction {
+  padding: 1.5rem 1.8rem;
+  background: var(--panel);
+  margin-bottom: 1.5rem;
+}
+.workflow-direction h2 {
+  font-size: 1.7rem;
+  margin-bottom: 0.7rem;
+}
+.workflow-direction > p:last-child {
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+.workflow-context,
+.workflow-materials {
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.workflow-context > section {
+  padding-top: 1rem;
+}
+.workflow-materials .toolbar {
+  margin-top: 1rem;
+}
+.workflow-sequence {
+  margin-top: 2rem;
+}
+.workflow-task {
+  border-top: 1px solid var(--line);
+  padding-block: 1.4rem;
+  scroll-margin-top: 1rem;
+}
+.workflow-task-heading {
+  margin-bottom: 0.4rem;
+}
+.workflow-task-heading .button {
+  justify-content: space-between;
+  font-weight: 400;
+  border: 0;
+  padding: 0.4rem 0;
+  font-family: Georgia, serif;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  text-align: left;
+  white-space: normal;
+  width: 100%;
+}
+.workflow-task-heading .button::after {
+  content: '+';
+  margin-left: 1rem;
+}
+.workflow-task.expanded .workflow-task-heading .button::after {
+  content: '−';
+}
+.workflow-task.expanded {
+  border-top: 2px solid var(--green);
+}
+.workflow-task [id^='task-body-'] > .columns {
+  margin-top: 2rem;
+}
+.workflow-task-next,
+.workflow-finish {
+  border-top: 1px solid var(--line);
+  padding-top: 1.5rem;
+  margin-top: 2rem;
+}
+.workflow-shared {
+  padding-block: 2rem;
+  border-top: 2px solid var(--green);
+  scroll-margin-top: 1rem;
+}
+@media (max-width: 600px) {
+  .workflow-direction {
+    padding: 1.2rem;
+  }
+}
 .project-manager {
   max-width: 960px;
 }

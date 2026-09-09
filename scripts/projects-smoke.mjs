@@ -1,3 +1,4 @@
+import { openTask } from './workflow-ui.mjs';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -15,7 +16,7 @@ try {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(base);
-  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
+  await openTask(page, 'workspace');
   await page.getByLabel('Research brief').fill('A synthetic saved question for project switching.');
   await page.getByRole('button', { name: 'Save your work', exact: true }).click();
   await page.getByText('Saved on this computer', { exact: true }).waitFor();
@@ -31,7 +32,7 @@ try {
   await page.getByText('Your research notebook is ready.', { exact: true }).waitFor();
   await page.getByRole('button', { name: 'Open project', exact: true }).click();
   await page.getByRole('button', { name: 'Open My first research project', exact: true }).click();
-  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
+  await openTask(page, 'workspace');
   assert.equal(
     await page.getByLabel('Research brief').inputValue(),
     'A synthetic saved question for project switching.',
@@ -48,20 +49,18 @@ try {
   await page.getByRole('button', { name: 'Save your work', exact: true }).click();
   await page.getByText('Saved on this computer', { exact: true }).waitFor();
   await page.getByRole('button', { name: 'Import project', exact: true }).click();
-  await page
-    .getByLabel('Project backup file')
-    .setInputFiles({
-      name: 'wrong.json',
-      mimeType: 'application/json',
-      buffer: Buffer.from('{"run":{}}'),
-    });
+  await page.getByLabel('Project backup file').setInputFiles({
+    name: 'wrong.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from('{"run":{}}'),
+  });
   await page.getByRole('status').filter({ hasText: 'not project backups' }).waitFor();
   await page
     .getByLabel('Project backup file')
     .setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: backup });
   await page.getByRole('button', { name: 'Import and open project', exact: true }).click();
   await page.getByText('Backup imported as a separate project.', { exact: true }).waitFor();
-  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
+  await openTask(page, 'workspace');
   assert.equal(
     await page.getByLabel('Research brief').inputValue(),
     'A synthetic saved question for project switching.',

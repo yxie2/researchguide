@@ -1,3 +1,4 @@
+import { openTask } from './workflow-ui.mjs';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -27,7 +28,7 @@ try {
     demoApiCalls = [];
   const original = await (await fetch(`${base}/api/project`)).json();
   await page.goto(base);
-  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
+  await openTask(page, 'workspace');
   await page.getByLabel('Research brief').fill('Unsaved work must survive exploring the demo.');
   const popup = context.waitForEvent('page');
   await page.getByRole('link', { name: 'Explore demo case' }).click();

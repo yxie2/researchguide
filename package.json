@@ -1,6 +1,6 @@
 {
   "name": "researchguide",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "description": "A guided research workspace for beginning PhD students and their supervisors.",
@@ -11,7 +11,7 @@
     "start": "node --env-file-if-exists=.env server.mjs",
     "dev": "node --watch --env-file-if-exists=.env server.mjs",
     "test": "node --test",
-    "check": "node --check server.mjs && node --check lib/workflow.mjs && node --check lib/guide.mjs && node --check public/app.js && node --check lib/llm.mjs && node --check lib/conversation.mjs && node --check lib/evidence.mjs && node --check lib/pdf-worker.mjs && node --check lib/consistency.mjs && node --check lib/analysis.mjs && node --check lib/r-runner.mjs && node --check lib/r-template.mjs && node --check public/demo.js && node --check lib/demo-case.mjs && node --check scripts/build-demo.mjs && node --check lib/business-demo-case.mjs && node --check lib/projects.mjs",
+    "check": "node --check server.mjs && node --check lib/workflow.mjs && node --check lib/guide.mjs && node --check public/app.js && node --check lib/llm.mjs && node --check lib/conversation.mjs && node --check lib/evidence.mjs && node --check lib/pdf-worker.mjs && node --check lib/consistency.mjs && node --check lib/analysis.mjs && node --check lib/r-runner.mjs && node --check lib/r-template.mjs && node --check public/demo.js && node --check lib/demo-case.mjs && node --check scripts/build-demo.mjs && node --check lib/business-demo-case.mjs && node --check lib/projects.mjs && node --check public/workflow-flow.js",
     "build:demo": "node scripts/build-demo.mjs"
   },
   "dependencies": {

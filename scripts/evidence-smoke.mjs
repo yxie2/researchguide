@@ -1,3 +1,4 @@
+import { openTask } from './workflow-ui.mjs';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
@@ -54,7 +55,7 @@ try {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(`http://127.0.0.1:${app.address().port}`);
-  await page.getByRole('button', { name: 'Sources', exact: true }).click();
+  await openTask(page, 'sources');
   await page.locator('#paper-title').fill('Synthetic observational study');
   await page
     .locator('#paper-file')
@@ -68,7 +69,7 @@ try {
   await page
     .getByText('Passage linked to its PDF page. You can now attach it to a claim.', { exact: true })
     .waitFor();
-  await page.getByRole('button', { name: 'Claims & evidence', exact: true }).click();
+  await openTask(page, 'claims');
   await page.locator('#claim-text').fill('AI use causes better grades.');
   await page.locator('fieldset input[type=checkbox]').check();
   await page.getByRole('button', { name: 'Save claim', exact: true }).click();
@@ -94,7 +95,7 @@ try {
     .waitFor();
   await page.screenshot({ path: 'docs/images/evidence.png', fullPage: true });
   await page.reload();
-  await page.getByRole('button', { name: 'Claims & evidence', exact: true }).click();
+  await openTask(page, 'claims');
   await page.getByText(/Researcher agree/).waitFor();
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(

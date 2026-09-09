@@ -1,3 +1,4 @@
+import { openTask } from './workflow-ui.mjs';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
@@ -76,11 +77,11 @@ try {
   );
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.screenshot({ path: 'docs/images/settings.png', fullPage: true });
-  await page.getByRole('button', { name: 'Research team', exact: true }).click();
+  await openTask(page, 'guide');
   await page.getByRole('button', { name: /Ask the research team/ }).click();
   await page.getByText('Guidance saved in your project history.', { exact: true }).waitFor();
   assert.equal(calls.length, 4);
-  await page.getByRole('button', { name: 'Guided conversation', exact: true }).click();
+  await openTask(page, 'conversation');
   await page.getByRole('button', { name: 'Start guiding me', exact: true }).click();
   await page.getByText('Your guide has responded.', { exact: true }).waitFor();
   await page
@@ -95,7 +96,7 @@ try {
       exact: true,
     })
     .waitFor();
-  await page.getByRole('button', { name: 'Your workspace', exact: true }).click();
+  await openTask(page, 'workspace');
   assert.match(await page.locator('#artifact').inputValue(), /AI use is not measured/);
   await page.reload();
   await page
@@ -106,7 +107,7 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.screenshot({ path: 'docs/images/conversation.png', fullPage: true });
   await page.getByRole('button', { name: '02 Evidence' }).click();
-  await page.getByText('Carried forward from 1 earlier milestone', { exact: true }).waitFor();
+  await page.getByText('What carries forward into this step', { exact: true }).waitFor();
   await page.getByRole('button', { name: 'Continue from earlier work', exact: true }).click();
   await page.getByText('Your guide has responded.', { exact: true }).waitFor();
   const handoff = JSON.parse(calls.at(-1).body.messages[1].content);

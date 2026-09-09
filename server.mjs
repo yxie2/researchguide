@@ -536,6 +536,7 @@ export async function createApp({
         '/demo-case.json': 'demo-case.json',
         '/business-demo-case.json': 'business-demo-case.json',
         '/app.js': 'app.js',
+        '/workflow-flow.js': 'workflow-flow.js',
         '/style.css': 'style.css',
         '/favicon.svg': 'favicon.svg',
       };

@@ -7,7 +7,7 @@
     {
       "id": "question",
       "title": "Frame the question",
-      "where": "Guided conversation → Your workspace → Supervisor review",
+      "where": "Discuss this step with your guide → Write and explain your decisions → Supervisor checkpoint",
       "input": "Maya starts with an interest in study habits and an eight-row synthetic class dataset.",
       "turns": [
         [
@@ -48,7 +48,7 @@
     {
       "id": "evidence",
       "title": "Read and challenge the evidence",
-      "where": "Sources → Claims & evidence → Your workspace",
+      "where": "Inspect sources and save passages → Check claims against source passages → Write and explain your decisions",
       "input": "The saved question determines the concepts to search: study time, quiz performance and observational university studies.",
       "turns": [
         [
@@ -94,7 +94,7 @@
     {
       "id": "design",
       "title": "Choose the design before the result",
-      "where": "Guided conversation → Your workspace → Supervisor review",
+      "where": "Discuss this step with your guide → Write and explain your decisions → Supervisor checkpoint",
       "input": "The saved question asks for an association; the evidence map identifies prior achievement as a possible confounder.",
       "turns": [
         ["Maya · researcher", "Which analysis will give the most significant result?"],
@@ -123,7 +123,7 @@
     {
       "id": "data",
       "title": "Inspect the data and document exclusions",
-      "where": "Run analysis → Import a permitted CSV dataset → Your workspace",
+      "where": "Data / Analysis tasks → Import a permitted CSV dataset → Write and explain your decisions",
       "input": "The protocol specifies two numeric variables and complete-case analysis.",
       "turns": [
         [
@@ -164,7 +164,7 @@
     {
       "id": "analysis",
       "title": "Approve the plan and inspect real outputs",
-      "where": "Run analysis → Propose a plan → Review script → Approve → Run",
+      "where": "Data / Analysis tasks → Propose a plan → Review script → Approve → Run",
       "input": "The saved question, design and data report constrain the plan. The dataset has six complete cases.",
       "turns": [
         [
@@ -200,7 +200,7 @@
     {
       "id": "interpretation",
       "title": "Catch an unsupported conclusion",
-      "where": "Your workspace → Consistency review → Researcher response",
+      "where": "Write and explain your decisions → Consistency review → Researcher response",
       "input": "The question and protocol are noncausal. R1 estimates an unadjusted slope from six synthetic complete cases.",
       "turns": [
         [
@@ -241,7 +241,7 @@
     {
       "id": "writing",
       "title": "Assemble the complete research package",
-      "where": "Your workspace → Supervisor review → Export project → Readable report or project backup; Run analysis → Download reproduction bundle",
+      "where": "Write and explain your decisions → Supervisor checkpoint → Export project → Readable report or project backup; Data / Analysis tasks → Download reproduction bundle",
       "input": "The final package combines the bounded question, source limitations, frozen decisions, actual R outputs and revised interpretation.",
       "turns": [
         ["Maya · researcher", "Can we turn this into a paper now?"],

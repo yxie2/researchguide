@@ -1,5 +1,13 @@
 # From prototype to research pilot
 
+## v0.9 — Unified research workflow (implemented)
+
+- A tailored vertical task sequence within each of the seven research steps, replacing the tool-tab matrix.
+- Saved-state next-action suggestions, carried-forward documents and shared Project materials access.
+- Embedded source checks, analysis execution, mentor feedback and supervisor checkpoints.
+- Distinct draft acceptance, execution approval and local supervisor decisions; continuation follows approval.
+- Task-switch text retention and updated walkthrough/navigation checks.
+
 ## v0.8 — Clear project management (implemented)
 
 - Explicit Open, New, Export and Import project actions.
