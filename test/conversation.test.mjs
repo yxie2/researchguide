@@ -100,11 +100,25 @@ test('conversation remembers answers, persists, and accepts a draft through norm
   assert.match(data.project.milestones[0].artifact, /AI use is unmeasured/);
   assert.equal(data.project.milestones[0].explanation, '');
   assert.notEqual(data.project.milestones[0].status, 'approved');
+  r = await post('/api/conversation', {
+    stageId: 'evidence',
+    question: 'Continue from my research brief',
+    revision: 3,
+    settingsRevision: 0,
+  });
+  assert.equal(r.status, 200);
+  const handoff = JSON.parse(calls.at(-1).messages[1].content);
+  assert.match(handoff.currentResearchBrief, /AI use is unmeasured/);
+  assert.equal(handoff.previousMilestones.length, 1);
+  assert.equal(handoff.previousMilestones[0].recentConversation[1].user, 'AI use was not measured');
+  assert.equal(handoff.previousMilestones[0].recentConversation[1].draftAccepted, true);
+  assert.notEqual(handoff.previousMilestones[0].status, 'approved');
+  assert.equal(handoff.conversation.length, 0);
   malformed = true;
   r = await post('/api/conversation', {
     stageId: 'question',
     question: 'Continue',
-    revision: 3,
+    revision: 4,
     settingsRevision: 0,
   });
   assert.equal(r.status, 502);
@@ -112,7 +126,7 @@ test('conversation remembers answers, persists, and accepts a draft through norm
   app = await createApp({ dataDir: dir });
   await new Promise((r) => app.listen(0, '127.0.0.1', r));
   data = await (await fetch(`http://127.0.0.1:${app.address().port}/api/project`)).json();
-  assert.equal(data.project.revision, 3);
+  assert.equal(data.project.revision, 4);
   assert.equal(data.project.milestones[0].conversation.length, 2);
   assert.equal(data.project.milestones[0].conversation[1].accepted, true);
 });

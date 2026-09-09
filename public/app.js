@@ -406,6 +406,11 @@ function updateSaveLabel() {
   if (label) label.textContent = isDirty() ? 'Unsaved changes' : 'Saved on this computer';
 }
 function conversationPanel() {
+  const prior = project.milestones.slice(
+    0,
+    stages.findIndex((s) => s.id === selected),
+  );
+  const carried = prior.filter((m) => m.artifact || m.conversation?.length);
   const turns = current().conversation || [];
   const latest = turns.at(-1);
   const send = (message) =>
@@ -437,6 +442,37 @@ function conversationPanel() {
           { className: 'note' },
           'Conversational guidance needs a model. Open LLM settings and choose Ollama or an API. The demo is available under Research team.',
         ),
+      carried.length > 0 &&
+        el(
+          'details',
+          { className: 'note' },
+          el(
+            'summary',
+            {},
+            `Carried forward from ${carried.length} earlier milestone${carried.length === 1 ? '' : 's'}`,
+          ),
+          el(
+            'p',
+            { className: 'small' },
+            'The guide receives saved artifacts, explanations, review status, and the latest 12 conversation turns from each earlier milestone. Saved drafts carry forward before supervisor approval.',
+          ),
+          carried.map((m) =>
+            el(
+              'section',
+              {},
+              el(
+                'h3',
+                {},
+                `${stages.find((s) => s.id === m.id).short} · v${m.version} · ${labels[m.status]}`,
+              ),
+              el(
+                'p',
+                { className: 'prewrap' },
+                m.artifact || 'No saved artifact yet; recent answers are available to the guide.',
+              ),
+            ),
+          ),
+        ),
       !turns.length &&
         el(
           'div',
@@ -444,13 +480,17 @@ function conversationPanel() {
           el(
             'p',
             {},
-            `We’ll begin with “${project.question || project.title}”. You do not need to complete the notebook first.`,
+            carried.length
+              ? 'Continue this study using your earlier work. The guide will connect those decisions to the next task here.'
+              : `We’ll begin with “${project.question || project.title}”. You do not need to complete the notebook first.`,
           ),
           button(
-            'Start guiding me',
+            carried.length ? 'Continue from earlier work' : 'Start guiding me',
             () =>
               send(
-                'Help me begin this milestone. Start from my project interest and ask me the most useful first question.',
+                carried.length
+                  ? 'Help me continue into this milestone. Build on my saved research brief and earlier answers. Briefly explain what carries forward, then ask the next milestone-specific question without restarting the project.'
+                  : 'Help me begin this milestone. Start from my project interest and ask me the most useful first question.',
               ),
             '',
             { disabled: busy || mode === 'demo' },
@@ -498,7 +538,7 @@ function conversationPanel() {
         { className: 'small muted' },
         mode === 'demo'
           ? 'No model is connected.'
-          : `Each turn sends saved research context and this milestone’s conversation to ${modelSettings.baseUrl}.`,
+          : `Each turn sends saved research context, recent earlier-milestone answers, and this milestone’s conversation to ${modelSettings.baseUrl}.`,
       ),
     ),
     el(

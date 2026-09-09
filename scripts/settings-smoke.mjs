@@ -105,6 +105,15 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.screenshot({ path: 'docs/images/conversation.png', fullPage: true });
+  await page.getByRole('button', { name: '02 Evidence' }).click();
+  await page.getByText('Carried forward from 1 earlier milestone', { exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Continue from earlier work', exact: true }).click();
+  await page.getByText('Your guide has responded.', { exact: true }).waitFor();
+  const handoff = JSON.parse(calls.at(-1).body.messages[1].content);
+  assert.match(handoff.currentResearchBrief, /AI use is not measured/);
+  assert.equal(handoff.previousMilestones[0].recentConversation.length, 2);
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+
   await page.getByRole('button', { name: 'LLM settings', exact: true }).click();
   await page.locator('#llm-provider').selectOption('ollama');
   await page.locator('#model-name').fill('installed-model');
