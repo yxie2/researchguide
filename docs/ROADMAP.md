@@ -21,6 +21,13 @@
 - Model-generated artifact proposals with explicit acceptance, stale-version protection, and normal review invalidation.
 - Conversation export and mocked integration/browser checks. Initial live DeepSeek verification used synthetic context; educational effectiveness remains unvalidated.
 
+## v0.4 — Traceable evidence (implemented)
+
+- Local PDF extraction with file-page references, exact normalized passage matching, and original-file hashes.
+- Versioned claims linked to source passages, constrained AI assessments, and separate researcher decisions.
+- Cross-milestone claim context and exported evidence records.
+- OCR, automatic literature retrieval, publication authenticity checks, and full-paper verification remain future work.
+
 ## Next — A real pilot in one discipline
 
 Recruit beginning PhD students and supervisors before increasing scope. Review the templates with a domain-methods specialist. Choose a licensed public dataset and a narrow, answerable question.

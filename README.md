@@ -6,11 +6,12 @@ ResearchGuide is an early, local-first prototype for beginning PhD students and 
 
 ![ResearchGuide desktop workspace](docs/images/workspace.png)
 
-## Run in one command
+## Run locally
 
-Requires **Node.js 22 or newer**. There are no runtime dependencies, no package installation, and no build step.
+Requires **Node.js 22.13 or newer**. Run `npm ci` once to install the pinned PDF.js dependency and its dependencies. There is no build step.
 
 ```bash
+npm ci
 npm start
 ```
 
@@ -41,6 +42,21 @@ Example: tell the guide, “I want to study AI use and learning, but I only have
 7. Work through design, data inspection, analysis, interpretation, and packaging. Export the saved notebook as Markdown or the complete record as JSON.
 
 You can draft ahead, but submitting a milestone requires approvals on all preceding milestones. Changing an earlier artifact invalidates its approval and affected downstream statuses while preserving historical reviews. Adding evidence also triggers renewed review of the evidence milestone and its dependents.
+
+## Trace a claim back to evidence
+
+1. Open **Sources**. Upload a text-based PDF (up to 5 MB and 100 pages), or use the existing form to enter a source URL and an inspected passage. Source URLs are recorded, not automatically fetched.
+2. For a PDF, select an extracted page, compare it with the original, and copy a short exact passage. **Save page-linked passage** checks that the quotation occurs in the normalized extracted page text. File-page numbers may differ from printed labels. Multi-column extraction can change reading order; scans need OCR elsewhere.
+3. Open **Claims & evidence**. Write a specific claim and attach 1–8 source passages. Save the claim.
+4. Click **Assess linked evidence**. The configured model receives only that claim and its linked passages. It suggests whether those excerpts support, limit, or contradict the claim and may propose narrower wording. Responses containing unknown source IDs are rejected. A supported verdict is not full-paper verification or proof of scientific truth.
+5. Inspect the source context. Open **Record your inspection and decision**, explain your reasoning, and record agreement, disagreement, or unresolved status. This local researcher record is unauthenticated and does not grant supervisor approval.
+6. Revise the claim if needed and reassess. Editing a claim preserves history but makes earlier assessments outdated. Evidence changes renew affected milestone reviews.
+
+The claim ledger is included in research guidance and Markdown/JSON exports. Cite claim IDs such as C1 alongside passage IDs such as S1 in artifacts. The app checks claims you explicitly add; it does not automatically find every claim in your manuscript or validate the source's publication metadata. Manual passages remain labeled unverified.
+
+PDF parsing is local and uses a worker with a 30-second timeout and a 256 MB JavaScript heap limit; this is not an operating-system sandbox. Limits are 10 papers, 500,000 extracted characters per paper, and two million per notebook. Each claim supports 20 assessment records, with 20 researcher decisions per assessment. Extraction uses [Mozilla PDF.js](https://mozilla.github.io/pdf.js/api/draft/module-pdfjsLib.html).
+
+Original PDFs live in `data/papers/`, named by SHA-256. JSON exports include extracted pages and provenance, but not original PDF bytes. Back up `data/papers/` with the notebook to retain originals; creating a new project preserves files needed by archived notebooks. Uploaded papers are not automatically sent to an LLM. Selected excerpts are sent during claim assessment; guidance receives source records and the first 30 claim records.
 
 ## Choose a local model or hosted API
 
@@ -75,15 +91,15 @@ Project text and up to 20 source records are sent to your configured endpoint. H
 
 ## Implemented versus planned
 
-| Available in v0.3                                       | Planned, not implemented                              |
-| ------------------------------------------------------- | ----------------------------------------------------- |
-| Seven milestone templates and worked examples           | Validated adaptive teaching and competence assessment |
-| Student explanations and supervisor checkpoints         | Authenticated roles and remote collaboration          |
-| Deterministic workflow coordinator                      | Autonomous tool selection and bounded replanning      |
-| Optional specialist/reviewer/coordinator model sequence | Literature search and source verification             |
-| User-entered source passages                            | PDF ingestion and evidence extraction                 |
-| Versioned artifacts and dependency invalidation         | Dataset profiling and isolated R execution            |
-| Atomic local saves, history, Markdown/JSON export       | RStudio integration and institutional storage         |
+| Available in v0.4                                            | Planned, not implemented                              |
+| ------------------------------------------------------------ | ----------------------------------------------------- |
+| Seven milestone templates and worked examples                | Validated adaptive teaching and competence assessment |
+| Student explanations and supervisor checkpoints              | Authenticated roles and remote collaboration          |
+| Deterministic workflow coordinator                           | Autonomous tool selection and bounded replanning      |
+| Optional specialist/reviewer/coordinator model sequence      | Literature search and source verification             |
+| PDF passages and claim assessments with researcher decisions | OCR, automated retrieval and full-paper verification  |
+| Versioned artifacts and dependency invalidation              | Dataset profiling and isolated R execution            |
+| Atomic local saves, history, Markdown/JSON export            | RStudio integration and institutional storage         |
 
 This is a working foundation for an agentic research guide. It is not an autonomous scientist, a scientific-quality certification system, or a replacement for supervision. The initial guidance focuses on quantitative secondary-data studies. Work in the data and analysis milestones is currently performed in the researcher's own tools and documented here.
 
@@ -101,6 +117,7 @@ Node HTTP server (loopback only)
   └── versioned notebook export
 ```
 
+- `lib/evidence.mjs` and `lib/pdf-worker.mjs`: local PDF extraction, page matching, and bounded claim assessments.
 - `lib/workflow.mjs`: milestone definitions, transitions, approval gates, invalidation, and export.
 - `lib/conversation.mjs`: persistent conversational guidance and validated artifact proposals.
 - `lib/guide.mjs`: transparent guidance traces and optional model orchestration.
@@ -136,6 +153,7 @@ npm install --no-save --package-lock=false playwright
 npx playwright install chromium
 node scripts/browser-smoke.mjs
 node scripts/settings-smoke.mjs
+node scripts/evidence-smoke.mjs
 ```
 
 It uses temporary data, walks project creation through review, checks export and revision invalidation, verifies mobile overflow, and regenerates the screenshots. The settings smoke test checks provider configuration, masked keys, connection testing, and guidance against a mock API; no real API credentials are required. Browser checks are not currently included in CI. `PLAYWRIGHT_MODULE` can point to an existing Playwright module URL instead of installing it here.

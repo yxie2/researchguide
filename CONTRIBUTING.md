@@ -2,7 +2,7 @@
 
 The initial scope is a guided quantitative secondary-data study for a beginning PhD student. Keep improvements concrete and testable.
 
-1. Use Node 22+ and start with `npm start`.
+1. Use Node 22.13+, install dependencies with `npm ci`, and start with `npm start`.
 2. Run `npm run check` and `npm test` before submitting a change.
 3. Add behavior tests for state transitions, permission boundaries, or persistence changes.
 4. For UI changes, check a narrow mobile viewport and keyboard navigation. The optional Playwright smoke script provides a reproducible walkthrough.

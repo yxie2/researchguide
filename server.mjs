@@ -1,10 +1,12 @@
 import http from 'node:http';
+import { extractPaper, assessClaim } from './lib/evidence.mjs';
 import { converse, appendConversation } from './lib/conversation.mjs';
 import { readFile, writeFile, mkdir, rename, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import {
   createProject,
+  evidenceUpdated,
   applyAction,
   appendGuide,
   exportMarkdown,
@@ -56,12 +58,12 @@ export async function createApp({
     await rename(`${projectFile}.tmp`, projectFile);
     project = next;
   }
-  async function body(req) {
+  async function body(req, limit = 128 * 1024) {
     let content = '',
       length = 0;
     for await (const chunk of req) {
       length += chunk.length;
-      if (length > 128 * 1024) throw new WorkflowError('Request exceeds the 128 KB limit.', 413);
+      if (length > limit) throw new WorkflowError('Request exceeds the permitted size.', 413);
       content += chunk;
     }
     try {
@@ -91,6 +93,27 @@ export async function createApp({
       if (req.headers.origin && req.headers.origin !== `http://${host}`)
         throw new WorkflowError('Cross-origin requests are not allowed.', 403);
       const pathname = new URL(req.url, `http://${host}`).pathname;
+      if (pathname.startsWith('/api/papers/') && req.method === 'GET') {
+        const id = pathname.slice('/api/papers/'.length);
+        const paper = (project.papers || []).find((p) => p.id === id);
+        if (!paper || !/^[a-f0-9]{64}$/.test(paper.sha256))
+          throw new WorkflowError('Paper not found.', 404);
+        let bytes;
+        try {
+          bytes = await readFile(path.join(dataDir, 'papers', `${paper.sha256}.pdf`));
+        } catch {
+          throw new WorkflowError(
+            'Original PDF is unavailable. Extracted pages remain in the notebook.',
+            404,
+          );
+        }
+        res.writeHead(200, {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'attachment; filename="research-paper.pdf"',
+          'Cache-Control': 'no-store',
+        });
+        return res.end(bytes);
+      }
       if (pathname === '/api/project' && req.method === 'GET')
         return send(200, {
           project,
@@ -114,9 +137,57 @@ export async function createApp({
       if (pathname.startsWith('/api/') && req.method === 'POST') {
         if (!req.headers['content-type']?.startsWith('application/json'))
           throw new WorkflowError('Content-Type must be application/json.', 415);
-        const payload = await body(req);
+        const payload = await body(
+          req,
+          pathname === '/api/papers' ? 7 * 1024 * 1024 + 4096 : 128 * 1024,
+        );
         if (!payload || typeof payload !== 'object' || Array.isArray(payload))
           throw new WorkflowError('Request must be a JSON object.');
+        if (pathname === '/api/papers' || pathname === '/api/claims/assess') {
+          if (writing || guiding)
+            throw new WorkflowError('Wait for the current operation to finish.', 409);
+          if (payload.revision !== project.revision)
+            throw new WorkflowError('Project changed. Reload before continuing.', 409);
+          if (pathname === '/api/claims/assess' && payload.settingsRevision !== settingsRevision)
+            throw new WorkflowError('Model settings changed. Reload before sending evidence.', 409);
+          guiding = true;
+          try {
+            let next = structuredClone(project);
+            if (pathname === '/api/papers') {
+              if ((next.papers || []).length >= 10)
+                throw new WorkflowError('This notebook supports up to 10 PDFs.');
+              const { paper, bytes } = await extractPaper(payload);
+              next.papers ||= [];
+              if (next.papers.some((p) => p.sha256 === paper.sha256))
+                throw new WorkflowError('This PDF is already in your notebook.');
+              const total =
+                next.papers.reduce(
+                  (n, p) => n + p.pages.reduce((n, p) => n + p.text.length, 0),
+                  0,
+                ) + paper.pages.reduce((n, p) => n + p.text.length, 0);
+              if (total > 2000000)
+                throw new WorkflowError('Notebook PDF text exceeds two million characters.');
+              await mkdir(path.join(dataDir, 'papers'), { recursive: true });
+              await writeFile(path.join(dataDir, 'papers', `${paper.sha256}.pdf`), bytes);
+              next.papers.push(paper);
+              next = evidenceUpdated(
+                next,
+                'PDF imported locally. Extracted text requires inspection before use as evidence.',
+              );
+            } else {
+              const assessment = await assessClaim(project, payload.claimId, { ...settings });
+              next.claims.find((c) => c.id === payload.claimId).assessments.push(assessment);
+              next = evidenceUpdated(
+                next,
+                'AI claim assessment saved as a suggestion, pending researcher inspection.',
+              );
+            }
+            await persist(next);
+            return send(200, { project });
+          } finally {
+            guiding = false;
+          }
+        }
         if (pathname === '/api/settings' || pathname === '/api/settings/test') {
           if (guiding || writing)
             throw new WorkflowError(

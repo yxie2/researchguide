@@ -710,3 +710,37 @@ details p {
 .conversation-log {
   margin-bottom: 2rem;
 }
+.paper-library {
+  padding: 1rem 0 2rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 2rem;
+}
+.paper-library form {
+  margin: 1rem 0 2rem;
+}
+.paper-library select {
+  margin-bottom: 1rem;
+}
+.extracted-page {
+  min-height: 16rem;
+  margin-top: 1rem;
+}
+.claim-record {
+  padding: 1.5rem 0 2rem;
+  border-bottom: 1px solid var(--line);
+}
+.claim-record details {
+  margin: 1rem 0;
+}
+.claim-record blockquote {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+fieldset {
+  border: 1px solid var(--line);
+  margin: 1rem 0;
+  min-width: 0;
+}
+.checkbox-label {
+  overflow-wrap: anywhere;
+}

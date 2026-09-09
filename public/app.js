@@ -12,6 +12,9 @@ let project,
   busy = false,
   newProject = false,
   noticeTimer;
+let selectedPaperId,
+  selectedPaperPage = 1,
+  claimEditor = { claim: '', sourceIds: [] };
 const labels = {
   draft: 'Draft',
   needs_revision: 'Needs revision',
@@ -251,6 +254,9 @@ function topbar() {
             settingsDraft = null;
             tab = 'settings';
             newProject = false;
+            selectedPaperId = null;
+            selectedPaperPage = 1;
+            claimEditor = { claim: '', sourceIds: [] };
           }),
         'quiet',
       ),
@@ -701,6 +707,450 @@ function guidePanel() {
     learningAside(),
   );
 }
+function paperLibrary() {
+  const papers = project.papers || [];
+  const paper = papers.find((p) => p.id === selectedPaperId) || papers.at(-1);
+  const page = paper?.pages.find((p) => p.number === selectedPaperPage) || paper?.pages[0];
+  const paperSelect = el(
+    'select',
+    {
+      id: 'paper-select',
+      disabled: busy,
+      onChange: (e) => {
+        selectedPaperId = e.target.value;
+        selectedPaperPage = 1;
+        render();
+      },
+    },
+    papers.map((p) => el('option', { value: p.id }, p.title)),
+  );
+  if (paper) paperSelect.value = paper.id;
+  const pageSelect = el(
+    'select',
+    {
+      id: 'paper-page',
+      disabled: busy,
+      onChange: (e) => {
+        selectedPaperPage = Number(e.target.value);
+        render();
+      },
+    },
+    (paper?.pages || []).map((p) =>
+      el('option', { value: p.number }, `PDF page ${p.number}${p.text ? '' : ' — no text'}`),
+    ),
+  );
+  if (page) pageSelect.value = page.number;
+  return el(
+    'section',
+    { className: 'paper-library' },
+    el('h3', {}, 'Inspect a paper'),
+    el(
+      'p',
+      { className: 'small muted' },
+      'Text-based PDFs only: up to 5 MB and 100 pages. Extraction happens locally, without a model call. Page numbers refer to file pages; layout and reading order may differ from the original. Scanned pages need OCR elsewhere.',
+    ),
+    el(
+      'form',
+      {
+        onSubmit: (e) => {
+          e.preventDefault();
+          const file = $('#paper-file').files[0],
+            title = $('#paper-title').value;
+          if (!file || file.size > 5 * 1024 * 1024) {
+            notice('Choose a PDF no larger than 5 MB.');
+            return;
+          }
+          perform(async () => {
+            const bytes = new Uint8Array(await file.arrayBuffer());
+            let binary = '';
+            for (let i = 0; i < bytes.length; i += 32768)
+              binary += String.fromCharCode(...bytes.subarray(i, i + 32768));
+            const r = await api('/api/papers', {
+              title,
+              pdf: btoa(binary),
+              revision: project.revision,
+            });
+            project = r.project;
+            selectedPaperId = project.papers.at(-1).id;
+            selectedPaperPage = 1;
+          }, 'PDF extracted locally. Inspect a page and save a short passage.');
+        },
+      },
+      field(
+        'paper-title',
+        'Title of uploaded paper',
+        'Use a recognizable citation title.',
+        '',
+        false,
+        { required: true, maxlength: 300 },
+      ),
+      el('label', { for: 'paper-file' }, 'PDF file'),
+      el('input', {
+        id: 'paper-file',
+        type: 'file',
+        accept: '.pdf,application/pdf',
+        required: true,
+        disabled: busy,
+      }),
+      el(
+        'button',
+        { type: 'submit', className: 'button', disabled: busy },
+        'Upload and extract PDF',
+      ),
+    ),
+    paper && [
+      el('label', { for: 'paper-select' }, 'Uploaded paper'),
+      paperSelect,
+      el('label', { for: 'paper-page' }, 'Extracted page'),
+      pageSelect,
+      el(
+        'a',
+        { href: `/api/papers/${paper.id}`, target: '_blank', rel: 'noopener noreferrer' },
+        'Download original PDF to compare',
+      ),
+      el('textarea', {
+        id: 'extracted-page',
+        className: 'extracted-page',
+        readonly: true,
+        'aria-label': 'Extracted page text',
+        value: page.text || 'No text extracted on this page.',
+      }),
+      el(
+        'p',
+        { className: 'small muted' },
+        'Copy an exact, short passage from the extracted text. Check its context against the original PDF.',
+      ),
+      el(
+        'form',
+        {
+          onSubmit: (e) => {
+            e.preventDefault();
+            const passage = $('#pdf-passage').value;
+            perform(
+              () =>
+                mutate({ type: 'paper_passage', paperId: paper.id, page: page.number, passage }),
+              'Passage linked to its PDF page. You can now attach it to a claim.',
+            );
+          },
+        },
+        field(
+          'pdf-passage',
+          'Exact passage from this page',
+          '20–8000 characters. Whitespace differences are normalized.',
+          '',
+          true,
+          { required: true, minlength: 20, maxlength: 8000 },
+        ),
+        el(
+          'button',
+          { type: 'submit', className: 'button', disabled: busy || !page.text },
+          'Save page-linked passage',
+        ),
+      ),
+    ],
+  );
+}
+function claimsPanel() {
+  const claims = project.claims || [];
+  return el(
+    'div',
+    { className: 'columns' },
+    el(
+      'section',
+      {},
+      el('h2', {}, 'What supports this claim?'),
+      el(
+        'p',
+        { className: 'muted' },
+        'Link a claim to inspected passages. Compare the model’s suggestion with the source text, then record your own decision. These checks do not verify a whole paper or certify scientific truth.',
+      ),
+      !claims.length &&
+        el(
+          'p',
+          { className: 'empty' },
+          'Begin in Sources: upload a PDF and select a passage, or paste a passage with a source link. Then add the claim you want to examine here.',
+        ),
+      claims.map((c) => {
+        const assessment = c.assessments.at(-1),
+          currentAssessment = assessment?.claimVersion === c.version;
+        return el(
+          'article',
+          { className: 'claim-record' },
+          el('p', { className: 'eyebrow' }, `${c.id} · version ${c.version}`),
+          el('h3', {}, c.claim),
+          c.sourceIds.map((id) => {
+            const source = project.sources.find((s) => s.id === id);
+            return el(
+              'details',
+              {},
+              el('summary', {}, `${id} · ${source.title} · ${source.location}`),
+              el('blockquote', {}, source.passage),
+              source.paperId
+                ? el(
+                    'a',
+                    {
+                      href: `/api/papers/${source.paperId}`,
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    },
+                    'Download original PDF',
+                  )
+                : el(
+                    'a',
+                    { href: source.url, target: '_blank', rel: 'noopener noreferrer' },
+                    'Open source link',
+                  ),
+              el(
+                'p',
+                { className: 'small muted' },
+                source.provenance === 'pdf-exact-match'
+                  ? 'Matched to extracted page text; inspect the original context.'
+                  : 'Manual passage: not independently matched to the source.',
+              ),
+            );
+          }),
+          el(
+            'div',
+            { className: 'form-actions' },
+            button(
+              'Assess linked evidence',
+              () =>
+                perform(async () => {
+                  const r = await api('/api/claims/assess', {
+                    claimId: c.id,
+                    revision: project.revision,
+                    settingsRevision: modelSettings.revision,
+                  });
+                  project = r.project;
+                }, 'AI assessment saved. Inspect the passages and record your own decision.'),
+              '',
+              { disabled: busy || mode === 'demo' },
+            ),
+            button(
+              'Edit claim and links',
+              () => {
+                claimEditor = { claimId: c.id, claim: c.claim, sourceIds: [...c.sourceIds] };
+                render();
+                $('#claim-text').focus();
+              },
+              'quiet',
+            ),
+          ),
+          assessment && [
+            el(
+              'p',
+              { className: 'status' },
+              `${currentAssessment ? 'AI suggestion' : 'Outdated AI suggestion'} · ${assessment.verdict.replaceAll('_', ' ')} · ${assessment.model}`,
+            ),
+            el('p', { className: 'prewrap' }, assessment.rationale),
+            el(
+              'ul',
+              {},
+              assessment.sources.map((s) =>
+                el('li', {}, `${s.sourceId} — ${s.relation}: ${s.reason}`),
+              ),
+            ),
+            assessment.suggestedClaim &&
+              el(
+                'div',
+                { className: 'note' },
+                el('strong', {}, 'Suggested wording — not applied'),
+                el('p', {}, assessment.suggestedClaim),
+                button(
+                  'Edit using this wording',
+                  () => {
+                    claimEditor = {
+                      claimId: c.id,
+                      claim: assessment.suggestedClaim,
+                      sourceIds: [...c.sourceIds],
+                    };
+                    render();
+                    $('#claim-text').focus();
+                  },
+                  'quiet',
+                  { disabled: busy || !currentAssessment },
+                ),
+              ),
+            (assessment.confirmations || []).map((f) =>
+              el(
+                'div',
+                { className: 'review' },
+                el('strong', {}, `Researcher ${f.decision} · ${f.name} · ${date(f.at)}`),
+                el('p', {}, f.note),
+                el('p', { className: 'small muted' }, 'Local, unauthenticated decision.'),
+              ),
+            ),
+            currentAssessment &&
+              el(
+                'details',
+                {},
+                el('summary', {}, 'Record your inspection and decision'),
+                el(
+                  'form',
+                  {
+                    onSubmit: (e) => {
+                      e.preventDefault();
+                      const name = $(`#researcher-${c.id}`).value,
+                        note = $(`#reason-${c.id}`).value,
+                        decision = $(`#decision-${c.id}`).value,
+                        inspected = $(`#inspected-${c.id}`).checked;
+                      perform(
+                        () =>
+                          mutate({
+                            type: 'claim_confirm',
+                            claimId: c.id,
+                            assessmentId: assessment.id,
+                            name,
+                            note,
+                            decision,
+                            inspected,
+                          }),
+                        'Researcher decision recorded. This is not supervisor approval.',
+                      );
+                    },
+                  },
+                  field(`researcher-${c.id}`, 'Researcher name', '', '', false, {
+                    required: true,
+                    maxlength: 100,
+                  }),
+                  el('label', { for: `decision-${c.id}` }, 'Your decision'),
+                  el(
+                    'select',
+                    { id: `decision-${c.id}`, disabled: busy },
+                    el('option', { value: 'unresolved' }, 'Still unresolved'),
+                    el('option', { value: 'agree' }, 'I agree with the assessment'),
+                    el('option', { value: 'disagree' }, 'I disagree with the assessment'),
+                  ),
+                  field(
+                    `reason-${c.id}`,
+                    'Explain why the passages support or limit the claim',
+                    'At least 40 characters, in your own words.',
+                    '',
+                    true,
+                    { required: true, minlength: 40, maxlength: 4000 },
+                  ),
+                  el(
+                    'label',
+                    { className: 'checkbox-label' },
+                    el('input', {
+                      id: `inspected-${c.id}`,
+                      type: 'checkbox',
+                      required: true,
+                      disabled: busy,
+                    }),
+                    'I inspected the linked passages and their source context.',
+                  ),
+                  el(
+                    'button',
+                    { type: 'submit', className: 'button', disabled: busy },
+                    'Save researcher decision',
+                  ),
+                ),
+              ),
+          ],
+          c.assessments.length > 1 &&
+            el(
+              'details',
+              {},
+              el('summary', {}, 'Earlier assessments'),
+              c.assessments.slice(0, -1).map((a) =>
+                el(
+                  'div',
+                  { className: 'review' },
+                  el('p', {}, `Claim v${a.claimVersion}: ${a.verdict} · ${date(a.at)}`),
+                  el('p', {}, a.rationale),
+                  (a.confirmations || []).map((f) =>
+                    el('p', {}, `${f.name}: ${f.decision}. ${f.note}`),
+                  ),
+                ),
+              ),
+            ),
+        );
+      }),
+    ),
+    el(
+      'aside',
+      { className: 'guide-aside' },
+      el('h2', {}, claimEditor.claimId ? `Edit ${claimEditor.claimId}` : 'Add a research claim'),
+      el(
+        'form',
+        {
+          onSubmit: (e) => {
+            e.preventDefault();
+            const values = { ...claimEditor, sourceIds: [...claimEditor.sourceIds] };
+            perform(async () => {
+              await mutate({ type: 'claim_save', ...values });
+              claimEditor = { claim: '', sourceIds: [] };
+            }, 'Claim saved. Assess its linked evidence next.');
+          },
+        },
+        field(
+          'claim-text',
+          'Claim to assess',
+          'A specific statement you intend to make in your literature review or interpretation.',
+          claimEditor.claim,
+          true,
+          {
+            required: true,
+            minlength: 10,
+            maxlength: 3000,
+            onInput: (e) => {
+              claimEditor.claim = e.target.value;
+            },
+          },
+        ),
+        el(
+          'fieldset',
+          {},
+          el('legend', {}, 'Linked source passages (choose 1–8)'),
+          project.sources.map((s) =>
+            el(
+              'label',
+              { className: 'checkbox-label' },
+              el('input', {
+                type: 'checkbox',
+                checked: claimEditor.sourceIds.includes(s.id),
+                disabled: busy,
+                onChange: (e) => {
+                  claimEditor.sourceIds = e.target.checked
+                    ? [...claimEditor.sourceIds, s.id]
+                    : claimEditor.sourceIds.filter((id) => id !== s.id);
+                },
+              }),
+              `${s.id} · ${s.title} · ${s.location}`,
+            ),
+          ),
+        ),
+        el(
+          'button',
+          { type: 'submit', className: 'button', disabled: busy || !project.sources.length },
+          'Save claim',
+        ),
+        claimEditor.claimId &&
+          button(
+            'Cancel editing',
+            () => {
+              claimEditor = { claim: '', sourceIds: [] };
+              render();
+            },
+            'quiet',
+          ),
+      ),
+      el(
+        'p',
+        { className: 'small muted' },
+        mode === 'demo'
+          ? 'Connect a model in LLM settings to request an assessment. You can still collect sources and claims.'
+          : `Assessment sends the claim and its linked excerpts to ${modelSettings.baseUrl}. Full PDFs are not sent. Research guidance also receives the claim ledger.`,
+      ),
+      el(
+        'p',
+        { className: 'small muted' },
+        'Editing a claim makes its earlier assessments outdated. Changes renew evidence and downstream review requirements. Cite claim IDs such as C1 alongside source IDs in your research artifacts.',
+      ),
+    ),
+  );
+}
 function sourcesPanel() {
   return el(
     'div',
@@ -712,15 +1162,26 @@ function sourcesPanel() {
       el(
         'p',
         { className: 'muted' },
-        'Record sources you have inspected. Cite their IDs, such as S1, in your artifacts. This prototype does not search the web or verify passages.',
+        'Import a paper or record a passage from a source link. Cite its ID in your artifacts, then connect it to a claim in Claims & evidence. Source links are not fetched automatically.',
       ),
+      paperLibrary(),
       project.sources.map((s) =>
         el(
           'article',
           { className: 'source' },
-          el('span', { className: 'status' }, `${s.id} · User-provided`),
+          el(
+            'span',
+            { className: 'status' },
+            `${s.id} · ${s.provenance === 'pdf-exact-match' ? 'Matched to extracted PDF page' : 'Manual passage — unverified'}`,
+          ),
           el('h3', {}, s.title),
-          el('a', { href: s.url, target: '_blank', rel: 'noopener noreferrer' }, s.url),
+          s.paperId
+            ? el(
+                'a',
+                { href: `/api/papers/${s.paperId}`, target: '_blank', rel: 'noopener noreferrer' },
+                `Download original PDF · file page ${s.page}`,
+              )
+            : el('a', { href: s.url, target: '_blank', rel: 'noopener noreferrer' }, s.url),
           el('p', { className: 'small muted' }, s.location),
           el('blockquote', {}, s.passage),
         ),
@@ -930,13 +1391,13 @@ function aboutPanel() {
     el(
       'p',
       {},
-      'Seven guided milestones, editable artifacts, understanding prompts, source records, version history, local review decisions, dependency invalidation, exports, and an optional mentor/reviewer/coordinator sequence using Ollama or an OpenAI-compatible API.',
+      'Seven guided milestones, editable artifacts, understanding prompts, source records, version history, local review decisions, dependency invalidation, exports, PDF text extraction, a claim–evidence ledger with AI suggestions and researcher decisions, and optional guidance using Ollama or an OpenAI-compatible API.',
     ),
     el('h3', {}, 'What is still ahead'),
     el(
       'p',
       {},
-      'Authenticated collaboration, literature retrieval, citation verification, dataset inspection, sandboxed R execution, and validated assessments of research competence. The analysis milestone currently records work you perform in your own analysis environment.',
+      'Authenticated collaboration, literature retrieval, full-paper verification, OCR, dataset inspection, sandboxed R execution, and validated assessments of research competence. The analysis milestone currently records work you perform in your own analysis environment.',
     ),
     el('h3', {}, 'Choose your model'),
     el(
@@ -972,6 +1433,9 @@ function onboardPanel() {
           perform(async () => {
             const response = await api('/api/new', { ...values, revision: project.revision });
             project = response.project;
+            selectedPaperId = null;
+            selectedPaperPage = 1;
+            claimEditor = { claim: '', sourceIds: [] };
             selected = 'question';
             tab = 'conversation';
             draft = null;
@@ -1251,6 +1715,7 @@ function render() {
     conversation: conversationPanel,
     guide: guidePanel,
     sources: sourcesPanel,
+    claims: claimsPanel,
     review: reviewPanel,
     activity: activityPanel,
     about: aboutPanel,
@@ -1261,6 +1726,7 @@ function render() {
     ['workspace', 'Your workspace'],
     ['guide', 'Research team'],
     ['sources', 'Sources'],
+    ['claims', 'Claims & evidence'],
     ['review', 'Supervisor review'],
     ['activity', 'History'],
   ];

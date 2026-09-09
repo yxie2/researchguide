@@ -13,6 +13,7 @@ gh api user --jq .login
 It must print `yxie2`. Then inspect the local changes and run:
 
 ```bash
+npm ci
 npm run check
 npm test
 git status --short
