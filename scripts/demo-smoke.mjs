@@ -39,7 +39,7 @@ try {
   });
   if (business) {
     // First establish distinct education progress, then switch to the business case.
-    await demo.getByRole('button', { name: 'Start the seven-phase walkthrough' }).click();
+    await demo.getByRole('button', { name: 'Start the seven-step walkthrough' }).click();
     await demo.getByRole('button', { name: 'Reveal next exchange' }).click();
     await demo.getByRole('link', { name: 'Business · Training and sales', exact: true }).click();
     await demo.getByRole('heading', { name: teachingCase.title, exact: true }).waitFor();
@@ -50,12 +50,24 @@ try {
       'page',
     );
   }
-  await demo.getByRole('button', { name: 'Start the seven-phase walkthrough' }).click();
+  await demo.getByRole('button', { name: 'Start the seven-step walkthrough' }).click();
   for (let i = 0; i < 7; i++) {
+    assert.equal(await demo.locator('.step-project-title').textContent(), teachingCase.title);
+    assert.equal(
+      await demo.locator('.demo-task-sequence > details').count(),
+      teachingCase.stages[i].tasks.length,
+    );
+    await demo.locator('.demo-task-sequence > details').first().locator('summary').click();
+    await demo.getByText(teachingCase.stages[i].tasks[0].example, { exact: true }).waitFor();
+    const exercise = demo.locator('.demo-decision');
+    await exercise.getByRole('button').nth(0).click();
+    await exercise.getByRole('status').waitFor();
+    await exercise.getByRole('button').nth(teachingCase.stages[i].depth.correct).click();
+    assert.match(await exercise.getByRole('status').textContent(), /Defensible choice/);
     assert.equal(await demo.locator('.demo-transcript article').count(), 1);
     await demo.getByRole('button', { name: 'Reveal next exchange' }).click();
     assert.equal(await demo.locator('.demo-transcript article').count(), 2);
-    await demo.getByRole('button', { name: 'Show full phase' }).click();
+    await demo.getByRole('button', { name: 'Show full step' }).click();
     await demo
       .getByRole('heading', { name: new RegExp(`^${business ? 'Alex' : 'Maya'}’s accepted `) })
       .waitFor();
@@ -72,15 +84,24 @@ try {
         .click();
       await demo.getByRole('status').filter({ hasText: 'Yes.' }).waitFor();
     }
-    if (i === 1) assert.equal(await demo.locator('.demo-source').count(), 2);
+    if (i === 1) assert.equal(await demo.locator('.demo-source').count(), 4);
     if (i === 4) {
       await demo.getByRole('heading', { name: 'Recorded R outputs' }).waitFor();
       assert.match(
-        await demo.locator('.demo-outputs').textContent(),
+        await demo.locator('.demo-outputs').first().textContent(),
         business ? /0.944055/ : /1.942857/,
       );
+      await demo.getByText('Compare the exploratory sensitivity run', { exact: true }).click();
+      await demo.getByRole('heading', { name: 'Exploratory R2 outputs', exact: true }).waitFor();
     }
-    if (i < 6) await demo.getByRole('button', { name: 'Next phase' }).click();
+    if (i === 3) {
+      assert.equal(await demo.locator('.demo-datasets > details').count(), 6);
+      await demo.locator('.demo-datasets > details').first().locator('summary').click();
+      const downloadEvent = demo.waitForEvent('download');
+      await demo.getByRole('button', { name: 'Download D1 CSV', exact: true }).click();
+      assert.equal(await readFile(await (await downloadEvent).path(), 'utf8'), teachingCase.csv);
+    }
+    if (i < 6) await demo.getByRole('button', { name: 'Next step' }).click();
   }
   await demo.reload();
   await demo.getByRole('heading', { name: teachingCase.stages[6].title, exact: true }).waitFor();
@@ -92,6 +113,7 @@ try {
       business ? /training_hours,next_month_sales_kusd/ : /study_hours,quiz_score/,
     ],
     ['Download reproduction bundle', /"status": "succeeded"/],
+    ['Download dataset workspace', /prepareDemoRaw/],
   ]) {
     const event = demo.waitForEvent('download');
     await demo.getByRole('button', { name: label, exact: true }).click();
@@ -100,6 +122,8 @@ try {
     if (label === 'Download reproduction bundle') {
       const bundle = JSON.parse(await readFile(await download.path(), 'utf8'));
       assert.equal(bundle.dataset.csv, teachingCase.csv);
+      assert.equal(bundle.sensitivity.run.status, 'succeeded');
+      assert.equal(bundle.datasets.length, 4);
     }
   }
   await demo.screenshot({
@@ -109,15 +133,17 @@ try {
   await demo.setViewportSize({ width: 390, height: 844 });
   assert.equal(await demo.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await demo.getByRole('button', { name: 'Restart walkthrough' }).click();
-  await demo.getByText('0 of 7 phase conversations explored', { exact: false }).waitFor();
+  await demo.getByText('0 of 7 step conversations explored', { exact: false }).waitFor();
   if (business) {
     assert.equal((await demo.locator('#demo').textContent()).includes('Maya'), false);
     await demo.getByRole('link', { name: 'Education · Study habits', exact: true }).click();
-    await demo.getByRole('heading', { name: 'Explore a research interest', exact: true }).waitFor();
+    await demo
+      .getByRole('heading', { name: 'Explore your research interest', exact: true })
+      .waitFor();
     assert.equal(await demo.locator('.demo-transcript article').count(), 2);
     await demo.getByRole('link', { name: 'Business · Training and sales', exact: true }).click();
     await demo.getByRole('heading', { name: teachingCase.title, exact: true }).waitFor();
-    await demo.getByText('0 of 7 phase conversations explored', { exact: false }).waitFor();
+    await demo.getByText('0 of 7 step conversations explored', { exact: false }).waitFor();
   }
   assert.equal(
     await page.getByLabel('Research direction').inputValue(),
@@ -127,7 +153,7 @@ try {
   assert.deepEqual(demoApiCalls, []);
   assert.deepEqual(errors, []);
   console.log(
-    `${business ? 'Business' : 'Education'} demo browser smoke passed: seven phases, reveal controls, learning checks, actual output display, three downloads, reload, restart, mobile, and preserved unsaved/active notebook without API calls.`,
+    `${business ? 'Business' : 'Education'} demo browser smoke passed: seven current steps, task panels, decision exercises, two R outputs, dataset downloads, reload, restart, mobile, and preserved unsaved/active notebook without API calls.`,
   );
 } finally {
   await browser?.close();

@@ -2,9 +2,10 @@ const root = document.querySelector('#demo');
 let data,
   index = -1,
   revealed = 1,
-  answer = null;
+  answer = null,
+  decisionAnswer = null;
 const business = new URLSearchParams(location.search).get('case') === 'business';
-const key = business ? 'researchguide-business-case-v1' : 'researchguide-teaching-case-v1';
+const key = business ? 'researchguide-business-case-v2' : 'researchguide-teaching-case-v2';
 const researcher = () => data.researcher || 'Maya';
 const documentNames = {
   question: 'research direction',
@@ -47,6 +48,7 @@ function go(next) {
   index = next;
   revealed = 1;
   answer = null;
+  decisionAnswer = null;
   save();
   render();
   document.querySelector('h1').focus();
@@ -67,15 +69,16 @@ function notebook() {
       .map(
         (s, i) =>
           `## ${i + 1}. ${s.title}\n\nIncoming context: ${s.input}\n\n` +
+          s.tasks.map((t, j) => `### Task ${j + 1}. ${t.title}\n\n${t.example}\n`).join('\n') +
           s.turns.map(([who, text]) => `**${who}:** ${text}`).join('\n\n') +
           '\n\n' +
           (s.sources || [])
             .map((s) => `### ${s.id}: ${s.title}\n\n> ${s.passage}\n\n${s.limitation}`)
             .join('\n\n') +
-          `\n\n### ${documentHeading(s)}\n\n${s.artifact}\n\n${researcher()}’s explanation: ${s.understanding}\n\n${s.review}\n\nCarried forward: ${s.carry}\n`,
+          `\n\n### ${documentHeading(s)}\n\n${s.artifact}\n\n${researcher()}’s explanation (${s.checkpoint ? 'for supervisor review' : 'optional reflection'}): ${s.understanding}\n\n${s.checkpoint ? 'Required checkpoint in live projects' : 'Optional discussion'}: ${s.review}\n\nCarried forward: ${s.carry}\n\n### Decision exercise: ${s.depth.complication}\n\n${s.depth.prompt}\n\n${s.depth.options.map(([choice, consequence]) => `- ${choice}: ${consequence}`).join('\n')}\n\nRecorded decision: ${s.depth.decision}\n`,
       )
       .join('\n') +
-    `\n## Reproduction\n\nR results built ${data.builtAt}. Save computation.run.inputCsv as input.csv and computation.run.script as analysis.R from the reproduction JSON, then run Rscript analysis.R in a clean directory. No external R packages are needed. This export is a teaching narrative, not an importable active notebook.\n`
+    `\n## Authored search and screening\n\n${data.search.disclosure}\n${data.search.results.map((r) => `- ${r.label}: ${r.status}`).join('\n')}\n\n## Public-data candidate decisions (simulated)\n\n${data.publicCandidates.map((c) => `- ${c.title}: ${c.decision}`).join('\n')}\n\n## Reproduction\n\nR results built ${data.builtAt}. Save run.inputCsv as input.csv and run.script as analysis.R from the reproduction JSON, then run Rscript analysis.R in a clean directory. Repeat in a separate directory using sensitivity.run for R2. No external R packages are needed. Dataset preparation instructions and code are included in the dataset workspace download. This export is a teaching narrative, not an importable active notebook.\n`
   );
 }
 function downloads() {
@@ -106,8 +109,28 @@ function downloads() {
               {
                 disclosure: data.disclosure,
                 reproduce:
-                  'Save run.inputCsv as input.csv and run.script as analysis.R in a clean directory. Run Rscript analysis.R. See run.files["session.txt"] for the original environment.',
+                  'Save run.inputCsv as input.csv and run.script as analysis.R in a clean directory. Run Rscript analysis.R. Repeat in a separate directory with sensitivity.run. See each run.files["session.txt"] for its original environment.',
                 ...data.computation,
+              },
+              null,
+              2,
+            ),
+            'application/json',
+          ),
+        true,
+      ),
+      button(
+        'Download dataset workspace',
+        () =>
+          download(
+            `${data.id}-datasets.json`,
+            JSON.stringify(
+              {
+                disclosure: data.disclosure,
+                instructions:
+                  'Save each datasets[].csv with its dataset name. Save preparation.script as prepare.mjs; run node prepare.mjs raw-register.csv primary-rebuilt.csv. Compare the result with D1. This is not a project backup.',
+                datasets: data.computation.datasets,
+                preparation: data.computation.preparation,
               },
               null,
               2,
@@ -124,12 +147,19 @@ function downloads() {
     ),
   );
 }
-function outputs() {
-  const run = data.computation.run;
+function outputs(exploratory = false) {
+  const run = exploratory ? data.computation.sensitivity.run : data.computation.run;
   return el(
     'section',
     { class: 'demo-outputs' },
-    el('h2', {}, 'Recorded R outputs'),
+    el('h2', {}, exploratory ? 'Exploratory R2 outputs' : 'Recorded R outputs'),
+    el(
+      'p',
+      {},
+      exploratory
+        ? 'Highest complete exposure omitted after the primary result was known. This separately approved run is one sensitivity check; retain R1 and report both.'
+        : 'Primary R1: the planned complete-case association in the synthetic sample.',
+    ),
     el(
       'p',
       { class: 'small' },
@@ -164,6 +194,95 @@ function outputs() {
     ),
   );
 }
+function workspaceFiles() {
+  return el(
+    'section',
+    { class: 'demo-datasets' },
+    el('h2', {}, 'Four datasets, four distinct roles'),
+    el(
+      'p',
+      {},
+      'All files are synthetic and stored with the demo. These are actual downloadable CSVs; no public repository was contacted.',
+    ),
+    data.computation.datasets.map((d) =>
+      el(
+        'details',
+        {},
+        el('summary', {}, `${d.id} · ${d.name} · ${d.rowCount} rows`),
+        el('p', {}, d.notes || 'Primary harmonized extract used for R1.'),
+        el('p', { class: 'small' }, `SHA-256: ${d.sha256}`),
+        el('pre', { class: 'demo-artifact' }, d.csv),
+        button(`Download ${d.id} CSV`, () => download(d.name, d.csv, 'text/csv'), true),
+      ),
+    ),
+    el(
+      'details',
+      {},
+      el('summary', {}, 'Reproduce preparation and inspect the transformation log'),
+      el('p', {}, data.computation.preparation.scope),
+      el(
+        'ul',
+        {},
+        data.computation.preparation.log.map((t) => el('li', {}, t)),
+      ),
+      el(
+        'p',
+        {},
+        'Save D2 as raw-register.csv, download prepare.mjs, then run: node prepare.mjs raw-register.csv primary-rebuilt.csv. The output should match D1 exactly.',
+      ),
+      el('pre', { class: 'demo-artifact' }, data.computation.preparation.script),
+      button(
+        'Download preparation script',
+        () => download('prepare.mjs', data.computation.preparation.script),
+        true,
+      ),
+    ),
+    el(
+      'details',
+      {},
+      el('summary', {}, 'Public dataset candidate decisions (simulated)'),
+      data.publicCandidates.map((c) =>
+        el('section', {}, el('h3', {}, c.title), el('p', {}, c.decision)),
+      ),
+    ),
+  );
+}
+function decisionExercise(s) {
+  const d = s.depth;
+  return el(
+    'section',
+    { class: 'demo-challenge demo-decision' },
+    el('h3', {}, d.complication),
+    el('p', {}, d.prompt),
+    d.options.map(([choice], i) =>
+      button(
+        choice,
+        () => {
+          decisionAnswer = i;
+          render();
+        },
+        true,
+        { 'aria-pressed': decisionAnswer === i },
+      ),
+    ),
+    decisionAnswer !== null &&
+      el(
+        'div',
+        { role: 'status' },
+        el(
+          'p',
+          {},
+          `${decisionAnswer === d.correct ? 'Defensible choice. ' : 'Consider the consequence. '}${d.options[decisionAnswer][1]}`,
+        ),
+        el('p', {}, `In this case: ${d.decision}`),
+      ),
+    el(
+      'p',
+      { class: 'small muted' },
+      'This exercise reveals consequences; it does not change the saved example or run an agent.',
+    ),
+  );
+}
 function scene() {
   const s = data.stages[index],
     complete = revealed >= s.turns.length;
@@ -171,10 +290,30 @@ function scene() {
     el(
       'header',
       { class: 'headline' },
-      el('p', { class: 'eyebrow' }, `Fictional case / Phase ${index + 1} of 7`),
+      el('p', { class: 'eyebrow' }, `Fictional case / Step ${index + 1} of 7`),
+      el('p', { class: 'step-project-title' }, data.title),
       el('h1', { tabindex: '-1' }, s.title),
       el('p', {}, s.input),
-      el('p', { class: 'small muted' }, `In your notebook: ${s.where}`),
+    ),
+    el(
+      'section',
+      { class: 'demo-task-sequence', 'aria-label': 'Tasks in this step' },
+      s.tasks.map((t, j) =>
+        el(
+          'details',
+          {},
+          el('summary', {}, `${j + 1}. ${t.title}`),
+          el('p', {}, t.description),
+          el('p', {}, t.example),
+        ),
+      ),
+      el(
+        'p',
+        { class: 'small muted' },
+        s.checkpoint
+          ? 'This step includes a required supervisor checkpoint in a live project. The decisions below are fictional.'
+          : 'Use Save and continue when ready. Guide conversations, mentor feedback and extra supervisor discussions are optional; shared tools remain in Project materials.',
+      ),
     ),
     el(
       'div',
@@ -216,7 +355,7 @@ function scene() {
                 .scrollIntoView({ block: 'nearest' });
             }),
             button(
-              'Show full phase',
+              'Show full step',
               () => {
                 revealed = s.turns.length;
                 seen.add(s.id);
@@ -238,16 +377,37 @@ function scene() {
           ),
           el('h2', {}, documentHeading(s)),
           el('pre', { class: 'demo-artifact' }, s.artifact),
-          el('h3', {}, `${researcher()} explains the reasoning`),
-          el('p', {}, s.understanding),
           el(
-            'h3',
-            {},
-            ['design', 'writing'].includes(s.id)
-              ? 'The review checkpoint'
-              : 'Optional supervisor discussion in this example',
+            'details',
+            { open: s.checkpoint },
+            el(
+              'summary',
+              {},
+              s.checkpoint
+                ? 'Reasoning and supervisor checkpoint'
+                : 'Optional reflection and supervisor discussion',
+            ),
+            el('p', {}, s.understanding),
+            el('p', {}, s.review),
           ),
-          el('p', {}, s.review),
+          el(
+            'details',
+            {},
+            el('summary', {}, 'How the saved decisions changed (authored history)'),
+            el(
+              'ol',
+              {},
+              s.depth.revision.map((r) => el('li', {}, r)),
+            ),
+          ),
+          index === 1 &&
+            el(
+              'details',
+              {},
+              el('summary', {}, 'Search and screening record (simulated)'),
+              el('p', {}, data.search.disclosure),
+              data.search.results.map((r) => el('p', {}, `${r.id} · ${r.label}: ${r.status}`)),
+            ),
           index === 3 &&
             el(
               'details',
@@ -255,16 +415,26 @@ function scene() {
               el('summary', {}, `Inspect all ${data.computation.dataset.rowCount} synthetic rows`),
               el('pre', { class: 'demo-artifact' }, data.csv),
             ),
-          index === 4 && outputs(),
+          index === 3 && workspaceFiles(),
+          index === 4 && [
+            outputs(),
+            el(
+              'details',
+              {},
+              el('summary', {}, 'Compare the exploratory sensitivity run'),
+              outputs(true),
+            ),
+          ],
           index === 6 && downloads(),
         ],
       ),
       el(
         'aside',
         { class: 'guide-aside' },
-        el('p', { class: 'eyebrow' }, 'How phases connect'),
+        el('p', { class: 'eyebrow' }, 'How steps connect'),
         el('h2', {}, 'Carry the decision forward.'),
         el('p', {}, s.carry),
+        decisionExercise(s),
         s.challenge &&
           el(
             'section',
@@ -299,9 +469,9 @@ function scene() {
     el(
       'nav',
       { class: 'demo-footer toolbar', 'aria-label': 'Walkthrough pages' },
-      button(index === 0 ? 'Case overview' : 'Previous phase', () => go(index - 1), true),
+      button(index === 0 ? 'Case overview' : 'Previous step', () => go(index - 1), true),
       index < 6
-        ? button('Next phase →', () => go(index + 1))
+        ? button('Next step →', () => go(index + 1))
         : button('Return to case overview', () => go(-1)),
     ),
   ];
@@ -311,7 +481,7 @@ function overview() {
     el(
       'header',
       { class: 'headline' },
-      el('p', { class: 'eyebrow' }, 'A complete worked example / About 15 minutes'),
+      el('p', { class: 'eyebrow' }, 'An extended worked example / Explore at your own pace'),
       el('h1', { tabindex: '-1' }, data.title),
       el('p', {}, data.subtitle),
     ),
@@ -331,13 +501,13 @@ function overview() {
         el(
           'p',
           {},
-          `Choose a phase in the sidebar or reveal the conversation one exchange at a time. Each phase shows the research document ${researcher()} accepted, the reasoning behind it and what carries forward. This teaching example includes extra supervisor discussions; your live project requires checkpoints only for the protocol and final report.`,
+          `Choose a step in the sidebar or reveal the conversation one exchange at a time. Each step shows the research document ${researcher()} accepted, the reasoning behind it and what carries forward. This teaching example includes extra supervisor discussions; your live project requires checkpoints only for the protocol and final report.`,
         ),
-        button('Start the seven-phase walkthrough', () => go(0)),
+        button('Start the seven-step walkthrough', () => go(0)),
         el(
           'p',
           { class: 'small muted demo-spacing' },
-          `${seen.size} of 7 phase conversations explored in this browser. Progress is saved locally when browser storage is available.`,
+          `${seen.size} of 7 step conversations explored in this browser. Progress is saved locally when browser storage is available.`,
         ),
       ),
       el(
@@ -348,11 +518,15 @@ function overview() {
           'ul',
           {},
           [
-            'How agents use decisions from earlier phases.',
+            'How agents use decisions from earlier steps.',
             'Why accepting a draft requires your judgment.',
             'How a claim is checked against an inspected passage.',
             'How approved code produces recorded results.',
             'How a consistency review catches an overclaim.',
+            'How to screen duplicates, preprints and inaccessible literature.',
+            'How raw data, harmonized data and contextual files stay distinct.',
+            'How to retain primary and exploratory results with separate approvals.',
+            'How revision requests and changed context affect later work.',
           ].map((t) => el('li', {}, t)),
         ),
         el(
@@ -376,7 +550,7 @@ function render() {
         el(
           'div',
           { class: 'brand' },
-          'ResearchGuide',
+          el('img', { class: 'brand-logo', src: '/researchguide-logo.png', alt: 'ResearchGuide' }),
           el('small', {}, 'Learn through a worked example'),
         ),
         el(
@@ -386,7 +560,7 @@ function render() {
         ),
         el(
           'nav',
-          { class: 'stage-nav', 'aria-label': 'Demo phases' },
+          { class: 'stage-nav', 'aria-label': 'Demo steps' },
           button('Case overview', () => go(-1), true),
           data.stages.map((s, i) =>
             el(

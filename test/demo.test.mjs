@@ -1,10 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import os from 'node:os';
+import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { parse } from 'csv-parse/sync';
 import { stages } from '../lib/workflow.mjs';
 import { analysisScript } from '../lib/r-template.mjs';
+import { workflowFor, requiresSupervisorReview } from '../public/workflow-flow.js';
+import { prepareDemoRaw } from '../lib/demo-preparation.mjs';
 const business = JSON.parse(
   await readFile(new URL('../public/business-demo-case.json', import.meta.url), 'utf8'),
 );
@@ -92,3 +98,91 @@ test('bundled R outputs match the synthetic data, fixed template and narrative',
   assert.match(demo.stages[4].artifact, /Intercept: -0.133333/);
   assert.match(run.files['session.txt'], /R version/);
 });
+
+for (const example of [demo, business]) {
+  test(`${example.id}: downloadable preparation script runs independently`, async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), 'researchguide-demo-prep-'));
+    try {
+      await writeFile(path.join(dir, 'prepare.mjs'), example.computation.preparation.script);
+      await writeFile(path.join(dir, 'raw.csv'), example.computation.datasets[1].csv);
+      await promisify(execFile)(process.execPath, ['prepare.mjs', 'raw.csv', 'rebuilt.csv'], {
+        cwd: dir,
+      });
+      assert.equal(await readFile(path.join(dir, 'rebuilt.csv'), 'utf8'), example.csv);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+  test(`${example.id}: extended walkthrough matches current tasks and has complete decision exercises`, () => {
+    assert.equal(example.edition, 2);
+    assert.doesNotMatch(JSON.stringify(example), /\{\{\w+\}\}/);
+    for (const [i, stage] of example.stages.entries()) {
+      assert.equal(stage.title, stages[i].title);
+      assert.equal(stage.checkpoint, requiresSupervisorReview(stage.id));
+      assert.deepEqual(
+        stage.tasks.map((t) => [t.id, t.title, t.description]),
+        workflowFor(stage.id),
+      );
+      for (const task of stage.tasks) assert.ok(task.example.length > 40);
+      assert.equal(stage.depth.options.length, 3);
+      assert.ok(stage.depth.options[stage.depth.correct]);
+      assert.ok(stage.depth.revision.length >= 2);
+    }
+    assert.equal(example.stages[1].sources.length, 4);
+    assert.equal(example.search.results.length, 6);
+    assert.equal(example.publicCandidates.length, 3);
+    assert.match(example.search.disclosure, /No live search/);
+    assert.doesNotMatch(
+      example.stages[4].artifact,
+      /Exploratory analyses: None|no comprehensive influence, clustering or sensitivity assessment/,
+    );
+  });
+
+  test(`${example.id}: raw preparation reproduces the primary file; sensitivity has independent valid provenance`, () => {
+    const { datasets, preparation, sensitivity, run: primary } = example.computation;
+    assert.equal(datasets.length, 4);
+    assert.equal(new Set(datasets.map((d) => d.sha256)).size, 4);
+    for (const d of datasets)
+      assert.equal(d.sha256, createHash('sha256').update(d.csv).digest('hex'));
+    const headers = example.csv.split('\n')[0];
+    const outcomeUnit = example.id === 'alex-business-study' ? 'kUSD' : 'points';
+    const prepared = prepareDemoRaw(datasets[1].csv, headers, outcomeUnit);
+    assert.equal(prepared.csv, example.csv);
+    assert.deepEqual(prepared.log, preparation.log);
+    assert.equal(prepared.log.length, 2);
+    assert.match(prepared.log.join('\n'), /duplicate/);
+    assert.match(prepared.log.join('\n'), /converted/);
+    const rawLines = datasets[1].csv.trimEnd().split('\n');
+    rawLines[rawLines.length - 1] = rawLines.at(-1).replace(/^2,[^,]+,/, '2,999,');
+    assert.throws(
+      () => prepareDemoRaw(rawLines.join('\n'), headers, outcomeUnit),
+      /Conflicting duplicate/,
+    );
+    assert.equal(sensitivity.dataset.id, 'D4');
+    assert.equal(sensitivity.plan.datasetHash, datasets[3].sha256);
+    assert.equal(sensitivity.run.status, 'succeeded');
+    assert.notEqual(primary.id, sensitivity.run.id);
+    assert.equal(sensitivity.run.script, analysisScript('linear'));
+    assert.equal(sensitivity.plan.approvals.length, 1);
+    const rows = parse(datasets[3].csv)
+      .slice(1)
+      .filter((r) => r.every((v) => v !== '' && v !== 'NA'))
+      .map((r) => r.map(Number));
+    const avgX = rows.reduce((sum, r) => sum + r[0], 0) / rows.length;
+    const avgY = rows.reduce((sum, r) => sum + r[1], 0) / rows.length;
+    const expected =
+      rows.reduce((sum, r) => sum + (r[0] - avgX) * (r[1] - avgY), 0) /
+      rows.reduce((sum, r) => sum + (r[0] - avgX) ** 2, 0);
+    const slope = parse(sensitivity.run.files['coefficients.csv'], { columns: true })[1];
+    assert.ok(Math.abs(Number(slope.estimate) - expected) < 1e-10);
+    const counts = parse(sensitivity.run.files['counts.csv'], { columns: true })[0];
+    assert.equal(Number(counts.used), rows.length);
+    assert.equal(Number(counts.excluded), 2);
+    assert.equal(rows.length, example.id === 'alex-business-study' ? 11 : 5);
+    for (const stage of example.stages.slice(4)) {
+      assert.match(stage.artifact, /Exploratory R2/);
+      for (const value of [slope.estimate, slope.lower_95, slope.upper_95])
+        assert.ok(stage.artifact.includes(Number(value).toFixed(3)));
+    }
+  });
+}

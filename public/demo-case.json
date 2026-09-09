@@ -6,8 +6,8 @@
   "stages": [
     {
       "id": "question",
-      "title": "Explore a research interest",
-      "where": "Discuss this step with your guide → Write and explain your decisions → Supervisor checkpoint",
+      "title": "Explore your research interest",
+      "where": "Explore a topic with your guide (optional) → Review your research starting point",
       "input": "Maya starts with an interest in study habits and an eight-row synthetic class dataset.",
       "turns": [
         [
@@ -29,12 +29,24 @@
         [
           "Maya · researcher",
           "I accept an initial research direction, not a final question. I will read about study time, prior achievement and learning measures, then refine an answerable question. I still need to justify the scope and contribution."
+        ],
+        [
+          "Maya · researcher",
+          "A complication to work through: A broad learning question meets a short deadline."
+        ],
+        [
+          "Research guide · simulated agent",
+          "Maya has eight weeks, no approved recruitment route, and a convenient teaching dataset. Her supervisor asks whether she is studying learning, study effort, or performance on one quiz."
+        ],
+        [
+          "Maya · researcher",
+          "The accepted conversation draft is already saved. Maya checks it in “Review your research starting point” and uses Save and continue without another mandatory explanation or review."
         ]
       ],
-      "artifact": "Initial research direction: Study habits and learning in a fictional university class.\nMotivation: Understand how students study and how their learning is assessed.\nTentative interest: Whether time spent studying relates to learning outcomes.\nReading priorities: Key concepts, possible mechanisms, outcome definitions, selection and alternative explanations.\nPossible access: Synthetic records are available for the tutorial; a real project would need access and permissions.\nOpen decisions: The refined question, scope, literature contribution and design will follow reading. No novel gap or causal conclusion is claimed.",
+      "artifact": "Initial research direction: Study habits and learning in a fictional university class.\nMotivation: Understand how students study and how their learning is assessed.\nTentative interest: Whether time spent studying relates to learning outcomes.\nReading priorities: Key concepts, possible mechanisms, outcome definitions, selection and alternative explanations.\nPossible access: Synthetic records are available for the tutorial; a real project would need access and permissions.\nOpen decisions: The refined question, scope, literature contribution and design will follow reading. No novel gap or causal conclusion is claimed.\n\nExtended decision record:\nDirection v1: Prove that studying improves learning.\nDirection v2: Explore study habits, measures of learning and feasible access. The initial claim is withdrawn.\nThe accepted conversation draft is already saved. Maya checks it in “Review your research starting point” and uses Save and continue without another mandatory explanation or review.",
       "understanding": "This direction is a starting point. The literature may change my concepts, scope and question; supervisor feedback here does not freeze them.",
       "review": "Fictional supervisor: The initial direction is suitable for exploratory reading. A final question, confirmed dataset and research gap are not required at this checkpoint.",
-      "carry": "Carry the motivation and open questions into the literature review. Return to this direction if the reading changes the scope.",
+      "carry": "Carry the motivation and open questions into the literature review. Return to this direction if the reading changes the scope. Direction v2: Explore study habits, measures of learning and feasible access. The initial claim is withdrawn.",
       "challenge": {
         "question": "What should this first step establish?",
         "choices": [
@@ -43,12 +55,55 @@
         ],
         "correct": 1,
         "feedback": "Agree a useful direction first. Reading then helps refine the question and assess whether a contribution is defensible."
+      },
+      "tasks": [
+        {
+          "id": "conversation",
+          "title": "Explore a topic with your guide (optional)",
+          "description": "Discuss your interests and practical constraints, or go straight to recording your direction.",
+          "example": "Maya asks the guide to distinguish learning, self-reported effort and measured performance, and records the eight-week constraint."
+        },
+        {
+          "id": "workspace",
+          "title": "Review your research starting point",
+          "description": "Check the summary from your conversation, adjust anything inaccurate, then continue to the literature review. An accepted AI draft is already saved; you do not need to write it again.",
+          "example": "She checks the accepted summary, retains the open questions and continues to reading without rewriting the draft."
+        }
+      ],
+      "checkpoint": false,
+      "depth": {
+        "complication": "A broad learning question meets a short deadline",
+        "prompt": "Maya has eight weeks, no approved recruitment route, and a convenient teaching dataset. Her supervisor asks whether she is studying learning, study effort, or performance on one quiz.",
+        "options": [
+          [
+            "Promise an intervention study now",
+            "That commits to recruitment and causal identification before feasibility and reading are established."
+          ],
+          [
+            "Save the interest, uncertainties and feasible scope",
+            "Maya records study habits as the interest and quiz performance as a possible measure. Reading will determine the bounded question."
+          ],
+          [
+            "Let the available columns define the entire dissertation",
+            "Convenient columns can support a practice analysis but cannot establish a worthwhile dissertation contribution."
+          ]
+        ],
+        "correct": 1,
+        "decision": "The accepted conversation draft is already saved. Maya checks it in “Review your research starting point” and uses Save and continue without another mandatory explanation or review.",
+        "tasks": [
+          "Maya asks the guide to distinguish learning, self-reported effort and measured performance, and records the eight-week constraint.",
+          "She checks the accepted summary, retains the open questions and continues to reading without rewriting the draft."
+        ],
+        "revision": [
+          "Direction v1: Prove that studying improves learning.",
+          "Direction v2: Explore study habits, measures of learning and feasible access. The initial claim is withdrawn."
+        ]
       }
     },
     {
       "id": "evidence",
-      "title": "Review literature and refine the question",
-      "where": "Inspect sources and save passages → Check claims against source passages → Write and explain your decisions",
+      "title": "Review the literature and refine your question",
+      "where": "Find literature for your research interest (optional) → Inspect sources and save passages → Synthesize the literature and refine your question",
       "input": "The initial direction is study habits and learning. Reading helps define concepts, examine explanations and refine the question; this is existing literature, not results from the new study.",
       "turns": [
         [
@@ -74,6 +129,18 @@
         [
           "Maya · researcher",
           "After considering those concepts and limitations, I refine my question: In this synthetic class sample, how are weekly self-reported study hours associated with quiz scores? This tiny synthetic exercise illustrates methods, not a verified new contribution to the literature."
+        ],
+        [
+          "Maya · researcher",
+          "A complication to work through: A persuasive preprint, a duplicate and an inaccessible paper."
+        ],
+        [
+          "Research guide · simulated agent",
+          "The simulated reading list contains an observational result, a selection explanation, a preprint on study diaries, its duplicate catalogue entry and an inaccessible abstract. Which items can support an inspected claim?"
+        ],
+        [
+          "Maya · researcher",
+          "The question narrows from improving learning to the association of reported hours with quiz points in the synthetic sample. The reading does not establish a novel gap."
         ]
       ],
       "sources": [
@@ -88,12 +155,24 @@
           "title": "Teaching excerpt B — prior achievement matters (fictional)",
           "passage": "In this fictional example, the association between study time and quiz performance weakened after prior achievement was included in the model.",
           "limitation": "Illustrates a competing explanation; it is not real empirical evidence."
+        },
+        {
+          "id": "S3",
+          "title": "Study diary measurement — preprint (fictional)",
+          "passage": "In this invented measurement example, retrospective reports of weekly study time differed from daily diary totals. Neither measure captured the quality of study strategies.",
+          "limitation": "Measurement preprint; no verified peer review and no estimate of a causal learning effect."
+        },
+        {
+          "id": "S4",
+          "title": "Study strategy interviews (fictional)",
+          "passage": "In these invented interviews, students described equal study hours spent on different activities, including retrieval practice and rereading. Their circumstances constrained how they studied.",
+          "limitation": "Illustrative qualitative counterpoint; not representative and not a quantitative effect estimate."
         }
       ],
-      "artifact": "Search plan for real work: Search appropriate scholarly databases for (study time OR study hours) AND (quiz OR academic performance) AND university; record database, date, query and inclusion decisions. No real search was performed in this demo.\nS1: A fictional unadjusted association; inspected passage does not justify causation.\nS2: A fictional example challenging the simple story through prior-achievement adjustment.\nClaim C1: S1 describes an association in its fictional sample. Decision: Accept this narrow reading only.\nRejected claim: S1 proves study hours improve learning.\nGap: This exercise explores a small dataset; it establishes no novel literature gap.\nConceptual framing: Study time is a possible correlate of performance; prior achievement and motivation are rival explanations. A single quiz does not represent all learning.\nRefined research question: In this synthetic class sample, how are weekly self-reported study hours associated with quiz scores?\nObjective: Describe an unadjusted association with uncertainty, without making a causal claim.\nContribution: A worked teaching example only; no verified literature gap or empirical novelty.\nHypotheses: No confirmatory hypothesis test or preregistration is claimed.\nRefinement: Narrowed a broad practical interest to measured variables in one synthetic sample.",
+      "artifact": "Search plan for real work: Search appropriate scholarly databases for (study time OR study hours) AND (quiz OR academic performance) AND university; record database, date, query and inclusion decisions. No real search was performed in this demo.\nS1: A fictional unadjusted association; inspected passage does not justify causation.\nS2: A fictional example challenging the simple story through prior-achievement adjustment.\nClaim C1: S1 describes an association in its fictional sample. Decision: Accept this narrow reading only.\nRejected claim: S1 proves study hours improve learning.\nGap: This exercise explores a small dataset; it establishes no novel literature gap.\nConceptual framing: Study time is a possible correlate of performance; prior achievement and motivation are rival explanations. A single quiz does not represent all learning.\nRefined research question: In this synthetic class sample, how are weekly self-reported study hours associated with quiz scores?\nObjective: Describe an unadjusted association with uncertainty, without making a causal claim.\nContribution: A worked teaching example only; no verified literature gap or empirical novelty.\nHypotheses: No confirmatory hypothesis test or preregistration is claimed.\nRefinement: Narrowed a broad practical interest to measured variables in one synthetic sample.\n\nExtended decision record:\nLiterature v1: Study time improves learning.\nLiterature v2: S1 supports an association; S2 raises confounding; S3 questions recall; S4 adds contextual variation.\nThe question narrows from improving learning to the association of reported hours with quiz points in the synthetic sample. The reading does not establish a novel gap.\nS3: Preprint mechanism or measurement limits; does not verify a causal effect.\nS4: Qualitative context retained as a counterpoint; does not estimate the regression slope.\nSearch accounting: Six authored records, one duplicate, one awaiting full text, four inspected fictional excerpts. No live search or systematic-review completeness claimed.",
       "understanding": "Reading changed a broad interest into a bounded question by clarifying concepts, measurements and alternative explanations. Real work would need verified literature and a defensible contribution.",
       "review": "Fictional supervisor: The evidence logic is adequate for a tutorial. These excerpts cannot be cited in a real manuscript; conduct and verify a real literature search. The checkpoint now considers the explicit refined question, concepts and feasibility; it does not certify a novel gap from invented sources.",
-      "carry": "The explicit refined question and conceptual limitations now guide the study protocol. If further reading changes them, revise this step and renew affected downstream reviews.",
+      "carry": "The explicit refined question and conceptual limitations now guide the study protocol. If further reading changes them, revise this step and renew affected downstream reviews. Literature v2: S1 supports an association; S2 raises confounding; S3 questions recall; S4 adds contextual variation.",
       "challenge": {
         "question": "Which question matches the available design?",
         "choices": [
@@ -102,15 +181,68 @@
         ],
         "correct": 1,
         "feedback": "The second question matches an observational comparison. Writing a causal question does not make the data causal."
+      },
+      "tasks": [
+        {
+          "id": "literature",
+          "title": "Find literature for your research interest (optional)",
+          "description": "Ask the agent to search public scholarly catalogues and suggest a reading order, or upload papers you already have in the next task.",
+          "example": "Try the authored search query: (study time OR study habits) AND (quiz OR learning). The live app offers Crossref, Europe PMC and arXiv; this example performs no search."
+        },
+        {
+          "id": "sources",
+          "title": "Inspect sources and save passages",
+          "description": "Upload papers or add source records, then preserve the passages you inspected.",
+          "example": "Inspect S1–S4 below, retain exact fictional passages, and separate catalogue discovery from evidence. An uploaded PDF would need extraction and passage verification before supporting a claim."
+        },
+        {
+          "id": "workspace",
+          "title": "Synthesize the literature and refine your question",
+          "description": "Connect inspected studies and theory, identify a feasible contribution, and save a clear question and objectives. Use the optional claim ledger for claims that need closer checking.",
+          "example": "Save the revised question and a synthesis of measurement and confounding concerns. Open the optional claim ledger in Project materials to record limited support and contrary evidence."
+        }
+      ],
+      "checkpoint": false,
+      "depth": {
+        "complication": "A persuasive preprint, a duplicate and an inaccessible paper",
+        "prompt": "The simulated reading list contains an observational result, a selection explanation, a preprint on study diaries, its duplicate catalogue entry and an inaccessible abstract. Which items can support an inspected claim?",
+        "options": [
+          [
+            "Count every search hit as independent evidence",
+            "Duplicate records inflate apparent support, and an abstract does not establish claims about uninspected methods or results."
+          ],
+          [
+            "Discard every source that complicates the preferred story",
+            "Selective reading hides confounding and measurement problems that should shape the question."
+          ],
+          [
+            "Deduplicate, inspect passages and record uncertainty",
+            "Maya retains conflicting evidence, labels the preprint, and leaves the inaccessible item awaiting full text."
+          ]
+        ],
+        "correct": 2,
+        "decision": "The question narrows from improving learning to the association of reported hours with quiz points in the synthetic sample. The reading does not establish a novel gap.",
+        "tasks": [
+          "Try the authored search query: (study time OR study habits) AND (quiz OR learning). The live app offers Crossref, Europe PMC and arXiv; this example performs no search.",
+          "Inspect S1–S4 below, retain exact fictional passages, and separate catalogue discovery from evidence. An uploaded PDF would need extraction and passage verification before supporting a claim.",
+          "Save the revised question and a synthesis of measurement and confounding concerns. Open the optional claim ledger in Project materials to record limited support and contrary evidence."
+        ],
+        "revision": [
+          "Literature v1: Study time improves learning.",
+          "Literature v2: S1 supports an association; S2 raises confounding; S3 questions recall; S4 adds contextual variation."
+        ]
       }
     },
     {
       "id": "design",
       "title": "Plan the study and methods",
-      "where": "Discuss this step with your guide → Write and explain your decisions → Supervisor checkpoint",
+      "where": "Develop the study protocol → Can these methods answer your question? (optional) → Review the protocol with your supervisor",
       "input": "The saved question asks for an association; the evidence map identifies prior achievement as a possible confounder.",
       "turns": [
-        ["Maya · researcher", "Which analysis will give the most significant result?"],
+        [
+          "Maya · researcher",
+          "Which analysis will give the most significant result?"
+        ],
         [
           "Methods mentor · simulated agent",
           "Choose the analysis from the question before inspecting the estimate. What is the observational unit, missing-data rule and scope of the model?"
@@ -126,17 +258,79 @@
         [
           "Maya · researcher",
           "I accept that limitation and freeze the plan. This is an authored teaching sequence, not a timestamped preregistration. A real analysis must disclose prior exposure to results."
+        ],
+        [
+          "Maya · researcher",
+          "A complication to work through: The proposed methods cannot answer the first question."
+        ],
+        [
+          "Research guide · simulated agent",
+          "A design-stage check flags causal language and an unmeasured learning construct. No findings exist yet. Maya considers adding a prior-achievement adjustment, but D1 has no such column."
+        ],
+        [
+          "Maya · researcher",
+          "A fictional revise decision is followed by protocol v2 and fictional approval. The check compares question, literature and methods; it does not demand findings. No claim of preregistration is made."
         ]
       ],
-      "artifact": "Design: Small observational secondary analysis of synthetic records. Unit: One fictional student per row.\nModel: quiz_score = intercept + slope × study_hours + error.\nPrimary quantity: Unadjusted slope in quiz points per additional reported study hour, with a model-based 95% confidence interval.\nMissing data: Complete cases on the two selected variables; report total, included and excluded rows. No imputation.\nDiagnostics: Inspect fitted values and residuals; assess linearity and unequal variance cautiously. Influence and sensitivity analyses require further work.\nAssumptions: Independent observations, an adequate linear conditional mean, and model assumptions for interval estimation.\nConfounding: Prior achievement and motivation are unmeasured; no causal interpretation.\nPrior exposure: Authored synthetic tutorial, constructed with known results; not preregistered research.\nEthics: No real people; real studies require institution-specific ethics and data-access checks.",
+      "artifact": "Design: Small observational secondary analysis of synthetic records. Unit: One fictional student per row.\nModel: quiz_score = intercept + slope × study_hours + error.\nPrimary quantity: Unadjusted slope in quiz points per additional reported study hour, with a model-based 95% confidence interval.\nMissing data: Complete cases on the two selected variables; report total, included and excluded rows. No imputation.\nDiagnostics: Inspect fitted values and residuals; assess linearity and unequal variance cautiously. A later post-hoc sensitivity check is disclosed separately; comprehensive influence analysis still requires further work.\nAssumptions: Independent observations, an adequate linear conditional mean, and model assumptions for interval estimation.\nConfounding: Prior achievement and motivation are unmeasured; no causal interpretation.\nPrior exposure: Authored synthetic tutorial, constructed with known results; not preregistered research.\nEthics: No real people; real studies require institution-specific ethics and data-access checks.\n\nExtended decision record:\nProtocol v1: Causal language and unspecified outcome scale; supervisor requests revision.\nProtocol v2: Unadjusted association, 0–15 quiz scale, explicit exclusions and limitations; fictional approval recorded.\nA fictional revise decision is followed by protocol v2 and fictional approval. The check compares question, literature and methods; it does not demand findings. No claim of preregistration is made.",
       "understanding": "Selecting a method to obtain a small p-value would change the question after seeing the answer. Missingness can also select a biased subset.",
       "review": "Fictional supervisor: Approve this limited teaching protocol. Do not present eight invented observations as a powered study or preregistration.",
-      "carry": "The exact variables, complete-case rule and noncausal interpretation guide profiling, execution approval and consistency checks."
+      "carry": "The exact variables, complete-case rule and noncausal interpretation guide profiling, execution approval and consistency checks. Protocol v2: Unadjusted association, 0–15 quiz scale, explicit exclusions and limitations; fictional approval recorded.",
+      "tasks": [
+        {
+          "id": "workspace",
+          "title": "Develop the study protocol",
+          "description": "Specify sampling, measures, data access, planned analysis and safeguards. Explain the key methodological choices for your supervisor.",
+          "example": "Specify one student per row, quiz points as outcome, reported hours as predictor, complete cases and the missing confounders. Explain those choices for protocol review."
+        },
+        {
+          "id": "consistency",
+          "title": "Can these methods answer your question? (optional)",
+          "description": "Check the proposed sample, measures and analysis against the refined question. This is a planning check; findings are not expected yet.",
+          "example": "Run the prospective question–methods check. Reject a suggestion to estimate a causal effect because no identification strategy or appropriate data exist."
+        },
+        {
+          "id": "review",
+          "title": "Review the protocol with your supervisor",
+          "description": "Record approval of the current protocol before completing data preparation. This local checkpoint does not replace institutional ethics or access permissions.",
+          "example": "Record a revision request, save the bounded protocol, and record approval of its current version before completing data preparation."
+        }
+      ],
+      "checkpoint": true,
+      "depth": {
+        "complication": "The proposed methods cannot answer the first question",
+        "prompt": "A design-stage check flags causal language and an unmeasured learning construct. No findings exist yet. Maya considers adding a prior-achievement adjustment, but D1 has no such column.",
+        "options": [
+          [
+            "Invent a proxy achievement column",
+            "An agent cannot reconstruct unobserved achievement from these records. This would fabricate information."
+          ],
+          [
+            "Bound the analysis and obtain protocol review",
+            "Keep an unadjusted teaching model, document omitted achievement and request approval of the revised protocol."
+          ],
+          [
+            "Wait for a significant result to settle the design",
+            "Results cannot retroactively justify an outcome, sampling scheme or causal estimand."
+          ]
+        ],
+        "correct": 1,
+        "decision": "A fictional revise decision is followed by protocol v2 and fictional approval. The check compares question, literature and methods; it does not demand findings. No claim of preregistration is made.",
+        "tasks": [
+          "Specify one student per row, quiz points as outcome, reported hours as predictor, complete cases and the missing confounders. Explain those choices for protocol review.",
+          "Run the prospective question–methods check. Reject a suggestion to estimate a causal effect because no identification strategy or appropriate data exist.",
+          "Record a revision request, save the bounded protocol, and record approval of its current version before completing data preparation."
+        ],
+        "revision": [
+          "Protocol v1: Causal language and unspecified outcome scale; supervisor requests revision.",
+          "Protocol v2: Unadjusted association, 0–15 quiz scale, explicit exclusions and limitations; fictional approval recorded."
+        ]
+      }
     },
     {
       "id": "data",
-      "title": "Obtain and prepare the data",
-      "where": "Data / Analysis tasks → Import a permitted CSV dataset → Write and explain your decisions",
+      "title": "Obtain and prepare your data",
+      "where": "Find relevant public datasets (optional) → Manage your project data workspace → Record preparation and data quality",
       "input": "The protocol specifies two numeric variables and complete-case analysis. In this example the data are already available synthetic records; new data collection would take place outside the app after the relevant permissions and protocol decisions.",
       "turns": [
         [
@@ -158,12 +352,24 @@
         [
           "Maya · researcher",
           "The tutorial author defines each row as a distinct fictional student. I retain NA and blank cells, use the planned six complete cases, and document that no missingness mechanism is known."
+        ],
+        [
+          "Maya · researcher",
+          "A complication to work through: Duplicate records, mixed units and a tempting public dataset."
+        ],
+        [
+          "Research guide · simulated agent",
+          "The bundled raw register repeats student 2 and records that student’s time in minutes. A separate contextual dataset has course averages but no student identifiers. A simulated Dataverse candidate also measures course averages."
+        ],
+        [
+          "Maya · researcher",
+          "D1 is the harmonized primary extract; D2 preserves the raw register; D3 holds separate contextual aggregates; D4 holds a documented exploratory sensitivity subset. No catalogue candidate is automatically a downloaded or verified dataset."
         ]
       ],
-      "artifact": "Dataset D1: synthetic-study-hours.csv; eight author-created rows, two numeric columns.\nDictionary: study_hours = weekly hours, nonnegative; quiz_score = points, 0–15.\nObserved ranges: Hours 1–7; quiz scores 2–12. No recorded out-of-range value.\nMissingness: Row 7 has no quiz score; row 8 has no study-hours value. Six complete cases; two excluded from regression.\nIdentity: Exact CSV preserved and SHA-256 recorded with the execution bundle.\nDuplicates and eligibility: All rows are distinct by tutorial construction; no real participant identity verification was performed.\nCleaning: No value replacement or imputation.\nProtocol deviations: None. Unknown missingness mechanism limits interpretation.",
+      "artifact": "Dataset D1: synthetic-study-hours.csv; eight author-created rows, two numeric columns.\nDictionary: study_hours = weekly hours, nonnegative; quiz_score = points, 0–15.\nObserved ranges: Hours 1–7; quiz scores 2–12. No recorded out-of-range value.\nMissingness: Row 7 has no quiz score; row 8 has no study-hours value. Six complete cases; two excluded from regression.\nIdentity: Exact CSV preserved and SHA-256 recorded with the execution bundle.\nDuplicates and eligibility: All rows are distinct by tutorial construction; no real participant identity verification was performed.\nCleaning: No value replacement or imputation.\nProtocol deviations: A later post-hoc sensitivity check is recorded separately; the primary complete-case rule is unchanged. Unknown missingness mechanism limits interpretation.\n\nExtended decision record:\nData report v1: Primary extract only.\nData report v2: Raw lineage, contextual file and exploratory subset added. Recheck downstream plan context; preserve any older outputs as history.\nD1 is the harmonized primary extract; D2 preserves the raw register; D3 holds separate contextual aggregates; D4 holds a documented exploratory sensitivity subset. No catalogue candidate is automatically a downloaded or verified dataset.\nExtended workspace: D2 raw register, D3 separate contextual aggregates and D4 exploratory subset accompany D1. Preparation occurs in the supplied external script, not automatically in the app. Full transformation log and exact files are included in the dataset workspace download.",
       "understanding": "Replacing a blank with zero would invent a measurement and change the slope. Exclusion counts alone do not prove missingness is harmless.",
       "review": "Fictional supervisor: The missing-data decision matches the protocol. Retain the original rows and report the reduced analysis sample.",
-      "carry": "The dataset hash and variable mappings bind the approved plan to the exact input used in R.",
+      "carry": "The dataset hash and variable mappings bind the approved plan to the exact input used in R. Data report v2: Raw lineage, contextual file and exploratory subset added. Recheck downstream plan context; preserve any older outputs as history.",
       "challenge": {
         "question": "How many rows should the planned regression use?",
         "choices": [
@@ -172,12 +378,62 @@
         ],
         "correct": 1,
         "feedback": "Six rows match the planned complete-case rule. Zero replacement would invent data and deviate from the protocol."
+      },
+      "tasks": [
+        {
+          "id": "discovery",
+          "title": "Find relevant public datasets (optional)",
+          "description": "Search a public catalogue and assess candidates, or skip this task if you already have data.",
+          "example": "Review the simulated public-data candidates, including incompatible units and unclear access. In a real search inspect the landing page, licence and dictionary before downloading."
+        },
+        {
+          "id": "execution",
+          "title": "Manage your project data workspace",
+          "description": "Keep multiple uploaded datasets and public-data candidates together, record their origins, and inspect each CSV before analysis. Collect new data outside the app under your protocol and permissions.",
+          "example": "Keep all four supplied CSVs in the data workspace. Inspect origins, hashes and profiles; use the bundled preparation script to reproduce the primary extract outside the app."
+        },
+        {
+          "id": "workspace",
+          "title": "Record preparation and data quality",
+          "description": "Document cleaning, missingness, exclusions, access and deviations from the protocol. Save and continue when the data are ready; revisit the design if the methods change.",
+          "example": "Save duplicate handling, minutes-to-hours conversion, missingness, the reason for keeping aggregates separate and the post-hoc sensitivity deviation."
+        }
+      ],
+      "checkpoint": false,
+      "depth": {
+        "complication": "Duplicate records, mixed units and a tempting public dataset",
+        "prompt": "The bundled raw register repeats student 2 and records that student’s time in minutes. A separate contextual dataset has course averages but no student identifiers. A simulated Dataverse candidate also measures course averages.",
+        "options": [
+          [
+            "Append course averages as additional students",
+            "That mixes units of analysis and can create ecological bias; there is no valid participant linkage."
+          ],
+          [
+            "Drop all unusual values and replace blanks with zero",
+            "Unusual observations are not automatically errors, and missing measurements are not zeros."
+          ],
+          [
+            "Preserve raw data, harmonize units and keep context separate",
+            "The build deduplicates the repeated ID, converts 120 minutes to 2 hours, and reproduces D1 exactly. Context remains a separate file."
+          ]
+        ],
+        "correct": 2,
+        "decision": "D1 is the harmonized primary extract; D2 preserves the raw register; D3 holds separate contextual aggregates; D4 holds a documented exploratory sensitivity subset. No catalogue candidate is automatically a downloaded or verified dataset.",
+        "tasks": [
+          "Review the simulated public-data candidates, including incompatible units and unclear access. In a real search inspect the landing page, licence and dictionary before downloading.",
+          "Keep all four supplied CSVs in the data workspace. Inspect origins, hashes and profiles; use the bundled preparation script to reproduce the primary extract outside the app.",
+          "Save duplicate handling, minutes-to-hours conversion, missingness, the reason for keeping aggregates separate and the post-hoc sensitivity deviation."
+        ],
+        "revision": [
+          "Data report v1: Primary extract only.",
+          "Data report v2: Raw lineage, contextual file and exploratory subset added. Recheck downstream plan context; preserve any older outputs as history."
+        ]
       }
     },
     {
       "id": "analysis",
-      "title": "Approve the plan and inspect real outputs",
-      "where": "Data / Analysis tasks → Propose a plan → Review script → Approve → Run",
+      "title": "Analyze your data",
+      "where": "Run and inspect your analysis → Record results and analysis checks",
       "input": "The saved question, design and data report constrain the plan. The dataset has six complete cases.",
       "turns": [
         [
@@ -203,17 +459,72 @@
         [
           "Analysis mentor · simulated agent",
           "Keep the code, input and outputs together. If the question, design or data report changes, review a new current plan before rerunning; an old output cannot silently answer a revised question."
+        ],
+        [
+          "Maya · researcher",
+          "A complication to work through: An attractive slope and an exploratory sensitivity analysis."
+        ],
+        [
+          "Research guide · simulated agent",
+          "The primary model is already known to the tutorial author. Maya now asks whether the highest complete study-time observation matters. Should a second run replace the primary result?"
+        ],
+        [
+          "Maya · researcher",
+          "R1 uses 6 rows with slope 1.943 (95% CI 1.568 to 2.318). R2 uses 5 rows with slope 1.800 (95% CI 1.280 to 2.320). Both were actually computed in R."
         ]
       ],
-      "artifact": "Execution: R1, computed from synthetic data using the app’s fixed local R template.\nModel: quiz_score ~ study_hours, six complete cases from eight rows.\nSlope: 1.942857 quiz points/hour; model-based 95% CI 1.567972 to 2.317742.\nIntercept: -0.133333 quiz points.\nReproduction: Save input.csv and analysis.R from the bundle in a clean directory, then run Rscript analysis.R. Exact versions are in session.txt.\nDiagnostics: Inspect diagnostics.csv. The exact fitted values and residuals are in the attached output; estimates may be sensitive to individual rows. No comprehensive influence or sensitivity assessment was performed.\nInterpretation limits: Constructed sample; tiny n; missingness; no adjustment; model-based interval is not protection against bias.\nExploratory analyses: None.",
+      "artifact": "Execution: R1, computed from synthetic data using the app’s fixed local R template.\nModel: quiz_score ~ study_hours, six complete cases from eight rows.\nSlope: 1.942857 quiz points/hour; model-based 95% CI 1.567972 to 2.317742.\nIntercept: -0.133333 quiz points.\nReproduction: Save input.csv and analysis.R from the bundle in a clean directory, then run Rscript analysis.R. Exact versions are in session.txt.\nDiagnostics: Inspect diagnostics.csv. The exact fitted values and residuals are in the attached output; estimates may be sensitive to individual rows. One exploratory highest-exposure omission check is provided as R2; no comprehensive influence assessment was performed.\nInterpretation limits: Constructed sample; tiny n; missingness; no adjustment; model-based interval is not protection against bias.\nExploratory analyses: R2, a post-hoc highest-complete-exposure omission check, retained alongside R1.\n\nExtended decision record:\nAnalysis record v1: Primary R1 retained.\nAnalysis record v2: Exploratory R2 added with a separate input hash and approval; primary result is not replaced.\nR1 uses 6 rows with slope 1.943 (95% CI 1.568 to 2.318). R2 uses 5 rows with slope 1.800 (95% CI 1.280 to 2.320). Both were actually computed in R.\nExploratory R2: Highest complete exposure omitted after the primary result was known; 5 records, slope 1.800 (model-based 95% CI 1.280 to 2.320). Units match R1. This is not an independent replication, a prespecified test or proof of robustness. Primary R1 remains reported.",
       "understanding": "The language model proposed a plan; R computed the numbers. Approval records a deliberate decision, not proof that the chosen model is scientifically adequate.",
       "review": "Fictional supervisor: The run is reproducible. Keep the limitations visible and do not mistake a narrow model interval for reliable evidence about real students.",
-      "carry": "Recorded estimates and exclusions feed the claims and consistency review. The original input, exact script and environment accompany the research package."
+      "carry": "Recorded estimates and exclusions feed the claims and consistency review. The original input, exact script and environment accompany the research package. Analysis record v2: Exploratory R2 added with a separate input hash and approval; primary result is not replaced.",
+      "tasks": [
+        {
+          "id": "execution",
+          "title": "Run and inspect your analysis",
+          "description": "For supported CSV analyses, review and approve the exact script, then inspect the R results. If you analyze elsewhere, record those methods and results in the next task.",
+          "example": "Review the D1 variable mapping and exact script, then inspect R1. Review a separate D4 plan and inspect R2, retaining its exploratory label and exclusion rule."
+        },
+        {
+          "id": "workspace",
+          "title": "Record results and analysis checks",
+          "description": "Preserve outputs, uncertainty, diagnostics and departures from the plan. You can document analyses performed outside the app. Save and continue to interpretation.",
+          "example": "Record both estimates, intervals and counts. Keep residuals and environment files. Multivariable, clustered and qualitative analyses require methods outside the current fixed runner."
+        }
+      ],
+      "checkpoint": false,
+      "depth": {
+        "complication": "An attractive slope and an exploratory sensitivity analysis",
+        "prompt": "The primary model is already known to the tutorial author. Maya now asks whether the highest complete study-time observation matters. Should a second run replace the primary result?",
+        "options": [
+          [
+            "Report whichever run has the better interval",
+            "Selecting the preferred result conceals researcher flexibility and misrepresents the analysis history."
+          ],
+          [
+            "Run and label a separate exploratory check",
+            "R2 omits the highest complete exposure, uses a separately approved plan and retains R1. It tests one sensitivity only, not overall robustness."
+          ],
+          [
+            "Say the agent verified every regression assumption",
+            "The agent cannot establish assumptions from a short conversation or certify a six-case model."
+          ]
+        ],
+        "correct": 1,
+        "decision": "R1 uses 6 rows with slope 1.943 (95% CI 1.568 to 2.318). R2 uses 5 rows with slope 1.800 (95% CI 1.280 to 2.320). Both were actually computed in R.",
+        "tasks": [
+          "Review the D1 variable mapping and exact script, then inspect R1. Review a separate D4 plan and inspect R2, retaining its exploratory label and exclusion rule.",
+          "Record both estimates, intervals and counts. Keep residuals and environment files. Multivariable, clustered and qualitative analyses require methods outside the current fixed runner."
+        ],
+        "revision": [
+          "Analysis record v1: Primary R1 retained.",
+          "Analysis record v2: Exploratory R2 added with a separate input hash and approval; primary result is not replaced."
+        ]
+      }
     },
     {
       "id": "interpretation",
       "title": "Interpret findings in context",
-      "where": "Write and explain your decisions → Consistency review → Researcher response",
+      "where": "Answer the question and explain the limitations → Check alignment with the study (optional AI check)",
       "input": "The question and protocol are noncausal. R1 estimates an unadjusted slope from six synthetic complete cases.",
       "turns": [
         [
@@ -235,12 +546,24 @@
         [
           "Maya · researcher",
           "I save the corrected interpretation and rerun the consistency review so it checks the current version. The scripted follow-up finds no remaining causal wording mismatch; that is not a certification of quality."
+        ],
+        [
+          "Maya · researcher",
+          "A complication to work through: Agreement between two slopes is not causal validation."
+        ],
+        [
+          "Research guide · simulated agent",
+          "Maya’s draft says the sensitivity analysis proves a stable benefit for every student. The qualitative teaching excerpt describes variation in study strategies, and prior achievement remains unmeasured."
+        ],
+        [
+          "Maya · researcher",
+          "A simulated consistency finding links the overclaim to the noncausal protocol and R1/R2. Maya accepts it, saves a revision and requests a check of the current version. Historical checks remain visible."
         ]
       ],
-      "artifact": "Claim linked to R1: In six complete synthetic records, one additional reported study hour was associated with an estimated 1.94-point higher quiz score (model-based 95% CI 1.57–2.32).\nRejected wording: “Each extra hour improves scores.”\nAlternative explanations: Prior achievement, motivation, reporting error and missingness.\nLimits: Tiny constructed sample; no confounder adjustment; no causal identification or external generalizability.\nConsistency response: Accepted the causal-language finding and revised the artifact. A new scripted review checks the revised version; the previous review remains historical.\nUnknown: Whether a similar association exists in a real population or changing study time causes any benefit.",
+      "artifact": "Claim linked to R1: In six complete synthetic records, one additional reported study hour was associated with an estimated 1.94-point higher quiz score (model-based 95% CI 1.57–2.32).\nRejected wording: “Each extra hour improves scores.”\nAlternative explanations: Prior achievement, motivation, reporting error and missingness.\nLimits: Tiny constructed sample; no confounder adjustment; no causal identification or external generalizability.\nConsistency response: Accepted the causal-language finding and revised the artifact. A new scripted review checks the revised version; the previous review remains historical.\nUnknown: Whether a similar association exists in a real population or changing study time causes any benefit.\n\nExtended decision record:\nConclusion v1: Stable causal benefit for all students.\nConclusion v2: A synthetic unadjusted association plus a limited exploratory check; causal and population claims withdrawn.\nA simulated consistency finding links the overclaim to the noncausal protocol and R1/R2. Maya accepts it, saves a revision and requests a check of the current version. Historical checks remain visible.\nExploratory R2: Highest complete exposure omitted after the primary result was known; 5 records, slope 1.800 (model-based 95% CI 1.280 to 2.320). Units match R1. This is not an independent replication, a prespecified test or proof of robustness. Primary R1 remains reported.",
       "understanding": "A fitted slope does not show what an intervention would do. A consistency check can detect contradictions but cannot supply missing data or validate the study.",
       "review": "Fictional supervisor: The revised wording matches the design and output. It remains a demonstration, not an empirical finding for publication.",
-      "carry": "The corrected claim, uncertainty, competing explanations and unresolved limitations must all remain in the final manuscript.",
+      "carry": "The corrected claim, uncertainty, competing explanations and unresolved limitations must all remain in the final manuscript. Conclusion v2: A synthetic unadjusted association plus a limited exploratory check; causal and population claims withdrawn.",
       "challenge": {
         "question": "Does a clean consistency review establish that this study is rigorous?",
         "choices": [
@@ -249,15 +572,61 @@
         ],
         "correct": 1,
         "feedback": "Consistency is one check. It cannot establish source truth, adequate power, valid assumptions or freedom from bias."
+      },
+      "tasks": [
+        {
+          "id": "workspace",
+          "title": "Answer the question and explain the limitations",
+          "description": "Use recorded results to answer the refined question, relate findings to the literature, and consider alternative explanations.",
+          "example": "Answer the refined question with R1 and disclose R2 separately; discuss achievement, recall, strategy differences and missingness."
+        },
+        {
+          "id": "consistency",
+          "title": "Check alignment with the study (optional AI check)",
+          "description": "Compare saved decisions and outputs; investigate findings and record your response.",
+          "example": "Inspect findings about causality and generalization. Record a reasoned response and rerun after revising the document; an old review is not evidence about the current wording."
+        }
+      ],
+      "checkpoint": false,
+      "depth": {
+        "complication": "Agreement between two slopes is not causal validation",
+        "prompt": "Maya’s draft says the sensitivity analysis proves a stable benefit for every student. The qualitative teaching excerpt describes variation in study strategies, and prior achievement remains unmeasured.",
+        "options": [
+          [
+            "Treat similar estimates as proof of a universal effect",
+            "One subset check cannot eliminate confounding, measurement error or sampling limitations."
+          ],
+          [
+            "Delete the qualitative disagreement",
+            "Different measures and contexts help explain why findings may differ; disagreement belongs in interpretation."
+          ],
+          [
+            "Bound the claim and retain unresolved explanations",
+            "The report distinguishes an observed synthetic association, one exploratory check and unanswered causal questions."
+          ]
+        ],
+        "correct": 2,
+        "decision": "A simulated consistency finding links the overclaim to the noncausal protocol and R1/R2. Maya accepts it, saves a revision and requests a check of the current version. Historical checks remain visible.",
+        "tasks": [
+          "Answer the refined question with R1 and disclose R2 separately; discuss achievement, recall, strategy differences and missingness.",
+          "Inspect findings about causality and generalization. Record a reasoned response and rerun after revising the document; an old review is not evidence about the current wording."
+        ],
+        "revision": [
+          "Conclusion v1: Stable causal benefit for all students.",
+          "Conclusion v2: A synthetic unadjusted association plus a limited exploratory check; causal and population claims withdrawn."
+        ]
       }
     },
     {
       "id": "writing",
-      "title": "Write, review and share the research",
-      "where": "Write and explain your decisions → Supervisor checkpoint → Export project → Readable report or project backup; Data / Analysis tasks → Download reproduction bundle",
+      "title": "Write, review and share your research",
+      "where": "Assemble and revise the research report → Check alignment with the study (optional AI check) → Review the final report with your supervisor → Export the research package",
       "input": "The final package combines the bounded question, source limitations, frozen decisions, actual R outputs and revised interpretation. Writing and literature review can begin earlier and continue throughout; this phase assembles and reviews the complete package.",
       "turns": [
-        ["Maya · researcher", "Can we turn this into a paper now?"],
+        [
+          "Maya · researcher",
+          "Can we turn this into a paper now?"
+        ],
         [
           "Writing mentor · simulated agent",
           "For this exercise, create a clearly labeled teaching report. Include methods, exclusions, results and limitations, and attach the data and script. Do not present invented citations or observations as real research."
@@ -273,22 +642,146 @@
         [
           "Maya · researcher",
           "I now understand the cycle: discuss, inspect, revise, explain, review and carry the accepted decisions forward. I still need to make and defend the scientific choices myself."
+        ],
+        [
+          "Maya · researcher",
+          "A complication to work through: A complete package still needs a bounded final claim."
+        ],
+        [
+          "Research guide · simulated agent",
+          "The draft abstract omits the two incomplete rows and presents the sensitivity check as planned. A reviewer asks for transparent exclusions, source status and a reproducible handoff."
+        ],
+        [
+          "Maya · researcher",
+          "The final simulated review covers the revised teaching report. The live app’s Export project offers a report and project backup; Open project, New project and Import project serve different purposes and do not advance a research step."
         ]
       ],
-      "artifact": "TEACHING REPORT — synthetic data; no real empirical claims\nTitle: Study hours and quiz scores in a fictional class: a reproducible demonstration.\nQuestion: How are weekly study hours associated with quiz scores in this synthetic sample?\nMethods: Eight constructed records; unadjusted simple linear regression; six complete cases, two excluded. No imputation. No preregistration or real literature search.\nResults: Estimated slope 1.94 quiz points/hour (model-based 95% CI 1.57–2.32). The exact computation, input and environment are attached.\nDiscussion: This illustrates workflow continuity and reproducibility. The result establishes nothing about real students and cannot support an intervention recommendation.\nLimitations: Invented sources and observations; tiny sample; missingness; unmeasured confounding; incomplete diagnostic assessment.\nTransparency: Conversations and reviews are authored simulations. Numerical outputs come from actual local R execution. All teaching materials are labeled fictional.\nPackage: Walkthrough and decision record, two teaching excerpts, original CSV, selected R input, fixed script, coefficients, diagnostics, figure, log and session information.\nNext real-world step: Develop an adequate study with verified literature and expert supervision.",
+      "artifact": "TEACHING REPORT — synthetic data; no real empirical claims\nTitle: Study hours and quiz scores in a fictional class: a reproducible demonstration.\nQuestion: How are weekly study hours associated with quiz scores in this synthetic sample?\nMethods: Eight constructed records; unadjusted simple linear regression; six complete cases, two excluded. No imputation. No preregistration or real literature search.\nResults: Estimated slope 1.94 quiz points/hour (model-based 95% CI 1.57–2.32). The exact computation, input and environment are attached.\nDiscussion: This illustrates workflow continuity and reproducibility. The result establishes nothing about real students and cannot support an intervention recommendation.\nLimitations: Invented sources and observations; tiny sample; missingness; unmeasured confounding; incomplete diagnostic assessment.\nTransparency: Conversations and reviews are authored simulations. Numerical outputs come from actual local R execution. All teaching materials are labeled fictional.\nPackage: Walkthrough and decision record, four teaching excerpts, original CSV, selected R input, fixed script, coefficients, diagnostics, figure, log and session information.\nNext real-world step: Develop an adequate study with verified literature and expert supervision.\n\nExtended decision record:\nReport v1: Exclusions and exploratory status omitted; review requests revision.\nReport v2: Corrected abstract, full provenance and both runs retained; fictional final approval.\nThe final simulated review covers the revised teaching report. The live app’s Export project offers a report and project backup; Open project, New project and Import project serve different purposes and do not advance a research step.\nExploratory R2: Highest complete exposure omitted after the primary result was known; 5 records, slope 1.800 (model-based 95% CI 1.280 to 2.320). Units match R1. This is not an independent replication, a prespecified test or proof of robustness. Primary R1 remains reported.\nExtended package: Four synthetic CSVs and their roles, reproducible preparation script, transformation log, two separately approved R plans and runs, fictional search/screening decisions, and versioned decision records. Both the primary and exploratory result must remain visible.",
       "understanding": "A complete package lets another person inspect what I did and why. Reproducibility is necessary, but does not make a weak or fictional study valid.",
       "review": "Fictional supervisor: Teaching walkthrough complete. No real supervisor approval, ethics approval or publication readiness is implied.",
-      "carry": "Download the materials below, then return to your notebook. To practice execution, import the synthetic CSV under Run analysis and review your own plan before running it."
+      "carry": "Download the materials below, then return to your notebook. To practice execution, import the synthetic CSV under Run analysis and review your own plan before running it. Report v2: Corrected abstract, full provenance and both runs retained; fictional final approval.",
+      "tasks": [
+        {
+          "id": "workspace",
+          "title": "Assemble and revise the research report",
+          "description": "Bring earlier writing, results and limitations together. Add data/code availability and contribution statements; explain key decisions for final review.",
+          "example": "Assemble earlier writing and preserve exclusions, fictional-source labels, prior exposure and the exploratory R2 designation."
+        },
+        {
+          "id": "consistency",
+          "title": "Check alignment with the study (optional AI check)",
+          "description": "Compare saved decisions and outputs; investigate findings and record your response.",
+          "example": "Check question, protocol, both runs and abstract for agreement; unresolved methodological limits stay in the report."
+        },
+        {
+          "id": "review",
+          "title": "Review the final report with your supervisor",
+          "description": "Resolve outstanding concerns and record the reviewer’s decision on the saved research package.",
+          "example": "Record the requested corrections and final review of the saved version. Only the protocol and this final report require supervisor checkpoints."
+        },
+        {
+          "id": "export",
+          "title": "Export the research package",
+          "description": "Download a readable report and a project backup with supporting materials.",
+          "example": "Download the walkthrough, four datasets, preparation script and two-run reproduction bundle. For live work, export a separate project backup and test import as a new copy."
+        }
+      ],
+      "checkpoint": true,
+      "depth": {
+        "complication": "A complete package still needs a bounded final claim",
+        "prompt": "The draft abstract omits the two incomplete rows and presents the sensitivity check as planned. A reviewer asks for transparent exclusions, source status and a reproducible handoff.",
+        "options": [
+          [
+            "Export the old approved draft after editing it",
+            "An earlier approval does not cover a changed document. Renew the final review for the saved revision."
+          ],
+          [
+            "Correct the report, renew review and export the full record",
+            "Include all datasets, preparation code, both R runs, search decisions, limitations and the revision trail."
+          ],
+          [
+            "Import the reproduction JSON as a project backup",
+            "The reproduction bundle contains data and computation, not the app’s project-backup schema. Use CSV imports for practice or a real project backup for restoration."
+          ]
+        ],
+        "correct": 1,
+        "decision": "The final simulated review covers the revised teaching report. The live app’s Export project offers a report and project backup; Open project, New project and Import project serve different purposes and do not advance a research step.",
+        "tasks": [
+          "Assemble earlier writing and preserve exclusions, fictional-source labels, prior exposure and the exploratory R2 designation.",
+          "Check question, protocol, both runs and abstract for agreement; unresolved methodological limits stay in the report.",
+          "Record the requested corrections and final review of the saved version. Only the protocol and this final report require supervisor checkpoints.",
+          "Download the walkthrough, four datasets, preparation script and two-run reproduction bundle. For live work, export a separate project backup and test import as a new copy."
+        ],
+        "revision": [
+          "Report v1: Exclusions and exploratory status omitted; review requests revision.",
+          "Report v2: Corrected abstract, full provenance and both runs retained; fictional final approval."
+        ]
+      }
     }
   ],
-  "overview": "Maya starts with a practical interest, reads teaching excerpts to clarify concepts and refine a question, plans a study, prepares synthetic data, reviews an R analysis, interprets its limits and assembles a report. The walkthrough shows a suggested route; real research involves revisiting earlier decisions.",
+  "overview": "Maya navigates all seven current research steps, with conflicting literature, a revised protocol, multiple datasets, raw-data preparation, two real R runs, selective-reporting pressure and a revised final report. Explore each task and try the decision exercises. Conversations, catalogue examples and reviews are authored simulations; only the bundled preparation and numerical computations actually execute during the build.",
+  "edition": 2,
+  "search": {
+    "disclosure": "Authored catalogue exercise only. No live search, real publication, DOI, repository deposit or access permission is implied.",
+    "results": [
+      {
+        "id": "L1",
+        "label": "S1 · observational association",
+        "status": "Inspected fictional passage; limited support for association."
+      },
+      {
+        "id": "L2",
+        "label": "S2 · selection / confounding",
+        "status": "Inspected fictional passage; retained as a competing explanation."
+      },
+      {
+        "id": "L3",
+        "label": "S3 · arXiv-style preprint candidate",
+        "status": "Inspected fictional passage; preprint status retained, not assumed peer reviewed."
+      },
+      {
+        "id": "L4",
+        "label": "Duplicate listing of S3",
+        "status": "Merged with L3; not another independent study."
+      },
+      {
+        "id": "L5",
+        "label": "Abstract-only candidate",
+        "status": "Full text unavailable in the scenario; awaiting inspection, not used to support full-text claims."
+      },
+      {
+        "id": "L6",
+        "label": "S4 · qualitative counterpoint",
+        "status": "Inspected fictional passage; explains contextual differences, not an effect-size estimate."
+      }
+    ]
+  },
+  "publicCandidates": [
+    {
+      "title": "Annual course performance aggregates",
+      "decision": "Reject for primary analysis: incompatible observational unit and time scale; no participant linkage."
+    },
+    {
+      "title": "Restricted student learning survey",
+      "decision": "Defer: access and reuse conditions unresolved; no file downloaded or permission inferred."
+    },
+    {
+      "title": "Course study context",
+      "decision": "Context only: illustrated by synthetic D3. This file is authored locally, not retrieved from a repository."
+    }
+  ],
   "csv": "study_hours,quiz_score\n1,2\n2,4\n3,5\n4,8\n5,9\n6,12\n7,NA\n,10\n",
-  "builtAt": "2026-09-09T18:44:20.700Z",
+  "builtAt": "2026-09-09T22:48:59.259Z",
   "computation": {
     "dataset": {
       "id": "D1",
       "name": "synthetic-study-hours.csv",
       "permission": "Author-created fictional observations for a public teaching demonstration; no real participants.",
+      "origin": {
+        "kind": "upload",
+        "filename": ""
+      },
+      "notes": "",
       "csv": "study_hours,quiz_score\n1,2\n2,4\n3,5\n4,8\n5,9\n6,12\n7,NA\n,10\n",
       "sha256": "915cec4f2b06f820cda8fc75c8647645eb5ad477f9eaf8aaebef5ea3e2cff876",
       "columns": [
@@ -308,7 +801,7 @@
         }
       ],
       "rowCount": 8,
-      "at": "2026-09-09T18:44:17.735Z"
+      "at": "2026-09-09T22:48:52.064Z"
     },
     "plan": {
       "id": "P1",
@@ -341,24 +834,24 @@
         }
       ],
       "model": null,
-      "at": "2026-09-09T18:44:17.735Z",
+      "at": "2026-09-09T22:48:52.064Z",
       "approvals": [
         {
-          "id": "36bc8f0c-e033-47b5-9ef8-a3c5c8b1ff4b",
-          "planHash": "2cf2ef8a5e5f2937169e7b15baeb82aa2f5ce4d962a197e4583059d283f86385",
+          "id": "86d6d663-f7fa-40ec-ac6e-dfeb1b26f81c",
+          "planHash": "7eab34cff1d82e998e0bb70e8810a4c8eb6d6c96e928959ea39baa6d9256337b",
           "name": "Demo build · synthetic data only",
           "note": "The tutorial author reviewed the fixed template and synthetic variable mapping. This build approval is not a real researcher or supervisor approval.",
-          "at": "2026-09-09T18:44:17.736Z",
+          "at": "2026-09-09T22:48:52.064Z",
           "authenticated": false
         }
       ],
-      "planHash": "2cf2ef8a5e5f2937169e7b15baeb82aa2f5ce4d962a197e4583059d283f86385"
+      "planHash": "7eab34cff1d82e998e0bb70e8810a4c8eb6d6c96e928959ea39baa6d9256337b"
     },
     "run": {
       "id": "R1",
       "planId": "P1",
-      "planHash": "2cf2ef8a5e5f2937169e7b15baeb82aa2f5ce4d962a197e4583059d283f86385",
-      "approvalId": "36bc8f0c-e033-47b5-9ef8-a3c5c8b1ff4b",
+      "planHash": "7eab34cff1d82e998e0bb70e8810a4c8eb6d6c96e928959ea39baa6d9256337b",
+      "approvalId": "86d6d663-f7fa-40ec-ac6e-dfeb1b26f81c",
       "datasetId": "D1",
       "datasetHash": "915cec4f2b06f820cda8fc75c8647645eb5ad477f9eaf8aaebef5ea3e2cff876",
       "scriptHash": "9535d21718a770574a4b775d96f23bd501df0aad205d18d8c5c883e3b2de9583",
@@ -382,8 +875,8 @@
           "version": 1
         }
       ],
-      "startedAt": "2026-09-09T18:44:17.736Z",
-      "finishedAt": "2026-09-09T18:44:20.699Z",
+      "startedAt": "2026-09-09T22:48:52.065Z",
+      "finishedAt": "2026-09-09T22:48:55.725Z",
       "status": "succeeded",
       "engine": "webR 0.6.0",
       "rVersion": "R version 4.6.0 (2026-04-24)",
@@ -397,6 +890,285 @@
         "coefficients.csv": "\"term\",\"estimate\",\"std_error\",\"statistic\",\"p_value\",\"lower_95\",\"upper_95\"\n\"(Intercept)\",-0.133333333333334,0.525840219560977,-0.253562448008738,0.812333170336603,-1.59329983704954,1.32663317038287\n\"x\",1.94285714285714,0.135023303607217,14.3890505635154,0.000135570944100301,1.56797235246925,2.31774193324504\n",
         "fit.csv": "\"n\",\"r_squared\",\"residual_sd\",\"residual_df\"\n6,0.981046676096181,0.564843003893665,4\n",
         "diagnostics.csv": "\"fitted\",\"residual\"\n1.80952380952381,0.190476190476191\n3.75238095238095,0.247619047619046\n5.69523809523809,-0.695238095238095\n7.63809523809524,0.361904761904762\n9.58095238095238,-0.580952380952381\n11.5238095238095,0.476190476190476\n"
+      }
+    },
+    "datasets": [
+      {
+        "id": "D1",
+        "name": "synthetic-study-hours.csv",
+        "permission": "Author-created fictional observations for a public teaching demonstration; no real participants.",
+        "origin": {
+          "kind": "upload",
+          "filename": ""
+        },
+        "notes": "",
+        "csv": "study_hours,quiz_score\n1,2\n2,4\n3,5\n4,8\n5,9\n6,12\n7,NA\n,10\n",
+        "sha256": "915cec4f2b06f820cda8fc75c8647645eb5ad477f9eaf8aaebef5ea3e2cff876",
+        "columns": [
+          {
+            "index": 0,
+            "name": "study_hours",
+            "numeric": true,
+            "missing": 1,
+            "observed": 7
+          },
+          {
+            "index": 1,
+            "name": "quiz_score",
+            "numeric": true,
+            "missing": 1,
+            "observed": 7
+          }
+        ],
+        "rowCount": 8,
+        "at": "2026-09-09T22:48:52.064Z"
+      },
+      {
+        "id": "D2",
+        "name": "raw-register.csv",
+        "permission": "Author-created fictional observations for a public teaching demonstration; no real participants or repository download.",
+        "origin": {
+          "kind": "upload",
+          "filename": ""
+        },
+        "notes": "D2: Synthetic raw register with one exact duplicate and a documented mixed-unit record. Prepared outside the app using the bundled script.",
+        "csv": "record_id,exposure,exposure_unit,outcome,outcome_unit\n1,1,hours,2,points\n2,120,minutes,4,points\n3,3,hours,5,points\n4,4,hours,8,points\n5,5,hours,9,points\n6,6,hours,12,points\n7,7,hours,NA,points\n8,,hours,10,points\n2,120,minutes,4,points\n",
+        "sha256": "217b88150f752b406a341c3398419bda9faf11fb93e138f83fdc3ce676697543",
+        "columns": [
+          {
+            "index": 0,
+            "name": "record_id",
+            "numeric": true,
+            "missing": 0,
+            "observed": 9
+          },
+          {
+            "index": 1,
+            "name": "exposure",
+            "numeric": true,
+            "missing": 1,
+            "observed": 8
+          },
+          {
+            "index": 2,
+            "name": "exposure_unit",
+            "numeric": false,
+            "missing": 0,
+            "observed": 0
+          },
+          {
+            "index": 3,
+            "name": "outcome",
+            "numeric": true,
+            "missing": 1,
+            "observed": 8
+          },
+          {
+            "index": 4,
+            "name": "outcome_unit",
+            "numeric": false,
+            "missing": 0,
+            "observed": 0
+          }
+        ],
+        "rowCount": 9,
+        "at": "2026-09-09T22:48:55.727Z"
+      },
+      {
+        "id": "D3",
+        "name": "context-aggregates.csv",
+        "permission": "Author-created fictional observations for a public teaching demonstration; no real participants or repository download.",
+        "origin": {
+          "kind": "upload",
+          "filename": ""
+        },
+        "notes": "D3: Locally authored synthetic context, not a repository download. Different observational unit; no supported participant linkage. Not included in either regression.",
+        "csv": "course,mean_study_hours,assessment_scale\nSeminar,5,100\nLaboratory,7,20\nLecture,4,15\n",
+        "sha256": "dac3fd91c8e260a1d7c3e7df910178a031282d1d9be2657a32fd92947cc1d430",
+        "columns": [
+          {
+            "index": 0,
+            "name": "course",
+            "numeric": false,
+            "missing": 0,
+            "observed": 0
+          },
+          {
+            "index": 1,
+            "name": "mean_study_hours",
+            "numeric": true,
+            "missing": 0,
+            "observed": 3
+          },
+          {
+            "index": 2,
+            "name": "assessment_scale",
+            "numeric": true,
+            "missing": 0,
+            "observed": 3
+          }
+        ],
+        "rowCount": 3,
+        "at": "2026-09-09T22:48:55.727Z"
+      },
+      {
+        "id": "D4",
+        "name": "exploratory-subset.csv",
+        "permission": "Author-created fictional observations for a public teaching demonstration; no real participants or repository download.",
+        "origin": {
+          "kind": "upload",
+          "filename": ""
+        },
+        "notes": "D4: D1 with the highest complete exposure omitted for a post-hoc sensitivity demonstration. Original incomplete records retained; not an error correction or independent sample.",
+        "csv": "study_hours,quiz_score\n1,2\n2,4\n3,5\n4,8\n5,9\n7,NA\n,10\n",
+        "sha256": "eabe331e1331f359edbd85ba087f7cdfba8fad0c2e5ae6788644f18cdeea8a20",
+        "columns": [
+          {
+            "index": 0,
+            "name": "study_hours",
+            "numeric": true,
+            "missing": 1,
+            "observed": 6
+          },
+          {
+            "index": 1,
+            "name": "quiz_score",
+            "numeric": true,
+            "missing": 1,
+            "observed": 6
+          }
+        ],
+        "rowCount": 7,
+        "at": "2026-09-09T22:48:55.727Z"
+      }
+    ],
+    "preparation": {
+      "script": "// Synthetic tutorial only. Run: node prepare.mjs raw-register.csv primary-rebuilt.csv\nimport { readFile, writeFile } from 'node:fs/promises';\nfunction prepareDemoRaw(csv, headers, expectedOutcomeUnit) {\n  const lines = csv.trimEnd().split(/\\r?\\n/);\n  if (lines.shift() !== 'record_id,exposure,exposure_unit,outcome,outcome_unit')\n    throw new Error('Unexpected teaching raw-register header.');\n  const seen = new Map();\n  const log = [];\n  const output = [headers];\n  for (const line of lines) {\n    const cells = line.split(',');\n    if (cells.length !== 5 || cells.some((c) => c.includes('\"')))\n      throw new Error('This teaching script accepts only its documented unquoted format.');\n    const [id, x, xUnit, y, yUnit] = cells;\n    if (!id) throw new Error('Missing record ID.');\n    if (seen.has(id)) {\n      if (seen.get(id) !== line)\n        throw new Error(`Conflicting duplicate ${id}; human review required.`);\n      log.push(`${id}: removed exact duplicate; first record retained.`);\n      continue;\n    }\n    seen.set(id, line);\n    if (!['hours', 'minutes'].includes(xUnit) || ![expectedOutcomeUnit, 'USD'].includes(yUnit))\n      throw new Error(`Unknown unit for ${id}.`);\n    const convert = (value, divisor) => {\n      if (value === '' || value === 'NA') return value;\n      if (!Number.isFinite(Number(value))) throw new Error(`Invalid numeric value for ${id}.`);\n      return String(Number(value) / divisor);\n    };\n    const cleanX = convert(x, xUnit === 'minutes' ? 60 : 1);\n    if (xUnit === 'minutes') log.push(`${id}: ${x} minutes converted to ${cleanX} hours.`);\n    if (yUnit === 'USD' && expectedOutcomeUnit !== 'kUSD')\n      throw new Error('Incompatible outcome unit.');\n    const cleanY = convert(y, yUnit === 'USD' ? 1000 : 1);\n    if (yUnit === 'USD') log.push(`${id}: ${y} USD converted to ${cleanY} kUSD.`);\n    output.push(`${cleanX},${cleanY}`);\n  }\n  return { csv: output.join('\\n') + '\\n', log };\n}\nconst [input, output] = process.argv.slice(2);\nif (!input || !output || input === output) throw new Error('Provide distinct input and output paths.');\nconst result = prepareDemoRaw(await readFile(input, 'utf8'), \"study_hours,quiz_score\", \"points\");\nawait writeFile(output, result.csv, { flag: 'wx' });\nconsole.log(result.log.join('\\n'));\n",
+      "log": [
+        "2: 120 minutes converted to 2 hours.",
+        "2: removed exact duplicate; first record retained."
+      ],
+      "scope": "Executed at demo build time. The script handles only the supplied simple unquoted format. It is an external preparation example, not an automated app cleaning operation."
+    },
+    "sensitivity": {
+      "dataset": {
+        "id": "D4",
+        "name": "exploratory-subset.csv",
+        "permission": "Author-created fictional observations for a public teaching demonstration; no real participants or repository download.",
+        "origin": {
+          "kind": "upload",
+          "filename": ""
+        },
+        "notes": "D4: D1 with the highest complete exposure omitted for a post-hoc sensitivity demonstration. Original incomplete records retained; not an error correction or independent sample.",
+        "csv": "study_hours,quiz_score\n1,2\n2,4\n3,5\n4,8\n5,9\n7,NA\n,10\n",
+        "sha256": "eabe331e1331f359edbd85ba087f7cdfba8fad0c2e5ae6788644f18cdeea8a20",
+        "columns": [
+          {
+            "index": 0,
+            "name": "study_hours",
+            "numeric": true,
+            "missing": 1,
+            "observed": 6
+          },
+          {
+            "index": 1,
+            "name": "quiz_score",
+            "numeric": true,
+            "missing": 1,
+            "observed": 6
+          }
+        ],
+        "rowCount": 7,
+        "at": "2026-09-09T22:48:55.727Z"
+      },
+      "plan": {
+        "id": "P2",
+        "datasetId": "D4",
+        "datasetHash": "eabe331e1331f359edbd85ba087f7cdfba8fad0c2e5ae6788644f18cdeea8a20",
+        "method": "linear",
+        "outcome": 1,
+        "predictor": 0,
+        "rationale": "Post-hoc teaching sensitivity check: omit the highest complete exposure while preserving primary R1. This is not a prespecified test, error correction or independent replication.",
+        "missingPolicy": "complete_cases",
+        "script": "# ResearchGuide analysis template v1; input.csv uses y (outcome) and optional x (predictor).\n# Complete-case analysis: blank/NA values are excluded and counts are recorded.\noptions(warn=1)\nd <- read.csv('input.csv', na.strings='NA', check.names=FALSE)\noriginal_n <- nrow(d)\nd <- d[complete.cases(d), , drop=FALSE]\nif (nrow(d) < 3) stop('Too few complete observations.')\nwrite.csv(data.frame(total=original_n, used=nrow(d), excluded=original_n-nrow(d)), 'counts.csv', row.names=FALSE)\ndescribe <- function(v) c(n=length(v), mean=mean(v), sd=sd(v), median=median(v), min=min(v), max=max(v))\nwrite.csv(data.frame(variable=names(d), t(vapply(d,describe,numeric(6))), check.names=FALSE), 'descriptives.csv', row.names=FALSE)\nif (length(unique(d$x)) < 2 || length(unique(d$y)) < 2) stop('Regression requires variation in both variables.')\nfit <- lm(y ~ x, data=d)\nif (fit$rank < 2) stop('The regression design is rank deficient.')\nsm <- summary(fit)\nci <- confint(fit,level=0.95)\nwrite.csv(data.frame(term=rownames(sm$coefficients), estimate=sm$coefficients[,1], std_error=sm$coefficients[,2], statistic=sm$coefficients[,3], p_value=sm$coefficients[,4], lower_95=ci[,1], upper_95=ci[,2]), 'coefficients.csv', row.names=FALSE)\nwrite.csv(data.frame(n=nrow(d), r_squared=sm$r.squared, residual_sd=sm$sigma, residual_df=df.residual(fit)), 'fit.csv', row.names=FALSE)\nwrite.csv(data.frame(fitted=fitted(fit), residual=residuals(fit)), 'diagnostics.csv', row.names=FALSE)\nprint(sm)\nprint(ci)\n\n# A reproducible SVG histogram generated from R-computed bin counts.\nh <- hist(d$y, plot=FALSE)\nheight <- 240; width <- 480\nbars <- vapply(seq_along(h$counts), function(i) {\n bh <- if(max(h$counts)>0) h$counts[i]/max(h$counts)*180 else 0\n sprintf('<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"#214f42\"/>', 40+(i-1)*400/length(h$counts), 200-bh, 390/length(h$counts),bh)\n}, character(1))\nsvg <- paste0('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 480 240\"><rect width=\"480\" height=\"240\" fill=\"#f7f5ed\"/><text x=\"40\" y=\"20\">Outcome distribution (complete cases)</text>',paste(bars,collapse=''),sprintf('<text x=\"40\" y=\"225\">Range: %.4g to %.4g; n = %d</text>',min(d$y),max(d$y),nrow(d)),'</svg>')\nwriteLines(svg,'figure.svg')\nwrite.csv(data.frame(lower=head(h$breaks,-1), upper=tail(h$breaks,-1), count=h$counts),'histogram.csv',row.names=FALSE)\nwriteLines(capture.output(sessionInfo()),'session.txt')\nprint(data.frame(total=original_n,used=nrow(d),excluded=original_n-nrow(d)))\n",
+        "scriptHash": "9535d21718a770574a4b775d96f23bd501df0aad205d18d8c5c883e3b2de9583",
+        "templateVersion": 1,
+        "contextVersions": [
+          {
+            "id": "question",
+            "version": 1
+          },
+          {
+            "id": "evidence",
+            "version": 1
+          },
+          {
+            "id": "design",
+            "version": 1
+          },
+          {
+            "id": "data",
+            "version": 1
+          }
+        ],
+        "model": null,
+        "at": "2026-09-09T22:48:55.727Z",
+        "approvals": [
+          {
+            "id": "618cba52-c043-40cc-913b-94d3af52b0fd",
+            "planHash": "1f6df984786f92e93bca297e04a748c3b4d3c25958dbbd9d1dbf64d20c844743",
+            "name": "Demo build · exploratory synthetic analysis",
+            "note": "The tutorial author reviewed the separate D4 mapping, omission rule and exact script. This is a build approval, not a real supervisor decision.",
+            "at": "2026-09-09T22:48:55.727Z",
+            "authenticated": false
+          }
+        ],
+        "planHash": "1f6df984786f92e93bca297e04a748c3b4d3c25958dbbd9d1dbf64d20c844743"
+      },
+      "run": {
+        "id": "R2",
+        "planId": "P2",
+        "planHash": "1f6df984786f92e93bca297e04a748c3b4d3c25958dbbd9d1dbf64d20c844743",
+        "approvalId": "618cba52-c043-40cc-913b-94d3af52b0fd",
+        "datasetId": "D4",
+        "datasetHash": "eabe331e1331f359edbd85ba087f7cdfba8fad0c2e5ae6788644f18cdeea8a20",
+        "scriptHash": "9535d21718a770574a4b775d96f23bd501df0aad205d18d8c5c883e3b2de9583",
+        "script": "# ResearchGuide analysis template v1; input.csv uses y (outcome) and optional x (predictor).\n# Complete-case analysis: blank/NA values are excluded and counts are recorded.\noptions(warn=1)\nd <- read.csv('input.csv', na.strings='NA', check.names=FALSE)\noriginal_n <- nrow(d)\nd <- d[complete.cases(d), , drop=FALSE]\nif (nrow(d) < 3) stop('Too few complete observations.')\nwrite.csv(data.frame(total=original_n, used=nrow(d), excluded=original_n-nrow(d)), 'counts.csv', row.names=FALSE)\ndescribe <- function(v) c(n=length(v), mean=mean(v), sd=sd(v), median=median(v), min=min(v), max=max(v))\nwrite.csv(data.frame(variable=names(d), t(vapply(d,describe,numeric(6))), check.names=FALSE), 'descriptives.csv', row.names=FALSE)\nif (length(unique(d$x)) < 2 || length(unique(d$y)) < 2) stop('Regression requires variation in both variables.')\nfit <- lm(y ~ x, data=d)\nif (fit$rank < 2) stop('The regression design is rank deficient.')\nsm <- summary(fit)\nci <- confint(fit,level=0.95)\nwrite.csv(data.frame(term=rownames(sm$coefficients), estimate=sm$coefficients[,1], std_error=sm$coefficients[,2], statistic=sm$coefficients[,3], p_value=sm$coefficients[,4], lower_95=ci[,1], upper_95=ci[,2]), 'coefficients.csv', row.names=FALSE)\nwrite.csv(data.frame(n=nrow(d), r_squared=sm$r.squared, residual_sd=sm$sigma, residual_df=df.residual(fit)), 'fit.csv', row.names=FALSE)\nwrite.csv(data.frame(fitted=fitted(fit), residual=residuals(fit)), 'diagnostics.csv', row.names=FALSE)\nprint(sm)\nprint(ci)\n\n# A reproducible SVG histogram generated from R-computed bin counts.\nh <- hist(d$y, plot=FALSE)\nheight <- 240; width <- 480\nbars <- vapply(seq_along(h$counts), function(i) {\n bh <- if(max(h$counts)>0) h$counts[i]/max(h$counts)*180 else 0\n sprintf('<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"#214f42\"/>', 40+(i-1)*400/length(h$counts), 200-bh, 390/length(h$counts),bh)\n}, character(1))\nsvg <- paste0('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 480 240\"><rect width=\"480\" height=\"240\" fill=\"#f7f5ed\"/><text x=\"40\" y=\"20\">Outcome distribution (complete cases)</text>',paste(bars,collapse=''),sprintf('<text x=\"40\" y=\"225\">Range: %.4g to %.4g; n = %d</text>',min(d$y),max(d$y),nrow(d)),'</svg>')\nwriteLines(svg,'figure.svg')\nwrite.csv(data.frame(lower=head(h$breaks,-1), upper=tail(h$breaks,-1), count=h$counts),'histogram.csv',row.names=FALSE)\nwriteLines(capture.output(sessionInfo()),'session.txt')\nprint(data.frame(total=original_n,used=nrow(d),excluded=original_n-nrow(d)))\n",
+        "inputCsv": "y,x\n2,1\n4,2\n5,3\n8,4\n9,5\nNA,7\n10,NA\n",
+        "contextVersions": [
+          {
+            "id": "question",
+            "version": 1
+          },
+          {
+            "id": "evidence",
+            "version": 1
+          },
+          {
+            "id": "design",
+            "version": 1
+          },
+          {
+            "id": "data",
+            "version": 1
+          }
+        ],
+        "startedAt": "2026-09-09T22:48:55.727Z",
+        "finishedAt": "2026-09-09T22:48:59.258Z",
+        "status": "succeeded",
+        "engine": "webR 0.6.0",
+        "rVersion": "R version 4.6.0 (2026-04-24)",
+        "log": "\nCall:\nlm(formula = y ~ x, data = d)\n\nResiduals:\n         1          2          3          4          5 \n 9.853e-16  2.000e-01 -6.000e-01  6.000e-01 -2.000e-01 \n\nCoefficients:\n            Estimate Std. Error t value Pr(>|t|)   \n(Intercept)   0.2000     0.5416   0.369   0.7364   \nx             1.8000     0.1633  11.023   0.0016 **\n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\nResidual standard error: 0.5164 on 3 degrees of freedom\nMultiple R-squared:  0.9759,\tAdjusted R-squared:  0.9679 \nF-statistic: 121.5 on 1 and 3 DF,  p-value: 0.001599\n\n                2.5 %   97.5 %\n(Intercept) -1.523621 1.923621\nx            1.280309 2.319691\n  total used excluded\n1     7    5        2",
+        "files": {
+          "counts.csv": "\"total\",\"used\",\"excluded\"\n7,5,2\n",
+          "descriptives.csv": "\"variable\",\"n\",\"mean\",\"sd\",\"median\",\"min\",\"max\"\n\"y\",5,5.6,2.88097205817759,5,2,9\n\"x\",5,3,1.58113883008419,3,1,5\n",
+          "histogram.csv": "\"lower\",\"upper\",\"count\"\n2,4,2\n4,6,1\n6,8,1\n8,10,1\n",
+          "figure.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 480 240\"><rect width=\"480\" height=\"240\" fill=\"#f7f5ed\"/><text x=\"40\" y=\"20\">Outcome distribution (complete cases)</text><rect x=\"40.00\" y=\"20.00\" width=\"97.50\" height=\"180.00\" fill=\"#214f42\"/><rect x=\"140.00\" y=\"110.00\" width=\"97.50\" height=\"90.00\" fill=\"#214f42\"/><rect x=\"240.00\" y=\"110.00\" width=\"97.50\" height=\"90.00\" fill=\"#214f42\"/><rect x=\"340.00\" y=\"110.00\" width=\"97.50\" height=\"90.00\" fill=\"#214f42\"/><text x=\"40\" y=\"225\">Range: 2 to 9; n = 5</text></svg>\n",
+          "session.txt": "R version 4.6.0 (2026-04-24)\nPlatform: wasm32-unknown-emscripten (32-bit)\nRunning under: emscripten\n\nMatrix products: default\n  LAPACK version 3.12.1\n\nlocale:\n[1] en_US.UTF-8 C           en_US.UTF-8 en_US.UTF-8 en_US.UTF-8 C          \n\ntime zone: America/New_York\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] webr_0.6.0\n",
+          "coefficients.csv": "\"term\",\"estimate\",\"std_error\",\"statistic\",\"p_value\",\"lower_95\",\"upper_95\"\n\"(Intercept)\",0.200000000000002,0.541602560309064,0.369274472938002,0.736447780019783,-1.52362106698777,1.92362106698778\n\"x\",1.8,0.163299316185545,11.0227038425243,0.00159913738856354,1.28030869454996,2.31969130545004\n",
+          "fit.csv": "\"n\",\"r_squared\",\"residual_sd\",\"residual_df\"\n5,0.975903614457831,0.516397779494322,3\n",
+          "diagnostics.csv": "\"fitted\",\"residual\"\n2,9.85322934354826e-16\n3.8,0.199999999999999\n5.6,-0.6\n7.4,0.6\n9.2,-0.199999999999999\n"
+        }
       }
     }
   }

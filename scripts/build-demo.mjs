@@ -5,9 +5,11 @@ import { importDataset, addAnalysisPlan, approvePlan, executeAnalysis } from '..
 import { demoCase, demoCSV } from '../lib/demo-case.mjs';
 import { businessCase, businessCSV } from '../lib/business-demo-case.mjs';
 import { parse } from 'csv-parse/sync';
+import { deepenDemo } from '../lib/demo-depth.mjs';
+import { demoWorkspace } from '../lib/demo-preparation.mjs';
 
 async function build(source, csv, filename) {
-  const teachingCase = structuredClone(source);
+  const teachingCase = deepenDemo(source);
   const project = createProject('Fictional teaching case', teachingCase.stages[0].artifact);
   for (const stage of teachingCase.stages) {
     Object.assign(
@@ -43,6 +45,8 @@ async function build(source, csv, filename) {
   });
   const run = await executeAnalysis(project, plan.id, plan.approvals.at(-1).id);
   if (run.status !== 'succeeded') throw new Error(run.log);
+  project.analysisRuns ||= [];
+  project.analysisRuns.push(run);
   const coefficients = parse(run.files['coefficients.csv'], { columns: true });
   const slope = coefficients[1];
   const analysis = teachingCase.stages.find((s) => s.id === 'analysis');
@@ -65,6 +69,43 @@ async function build(source, csv, filename) {
     intercept: Number(coefficients[0].estimate).toFixed(3),
     ...counts,
   };
+  const workspace = demoWorkspace(csv, teachingCase.id === 'alex-business-study');
+  for (const file of workspace.files) {
+    importDataset(project, {
+      ...file,
+      permission:
+        'Author-created fictional observations for a public teaching demonstration; no real participants or repository download.',
+    });
+  }
+  const sensitivityPlan = addAnalysisPlan(project, {
+    datasetId: 'D4',
+    method: 'linear',
+    outcome: 1,
+    predictor: 0,
+    rationale:
+      'Post-hoc teaching sensitivity check: omit the highest complete exposure while preserving primary R1. This is not a prespecified test, error correction or independent replication.',
+  });
+  approvePlan(project, {
+    planId: sensitivityPlan.id,
+    planHash: sensitivityPlan.planHash,
+    name: 'Demo build · exploratory synthetic analysis',
+    note: 'The tutorial author reviewed the separate D4 mapping, omission rule and exact script. This is a build approval, not a real supervisor decision.',
+    reviewed: true,
+  });
+  const sensitivityRun = await executeAnalysis(
+    project,
+    sensitivityPlan.id,
+    sensitivityPlan.approvals.at(-1).id,
+  );
+  if (sensitivityRun.status !== 'succeeded') throw new Error(sensitivityRun.log);
+  const sensitivitySlope = parse(sensitivityRun.files['coefficients.csv'], { columns: true })[1];
+  const sensitivityCounts = parse(sensitivityRun.files['counts.csv'], { columns: true })[0];
+  Object.assign(values, {
+    sensitivity_slope: Number(sensitivitySlope.estimate).toFixed(3),
+    sensitivity_lower: Number(sensitivitySlope.lower_95).toFixed(3),
+    sensitivity_upper: Number(sensitivitySlope.upper_95).toFixed(3),
+    sensitivity_used: sensitivityCounts.used,
+  });
   if (
     teachingCase.id === 'alex-business-study' &&
     !(Number(slope.lower_95) < 0 && Number(slope.upper_95) > 0)
@@ -85,7 +126,14 @@ async function build(source, csv, filename) {
     ...resolve(teachingCase),
     csv,
     builtAt: new Date().toISOString(),
-    computation: { dataset: project.datasets[0], plan, run },
+    computation: {
+      dataset: project.datasets[0],
+      plan,
+      run,
+      datasets: project.datasets,
+      preparation: workspace.preparation,
+      sensitivity: { dataset: project.datasets[3], plan: sensitivityPlan, run: sensitivityRun },
+    },
   };
   await writeFile(
     new URL(`../public/${filename}`, import.meta.url),

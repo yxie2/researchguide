@@ -3,15 +3,15 @@
   "researcher": "Alex",
   "title": "Is employee training associated with higher sales?",
   "subtitle": "Follow Alex Morgan, a fictional management PhD student, studying sales training at the invented company Northstar Office Supply.",
-  "overview": "Alex starts with a practical interest, reads teaching excerpts to clarify concepts and refine a question, plans a study, prepares synthetic data, reviews an R analysis, interprets its limits and assembles a report. The walkthrough shows a suggested route; real research involves revisiting earlier decisions.",
+  "overview": "Alex navigates all seven current research steps, with conflicting literature, a revised protocol, multiple datasets, raw-data preparation, two real R runs, selective-reporting pressure and a revised final report. Explore each task and try the decision exercises. Conversations, catalogue examples and reviews are authored simulations; only the bundled preparation and numerical computations actually execute during the build.",
   "datasetName": "synthetic-training-sales.csv",
   "rationale": "Estimate the unadjusted association between training hours and next-month sales revenue in synthetic employee records. Use complete cases; unmeasured territory opportunity and manager selection preclude a causal or ROI interpretation.",
   "disclosure": "Teaching simulation: all people, companies, sources, conversations, reviews and observations are invented. The bundled numbers were computed by the app’s real R runner on synthetic data. Opening this case makes no AI calls and runs no analysis.",
   "stages": [
     {
       "id": "question",
-      "title": "Explore a research interest",
-      "where": "Discuss this step with your guide → Write and explain your decisions → Supervisor checkpoint",
+      "title": "Explore your research interest",
+      "where": "Explore a topic with your guide (optional) → Review your research starting point",
       "input": "Northstar’s fictional sales director asks Alex whether a training program pays for itself. The available teaching data contain training hours and sales revenue, but no training costs or margins.",
       "turns": [
         [
@@ -33,12 +33,24 @@
         [
           "Alex · researcher",
           "I accept an initial research direction, not a final question. I will read about training, employee selection and sales measures, then refine an answerable question. I still need to justify the scope and contribution."
+        ],
+        [
+          "Alex · researcher",
+          "A complication to work through: The sponsor wants ROI before the research question exists."
+        ],
+        [
+          "Research guide · simulated agent",
+          "Northstar’s director requests a profitable-training story within one term. Alex has revenue records but no costs, margins or comparison group, and needs to distinguish sponsor priorities from research commitments."
+        ],
+        [
+          "Alex · researcher",
+          "Alex accepts a provisional summary and reviews the already saved starting point. Save and continue carries the scope into reading without a compulsory early supervisor checkpoint."
         ]
       ],
-      "artifact": "Initial research direction: Employee training and business performance at a fictional sales organization.\nMotivation: Understand what a training program might contribute and what an evaluation would need to measure.\nTentative interest: Whether training participation relates to sales performance.\nReading priorities: Key concepts, possible mechanisms, outcome definitions, selection and alternative explanations.\nPossible access: Synthetic records are available for the tutorial; a real project would need access and permissions.\nOpen decisions: The refined question, scope, literature contribution and design will follow reading. No novel gap or causal conclusion is claimed.",
+      "artifact": "Initial research direction: Employee training and business performance at a fictional sales organization.\nMotivation: Understand what a training program might contribute and what an evaluation would need to measure.\nTentative interest: Whether training participation relates to sales performance.\nReading priorities: Key concepts, possible mechanisms, outcome definitions, selection and alternative explanations.\nPossible access: Synthetic records are available for the tutorial; a real project would need access and permissions.\nOpen decisions: The refined question, scope, literature contribution and design will follow reading. No novel gap or causal conclusion is claimed.\n\nExtended decision record:\nDirection v1: Prove training is profitable.\nDirection v2: Explore training and performance, with ROI and selection explicitly unresolved.\nAlex accepts a provisional summary and reviews the already saved starting point. Save and continue carries the scope into reading without a compulsory early supervisor checkpoint.",
       "understanding": "This direction is a starting point. The literature may change my concepts, scope and question; supervisor feedback here does not freeze them.",
       "review": "Fictional supervisor: The initial direction is suitable for exploratory reading. A final question, confirmed dataset and research gap are not required at this checkpoint.",
-      "carry": "Carry the motivation and open questions into the literature review. Return to this direction if the reading changes the scope.",
+      "carry": "Carry the motivation and open questions into the literature review. Return to this direction if the reading changes the scope. Direction v2: Explore training and performance, with ROI and selection explicitly unresolved.",
       "challenge": {
         "question": "What should this first step establish?",
         "choices": [
@@ -47,12 +59,55 @@
         ],
         "correct": 1,
         "feedback": "Agree a useful direction first. Reading then helps refine the question and assess whether a contribution is defensible."
+      },
+      "tasks": [
+        {
+          "id": "conversation",
+          "title": "Explore a topic with your guide (optional)",
+          "description": "Discuss your interests and practical constraints, or go straight to recording your direction.",
+          "example": "Discuss skills, sales performance, sponsor expectations and access constraints with the optional guide."
+        },
+        {
+          "id": "workspace",
+          "title": "Review your research starting point",
+          "description": "Check the summary from your conversation, adjust anything inaccurate, then continue to the literature review. An accepted AI draft is already saved; you do not need to write it again.",
+          "example": "Check the accepted draft and retain the missing costs and comparison group as open questions before reading."
+        }
+      ],
+      "checkpoint": false,
+      "depth": {
+        "complication": "The sponsor wants ROI before the research question exists",
+        "prompt": "Northstar’s director requests a profitable-training story within one term. Alex has revenue records but no costs, margins or comparison group, and needs to distinguish sponsor priorities from research commitments.",
+        "options": [
+          [
+            "Promise a positive ROI conclusion",
+            "That precommits to an answer and a business measure the records do not contain."
+          ],
+          [
+            "Record the interest, stakeholder pressure and missing information",
+            "Alex saves employee development as the interest, revenue as a possible outcome, and profitability as an unanswered managerial question."
+          ],
+          [
+            "Ask the agent to choose a conclusion now",
+            "The agent can help structure uncertainties; it cannot replace the researcher’s scientific judgment."
+          ]
+        ],
+        "correct": 1,
+        "decision": "Alex accepts a provisional summary and reviews the already saved starting point. Save and continue carries the scope into reading without a compulsory early supervisor checkpoint.",
+        "tasks": [
+          "Discuss skills, sales performance, sponsor expectations and access constraints with the optional guide.",
+          "Check the accepted draft and retain the missing costs and comparison group as open questions before reading."
+        ],
+        "revision": [
+          "Direction v1: Prove training is profitable.",
+          "Direction v2: Explore training and performance, with ROI and selection explicitly unresolved."
+        ]
       }
     },
     {
       "id": "evidence",
-      "title": "Review literature and refine the question",
-      "where": "Inspect sources and save passages → Check claims against source passages → Write and explain your decisions",
+      "title": "Review the literature and refine your question",
+      "where": "Find literature for your research interest (optional) → Inspect sources and save passages → Synthesize the literature and refine your question",
       "input": "The initial direction is employee training and business performance. Reading helps define concepts, examine explanations and refine the question; this is existing literature, not results from the new study.",
       "turns": [
         [
@@ -78,6 +133,18 @@
         [
           "Alex · researcher",
           "After considering those concepts and limitations, I refine my question: Among the 14 fictional full-time sales representatives at Northstar, how are April training hours associated with May booked sales revenue? This tiny synthetic exercise illustrates methods, not a verified new contribution to the literature."
+        ],
+        [
+          "Alex · researcher",
+          "A complication to work through: A vendor claim conflicts with selection and transfer mechanisms."
+        ],
+        [
+          "Research guide · simulated agent",
+          "A simulated search includes an observational association, manager selection, an unreviewed skills-transfer model, a duplicate preprint and a vendor abstract. Which reading strategy protects the question from sponsor bias?"
+        ],
+        [
+          "Alex · researcher",
+          "The refined question concerns April training and May booked revenue among fictional representatives. A skill mechanism remains hypothetical and the small simulated search establishes no novel gap."
         ]
       ],
       "sources": [
@@ -92,23 +159,88 @@
           "title": "Teaching excerpt B — opportunity and selection (fictional)",
           "passage": "In this fictional organization, managers offered additional training to representatives with stronger prospective customer pipelines. Pipeline opportunity also predicted later booked sales.",
           "limitation": "Illustrates a confounding pathway; not a real empirical publication."
+        },
+        {
+          "id": "S3",
+          "title": "Skills transfer model — preprint (fictional)",
+          "passage": "In this fictional conceptual account, training may develop skills, but opportunities to apply those skills differ between teams. No revenue or profit effect is estimated.",
+          "limitation": "Conceptual preprint; mechanism hypothesis only, not verified peer review or empirical support for ROI."
+        },
+        {
+          "id": "S4",
+          "title": "Workplace implementation interviews (fictional)",
+          "passage": "In these invented interviews, representatives described limited manager follow-up and uneven access to promising accounts as barriers to applying training.",
+          "limitation": "Illustrative qualitative counterpoint; no sampling documentation or causal effect estimate."
         }
       ],
-      "artifact": "Real-search plan: Search suitable management and business databases for (sales training OR employee development) AND (sales revenue OR sales performance); record dates, exact queries, inclusion decisions and inspected passages. No real search was run here.\nS1: Fictional association, with voluntary attendance and no baseline adjustment.\nS2: Fictional selection pathway: pipeline opportunity → training attendance and later sales.\nClaim C1: S1 reports an observational training–revenue association. Accept only this narrow reading.\nRejected claim: Training has a proven positive ROI.\nHypothesized mechanism: Training may improve selling skills; skills are unmeasured here.\nEvidence gap: This tutorial establishes no novel literature gap or verified empirical consensus.\nConceptual framing: Skill development is a possible mechanism; employee selection and territory opportunity are rival explanations. Revenue and profit are distinct concepts.\nRefined research question: Among the 14 fictional full-time sales representatives at Northstar, how are April training hours associated with May booked sales revenue?\nObjective: Describe an unadjusted association with uncertainty, without making a causal claim.\nContribution: A worked teaching example only; no verified literature gap or empirical novelty.\nHypotheses: No confirmatory hypothesis test or preregistration is claimed.\nRefinement: Narrowed a broad practical interest to measured variables in one synthetic sample.",
+      "artifact": "Real-search plan: Search suitable management and business databases for (sales training OR employee development) AND (sales revenue OR sales performance); record dates, exact queries, inclusion decisions and inspected passages. No real search was run here.\nS1: Fictional association, with voluntary attendance and no baseline adjustment.\nS2: Fictional selection pathway: pipeline opportunity → training attendance and later sales.\nClaim C1: S1 reports an observational training–revenue association. Accept only this narrow reading.\nRejected claim: Training has a proven positive ROI.\nHypothesized mechanism: Training may improve selling skills; skills are unmeasured here.\nEvidence gap: This tutorial establishes no novel literature gap or verified empirical consensus.\nConceptual framing: Skill development is a possible mechanism; employee selection and territory opportunity are rival explanations. Revenue and profit are distinct concepts.\nRefined research question: Among the 14 fictional full-time sales representatives at Northstar, how are April training hours associated with May booked sales revenue?\nObjective: Describe an unadjusted association with uncertainty, without making a causal claim.\nContribution: A worked teaching example only; no verified literature gap or empirical novelty.\nHypotheses: No confirmatory hypothesis test or preregistration is claimed.\nRefinement: Narrowed a broad practical interest to measured variables in one synthetic sample.\n\nExtended decision record:\nLiterature v1: Training generates profit.\nLiterature v2: Revenue association, selection and transfer conditions; profit claim rejected.\nThe refined question concerns April training and May booked revenue among fictional representatives. A skill mechanism remains hypothetical and the small simulated search establishes no novel gap.\nS3: Preprint mechanism or measurement limits; does not verify a causal effect.\nS4: Qualitative context retained as a counterpoint; does not estimate the regression slope.\nSearch accounting: Six authored records, one duplicate, one awaiting full text, four inspected fictional excerpts. No live search or systematic-review completeness claimed.",
       "understanding": "Reading changed a broad interest into a bounded question by clarifying concepts, measurements and alternative explanations. Real work would need verified literature and a defensible contribution.",
       "review": "Fictional supervisor: Preserve the selection explanation in the protocol. Real scholarship requires authentic sources, critical synthesis and a defensible contribution. The checkpoint now considers the explicit refined question, concepts and feasibility; it does not certify a novel gap from invented sources.",
-      "carry": "The explicit refined question and conceptual limitations now guide the study protocol. If further reading changes them, revise this step and renew affected downstream reviews.",
+      "carry": "The explicit refined question and conceptual limitations now guide the study protocol. If further reading changes them, revise this step and renew affected downstream reviews. Literature v2: Revenue association, selection and transfer conditions; profit claim rejected.",
       "challenge": {
         "question": "Which outcome can this dataset actually measure?",
-        "choices": ["Return on the training investment", "Next-month booked sales revenue"],
+        "choices": [
+          "Return on the training investment",
+          "Next-month booked sales revenue"
+        ],
         "correct": 1,
         "feedback": "Booked sales are recorded. ROI additionally needs attributable benefits and appropriate costs; revenue alone does not establish either."
+      },
+      "tasks": [
+        {
+          "id": "literature",
+          "title": "Find literature for your research interest (optional)",
+          "description": "Ask the agent to search public scholarly catalogues and suggest a reading order, or upload papers you already have in the next task.",
+          "example": "Explore the authored query (sales training OR employee development) AND (sales performance OR revenue). Crossref, Europe PMC and arXiv are live options; disciplinary coverage must be assessed."
+        },
+        {
+          "id": "sources",
+          "title": "Inspect sources and save passages",
+          "description": "Upload papers or add source records, then preserve the passages you inspected.",
+          "example": "Inspect S1–S4, keep the preprint status and retain only claims supported by the quoted fictional passages. Uploading a paper and accepting an extracted passage are separate decisions."
+        },
+        {
+          "id": "workspace",
+          "title": "Synthesize the literature and refine your question",
+          "description": "Connect inspected studies and theory, identify a feasible contribution, and save a clear question and objectives. Use the optional claim ledger for claims that need closer checking.",
+          "example": "Synthesize selection, skills transfer and revenue definitions; use the optional claim ledger for the rejected ROI claim and competing mechanisms."
+        }
+      ],
+      "checkpoint": false,
+      "depth": {
+        "complication": "A vendor claim conflicts with selection and transfer mechanisms",
+        "prompt": "A simulated search includes an observational association, manager selection, an unreviewed skills-transfer model, a duplicate preprint and a vendor abstract. Which reading strategy protects the question from sponsor bias?",
+        "options": [
+          [
+            "Treat the vendor abstract as verified ROI evidence",
+            "Marketing language and an uninspected abstract cannot establish attributable benefits or costs."
+          ],
+          [
+            "Retain only positive training studies",
+            "That would conceal selection and implementation conditions central to the research problem."
+          ],
+          [
+            "Inspect contradictory mechanisms and track source status",
+            "Alex records selection, transfer conditions and measurement differences; duplicate and inaccessible items do not add independent support."
+          ]
+        ],
+        "correct": 2,
+        "decision": "The refined question concerns April training and May booked revenue among fictional representatives. A skill mechanism remains hypothetical and the small simulated search establishes no novel gap.",
+        "tasks": [
+          "Explore the authored query (sales training OR employee development) AND (sales performance OR revenue). Crossref, Europe PMC and arXiv are live options; disciplinary coverage must be assessed.",
+          "Inspect S1–S4, keep the preprint status and retain only claims supported by the quoted fictional passages. Uploading a paper and accepting an extracted passage are separate decisions.",
+          "Synthesize selection, skills transfer and revenue definitions; use the optional claim ledger for the rejected ROI claim and competing mechanisms."
+        ],
+        "revision": [
+          "Literature v1: Training generates profit.",
+          "Literature v2: Revenue association, selection and transfer conditions; profit claim rejected."
+        ]
       }
     },
     {
       "id": "design",
       "title": "Plan the study and methods",
-      "where": "Discuss this step with your guide → Write and explain your decisions → Supervisor checkpoint",
+      "where": "Develop the study protocol → Can these methods answer your question? (optional) → Review the protocol with your supervisor",
       "input": "The question is about representatives, not monthly firm totals. The evidence map identifies selection and territory opportunity as unmeasured confounders.",
       "turns": [
         [
@@ -130,17 +262,79 @@
         [
           "Alex · researcher",
           "I accept a limited descriptive model. A credible program evaluation would need a stronger design and additional measures, beyond this exercise. The tutorial was authored with its data and results known, so it is not a preregistration."
+        ],
+        [
+          "Alex · researcher",
+          "A complication to work through: Transaction counts would inflate the employee sample."
+        ],
+        [
+          "Research guide · simulated agent",
+          "Alex is offered transaction rows and regional aggregates. Transactions nest within representatives and territories, while the intended question concerns representatives. Baseline sales and costs are unavailable."
+        ],
+        [
+          "Alex · researcher",
+          "The prospective design check flags the unit and ROI mismatch, not absent findings. The fictional supervisor requests revision and approves a corrected limited protocol, not a company investment decision."
         ]
       ],
-      "artifact": "Design: Observational secondary analysis of constructed employee records.\nUnit: One fictional representative; training measured in April and revenue in May.\nModel: next_month_sales_kusd ~ training_hours. Primary quantity: Unadjusted slope, kUSD per training hour, with a model-based 95% interval.\nMissingness: Complete cases on both fields; no zero replacement or imputation.\nAssumptions and checks: Inspect fitted values and residuals for curvature, unequal spread and unusual observations. Independent errors are assumed, not established; teams and territories are unmeasured.\nOmitted variables: Baseline sales, tenure, pipeline quality, territory opportunity, account mix and manager selection.\nScope: No adjustment, causal identification, mediation analysis or ROI calculation.\nPrior exposure: Authored teaching dataset with known outputs; not preregistered research.\nReal-world preparation: Agree access and appropriate employee-data handling with the institution and company before collecting real records.",
+      "artifact": "Design: Observational secondary analysis of constructed employee records.\nUnit: One fictional representative; training measured in April and revenue in May.\nModel: next_month_sales_kusd ~ training_hours. Primary quantity: Unadjusted slope, kUSD per training hour, with a model-based 95% interval.\nMissingness: Complete cases on both fields; no zero replacement or imputation.\nAssumptions and checks: Inspect fitted values and residuals for curvature, unequal spread and unusual observations. Independent errors are assumed, not established; teams and territories are unmeasured.\nOmitted variables: Baseline sales, tenure, pipeline quality, territory opportunity, account mix and manager selection.\nScope: No adjustment, causal identification, mediation analysis or ROI calculation.\nPrior exposure: Authored teaching dataset with known outputs; not preregistered research.\nReal-world preparation: Agree access and appropriate employee-data handling with the institution and company before collecting real records.\n\nExtended decision record:\nProtocol v1: Transactions treated as representatives; ROI promised.\nProtocol v2: One representative per row, booked revenue in kUSD, complete cases, no causal or ROI inference; fictional approval.\nThe prospective design check flags the unit and ROI mismatch, not absent findings. The fictional supervisor requests revision and approves a corrected limited protocol, not a company investment decision.",
       "understanding": "Time order makes a hypothesis plausible but does not remove selection. Changing the unit to inflate the sample would give misleading precision.",
       "review": "Fictional supervisor: Approve the bounded teaching protocol, with independence and omitted-variable limitations retained. It is insufficient for a causal program evaluation.",
-      "carry": "One row per representative, two selected variables, complete-case exclusions and no ROI claim govern data inspection and execution approval."
+      "carry": "One row per representative, two selected variables, complete-case exclusions and no ROI claim govern data inspection and execution approval. Protocol v2: One representative per row, booked revenue in kUSD, complete cases, no causal or ROI inference; fictional approval.",
+      "tasks": [
+        {
+          "id": "workspace",
+          "title": "Develop the study protocol",
+          "description": "Specify sampling, measures, data access, planned analysis and safeguards. Explain the key methodological choices for your supervisor.",
+          "example": "Write the unit, April/May timing, kUSD outcome, exclusions and manager selection. Explain why ROI, mediation and causal evaluation are outside scope."
+        },
+        {
+          "id": "consistency",
+          "title": "Can these methods answer your question? (optional)",
+          "description": "Check the proposed sample, measures and analysis against the refined question. This is a planning check; findings are not expected yet.",
+          "example": "Compare the literature-informed question with proposed methods. Do not ask for findings at the planning stage."
+        },
+        {
+          "id": "review",
+          "title": "Review the protocol with your supervisor",
+          "description": "Record approval of the current protocol before completing data preparation. This local checkpoint does not replace institutional ethics or access permissions.",
+          "example": "Save protocol v2 after a revision request and record the fictional approval of that version."
+        }
+      ],
+      "checkpoint": true,
+      "depth": {
+        "complication": "Transaction counts would inflate the employee sample",
+        "prompt": "Alex is offered transaction rows and regional aggregates. Transactions nest within representatives and territories, while the intended question concerns representatives. Baseline sales and costs are unavailable.",
+        "options": [
+          [
+            "Treat each transaction as an independent employee",
+            "Repeated transactions do not create independent representatives and could understate uncertainty."
+          ],
+          [
+            "Keep the representative unit and limit the estimand",
+            "Use the bounded unadjusted teaching association; document clustering concerns and defer a causal evaluation to a stronger design."
+          ],
+          [
+            "Use a simple regression and call it difference-in-differences",
+            "A label cannot supply treated and comparison units, pre-period outcomes or identification assumptions."
+          ]
+        ],
+        "correct": 1,
+        "decision": "The prospective design check flags the unit and ROI mismatch, not absent findings. The fictional supervisor requests revision and approves a corrected limited protocol, not a company investment decision.",
+        "tasks": [
+          "Write the unit, April/May timing, kUSD outcome, exclusions and manager selection. Explain why ROI, mediation and causal evaluation are outside scope.",
+          "Compare the literature-informed question with proposed methods. Do not ask for findings at the planning stage.",
+          "Save protocol v2 after a revision request and record the fictional approval of that version."
+        ],
+        "revision": [
+          "Protocol v1: Transactions treated as representatives; ROI promised.",
+          "Protocol v2: One representative per row, booked revenue in kUSD, complete cases, no causal or ROI inference; fictional approval."
+        ]
+      }
     },
     {
       "id": "data",
-      "title": "Obtain and prepare the data",
-      "where": "Data / Analysis tasks → Import a permitted CSV dataset → Write and explain your decisions",
+      "title": "Obtain and prepare your data",
+      "where": "Find relevant public datasets (optional) → Manage your project data workspace → Record preparation and data quality",
       "input": "The protocol requires training hours and subsequent revenue in kUSD, one row per representative. In this example the data are already available synthetic records; new data collection would take place outside the app after the relevant permissions and protocol decisions.",
       "turns": [
         [
@@ -162,26 +356,94 @@
         [
           "Alex · researcher",
           "The teaching dictionary defines all values as May booked revenue in kUSD, with no real transactions behind them. I keep the missing cells, report two exclusions and do not claim to have audited real company records."
+        ],
+        [
+          "Alex · researcher",
+          "A complication to work through: Dollar units, a duplicated representative and incompatible aggregates."
+        ],
+        [
+          "Research guide · simulated agent",
+          "The raw register repeats representative 2, whose revenue is stored in dollars while others use kUSD. The contextual file describes regions, not representatives. A simulated public catalogue result reports annual firm sales."
+        ],
+        [
+          "Alex · researcher",
+          "Four saved files have distinct roles: harmonized primary data, raw register, contextual aggregates and an exploratory subset. Public candidates remain separate from verified downloaded files and employee-level evidence."
         ]
       ],
-      "artifact": "D1: synthetic-training-sales.csv; 14 author-created rows, two numeric columns.\nDictionary: training_hours = April attendance hours; next_month_sales_kusd = May booked revenue, thousands of US dollars. Revenue is not profit or cash receipts.\nObserved ranges: Training 1–13 hours; revenue 44–72 kUSD.\nMissingness: Row 13 lacks revenue; row 14 lacks training hours. Twelve complete records; two excluded by the planned rule. Missingness mechanism unknown.\nUnits and identity: Common currency and month by construction; each row represents a distinct fictional employee.\nProvenance: Original CSV and SHA-256 retained in the reproduction bundle. No real employee identifiers or commercial records.\nCleaning and deviations: No transformations, imputation or protocol deviations. A real study must inspect the source-system definitions and any corrections separately.",
+      "artifact": "D1: synthetic-training-sales.csv; 14 author-created rows, two numeric columns.\nDictionary: training_hours = April attendance hours; next_month_sales_kusd = May booked revenue, thousands of US dollars. Revenue is not profit or cash receipts.\nObserved ranges: Training 1–13 hours; revenue 44–72 kUSD.\nMissingness: Row 13 lacks revenue; row 14 lacks training hours. Twelve complete records; two excluded by the planned rule. Missingness mechanism unknown.\nUnits and identity: Common currency and month by construction; each row represents a distinct fictional employee.\nProvenance: Original CSV and SHA-256 retained in the reproduction bundle. No real employee identifiers or commercial records.\nCleaning and deviations: No transformations, imputation or protocol deviations. A real study must inspect the source-system definitions and any corrections separately.\n\nExtended decision record:\nData report v1: Prepared primary data only.\nData report v2: Raw lineage, unit correction, context and exploratory subset recorded; downstream plans must use current context.\nFour saved files have distinct roles: harmonized primary data, raw register, contextual aggregates and an exploratory subset. Public candidates remain separate from verified downloaded files and employee-level evidence.\nExtended workspace: D2 raw register, D3 separate contextual aggregates and D4 exploratory subset accompany D1. Preparation occurs in the supplied external script, not automatically in the app. Full transformation log and exact files are included in the dataset workspace download.",
       "understanding": "A coefficient expressed in thousands of dollars cannot be reported as dollars. Synthetic consistency of units does not imply that real operational data would be clean.",
       "review": "Fictional supervisor: The data report matches the planned sample and units. Keep uncertainty about missingness and record definitions visible.",
-      "carry": "The selected input uses twelve complete employee records; the unit kUSD must remain consistent in outputs, claims and the report.",
+      "carry": "The selected input uses twelve complete employee records; the unit kUSD must remain consistent in outputs, claims and the report. Data report v2: Raw lineage, unit correction, context and exploratory subset recorded; downstream plans must use current context.",
       "challenge": {
         "question": "What does a recorded revenue value of 44 mean here?",
-        "choices": ["44 US dollars of profit", "44,000 US dollars of booked revenue"],
+        "choices": [
+          "44 US dollars of profit",
+          "44,000 US dollars of booked revenue"
+        ],
         "correct": 1,
         "feedback": "The dictionary defines kUSD of booked revenue. Both the scale and the distinction from profit matter."
+      },
+      "tasks": [
+        {
+          "id": "discovery",
+          "title": "Find relevant public datasets (optional)",
+          "description": "Search a public catalogue and assess candidates, or skip this task if you already have data.",
+          "example": "Assess authored Dataverse-style candidates for unit, year, licence and access; annual firm aggregates do not answer an employee-level monthly question."
+        },
+        {
+          "id": "execution",
+          "title": "Manage your project data workspace",
+          "description": "Keep multiple uploaded datasets and public-data candidates together, record their origins, and inspect each CSV before analysis. Collect new data outside the app under your protocol and permissions.",
+          "example": "Inspect all four files, dictionaries and hashes. The provided preparation script runs outside the app; neither an LLM nor a CSV profile automatically verifies joins or identities."
+        },
+        {
+          "id": "workspace",
+          "title": "Record preparation and data quality",
+          "description": "Document cleaning, missingness, exclusions, access and deviations from the protocol. Save and continue when the data are ready; revisit the design if the methods change.",
+          "example": "Record duplicate handling, dollars-to-kUSD conversion, two incomplete records and the decision to keep context separate."
+        }
+      ],
+      "checkpoint": false,
+      "depth": {
+        "complication": "Dollar units, a duplicated representative and incompatible aggregates",
+        "prompt": "The raw register repeats representative 2, whose revenue is stored in dollars while others use kUSD. The contextual file describes regions, not representatives. A simulated public catalogue result reports annual firm sales.",
+        "options": [
+          [
+            "Join regional averages to every employee and call them controls",
+            "Without a justified linkage and model, this introduces unsupported information and does not resolve employee selection."
+          ],
+          [
+            "Interpret 61,000 as kUSD",
+            "The dictionary identifies dollars; missing the conversion creates a thousand-fold error."
+          ],
+          [
+            "Retain raw data and document every transformation",
+            "The preparation code deduplicates the repeated ID, converts 61,000 USD to 61 kUSD, reproduces D1, and keeps regional context separate."
+          ]
+        ],
+        "correct": 2,
+        "decision": "Four saved files have distinct roles: harmonized primary data, raw register, contextual aggregates and an exploratory subset. Public candidates remain separate from verified downloaded files and employee-level evidence.",
+        "tasks": [
+          "Assess authored Dataverse-style candidates for unit, year, licence and access; annual firm aggregates do not answer an employee-level monthly question.",
+          "Inspect all four files, dictionaries and hashes. The provided preparation script runs outside the app; neither an LLM nor a CSV profile automatically verifies joins or identities.",
+          "Record duplicate handling, dollars-to-kUSD conversion, two incomplete records and the decision to keep context separate."
+        ],
+        "revision": [
+          "Data report v1: Prepared primary data only.",
+          "Data report v2: Raw lineage, unit correction, context and exploratory subset recorded; downstream plans must use current context."
+        ]
       }
     },
     {
       "id": "analysis",
-      "title": "Run the approved model and retain uncertainty",
-      "where": "Data / Analysis tasks → Propose a plan → Review script → Approve → Run",
+      "title": "Analyze your data",
+      "where": "Run and inspect your analysis → Record results and analysis checks",
       "input": "The saved protocol selects simple regression on complete cases, with revenue as the outcome and hours as the predictor.",
       "turns": [
-        ["Alex · researcher", "Please propose the analysis that matches the protocol."],
+        [
+          "Alex · researcher",
+          "Please propose the analysis that matches the protocol."
+        ],
         [
           "Analysis mentor · simulated agent",
           "Use the fixed simple linear regression template: outcome next_month_sales_kusd and predictor training_hours. Use complete cases. No baseline or territory adjustment can be claimed from these two columns."
@@ -201,17 +463,72 @@
         [
           "Analysis mentor · simulated agent",
           "An interval containing zero is not proof of no association. The model is imprecise, and its interval does not address confounding, measurement problems or selection. Keep the input, exact script and session information."
+        ],
+        [
+          "Alex · researcher",
+          "A complication to work through: The sponsor prefers a more favorable model."
+        ],
+        [
+          "Research guide · simulated agent",
+          "The director asks Alex to remove a high-training representative whose sales look disappointing. Alex can demonstrate a sensitivity check but must not hide the original analysis or imply a data error without evidence."
+        ],
+        [
+          "Alex · researcher",
+          "R1 uses 12 records: slope 0.944 kUSD/hour (95% CI -0.748 to 2.636). R2 uses 11: 0.909 (95% CI -1.154 to 2.972). Both runs remain visible; neither estimates ROI."
         ]
       ],
-      "artifact": "Execution R1: Actual local R template applied to synthetic employee records.\nModel: next_month_sales_kusd ~ training_hours. 12 complete cases from 14 records, 2 excluded.\nSlope: 0.944 kUSD/hour; model-based 95% CI -0.748 to 2.636. Intercept: 52.030 kUSD.\nThe interval crosses zero; this example does not establish a precisely estimated positive association or demonstrate no association.\nDiagnostics: Exact fitted values and residuals are in diagnostics.csv. The wide dispersion calls for inspection; no comprehensive influence, clustering or sensitivity assessment was performed.\nReproduction: Save run.inputCsv as input.csv and run.script as analysis.R, then run Rscript analysis.R in a clean directory. Retain session.txt and all outputs.\nExploratory analyses: None. No model switching to obtain significance.\nLimitations: Small constructed sample, complete-case selection, unmeasured confounding and unverified assumptions.",
+      "artifact": "Execution R1: Actual local R template applied to synthetic employee records.\nModel: next_month_sales_kusd ~ training_hours. 12 complete cases from 14 records, 2 excluded.\nSlope: 0.944 kUSD/hour; model-based 95% CI -0.748 to 2.636. Intercept: 52.030 kUSD.\nThe interval crosses zero; this example does not establish a precisely estimated positive association or demonstrate no association.\nDiagnostics: Exact fitted values and residuals are in diagnostics.csv. The wide dispersion calls for inspection; one exploratory highest-exposure omission check is provided as R2; no comprehensive influence or clustering assessment was performed.\nReproduction: Save run.inputCsv as input.csv and run.script as analysis.R, then run Rscript analysis.R in a clean directory. Retain session.txt and all outputs.\nExploratory analyses: R2, a post-hoc highest-complete-exposure omission check, retained alongside R1. No model switching to obtain significance.\nLimitations: Small constructed sample, complete-case selection, unmeasured confounding and unverified assumptions.\n\nExtended decision record:\nAnalysis record v1: Primary R1.\nAnalysis record v2: Exploratory R2 alongside R1; no evidence that the omitted record was erroneous.\nR1 uses 12 records: slope 0.944 kUSD/hour (95% CI -0.748 to 2.636). R2 uses 11: 0.909 (95% CI -1.154 to 2.972). Both runs remain visible; neither estimates ROI.\nExploratory R2: Highest complete exposure omitted after the primary result was known; 11 records, slope 0.909 (model-based 95% CI -1.154 to 2.972). Units match R1. This is not an independent replication, a prespecified test or proof of robustness. Primary R1 remains reported.",
       "understanding": "R computes the numbers; the agent does not manufacture them. A statistically uncertain association must remain uncertain in the business discussion.",
       "review": "Fictional supervisor: Accept this reproducible teaching run with its uncertainty. It cannot establish a training effect, a profitable investment or lack of any possible benefit.",
-      "carry": "The exact slope, interval, sample size and kUSD scale constrain interpretation. The uncertainty must survive any executive summary."
+      "carry": "The exact slope, interval, sample size and kUSD scale constrain interpretation. The uncertainty must survive any executive summary. Analysis record v2: Exploratory R2 alongside R1; no evidence that the omitted record was erroneous.",
+      "tasks": [
+        {
+          "id": "execution",
+          "title": "Run and inspect your analysis",
+          "description": "For supported CSV analyses, review and approve the exact script, then inspect the R results. If you analyze elsewhere, record those methods and results in the next task.",
+          "example": "Review the variable mapping, selected dataset, script and separate approval for each run. Inspect counts, coefficients and residuals; preserve both results."
+        },
+        {
+          "id": "workspace",
+          "title": "Record results and analysis checks",
+          "description": "Preserve outputs, uncertainty, diagnostics and departures from the plan. You can document analyses performed outside the app. Save and continue to interpretation.",
+          "example": "Document sponsor pressure, the post-hoc exclusion and both intervals. A future panel or clustered analysis needs an appropriate external method, not relabeling the fixed simple regression."
+        }
+      ],
+      "checkpoint": false,
+      "depth": {
+        "complication": "The sponsor prefers a more favorable model",
+        "prompt": "The director asks Alex to remove a high-training representative whose sales look disappointing. Alex can demonstrate a sensitivity check but must not hide the original analysis or imply a data error without evidence.",
+        "options": [
+          [
+            "Delete the record and report only the improved story",
+            "Outcome-driven exclusion would change the analysis and conceal the sponsor’s influence."
+          ],
+          [
+            "Keep R1 and disclose a separately approved exploratory R2",
+            "The highest complete exposure is omitted only in a labeled sensitivity subset; both datasets and outputs remain available."
+          ],
+          [
+            "Run many variants and keep the smallest p-value",
+            "That introduces unreported selection among analyses and undermines the meaning of the reported uncertainty."
+          ]
+        ],
+        "correct": 1,
+        "decision": "R1 uses 12 records: slope 0.944 kUSD/hour (95% CI -0.748 to 2.636). R2 uses 11: 0.909 (95% CI -1.154 to 2.972). Both runs remain visible; neither estimates ROI.",
+        "tasks": [
+          "Review the variable mapping, selected dataset, script and separate approval for each run. Inspect counts, coefficients and residuals; preserve both results.",
+          "Document sponsor pressure, the post-hoc exclusion and both intervals. A future panel or clustered analysis needs an appropriate external method, not relabeling the fixed simple regression."
+        ],
+        "revision": [
+          "Analysis record v1: Primary R1.",
+          "Analysis record v2: Exploratory R2 alongside R1; no evidence that the omitted record was erroneous."
+        ]
+      }
     },
     {
       "id": "interpretation",
       "title": "Interpret findings in context",
-      "where": "Write and explain your decisions → Consistency review → Researcher response",
+      "where": "Answer the question and explain the limitations → Check alignment with the study (optional AI check)",
       "input": "R1 provides an imprecise unadjusted association in kUSD. The protocol explicitly excludes causal and ROI claims.",
       "turns": [
         [
@@ -233,12 +550,24 @@
         [
           "Alex · researcher",
           "I save the corrected interpretation and request a fresh consistency review of that version. I frame a stronger future evaluation as a research need, not a recommendation to expand or cancel training."
+        ],
+        [
+          "Alex · researcher",
+          "A complication to work through: An uncertain association is mistaken for a cancellation decision."
+        ],
+        [
+          "Research guide · simulated agent",
+          "One reader calls the slope proof of profit, while another calls the zero-crossing primary interval proof the program has no value. The qualitative teaching excerpt describes barriers to transferring training into work."
+        ],
+        [
+          "Alex · researcher",
+          "The simulated consistency review flags causal wording, a revenue/profit mismatch and selective omission of R2. Alex revises the conclusion and requests a new review; methodological uncertainty remains."
         ]
       ],
-      "artifact": "Claim linked to R1: In twelve complete synthetic records, the unadjusted association was 0.944 kUSD of next-month booked revenue per training hour (model-based 95% CI -0.748 to 2.636).\nRejected wording: “Creates dollars of profit” and “training has no benefit.”\nConsistency response: Accepted the unit, outcome, causality and omitted-uncertainty findings; corrected the saved artifact and requested a new scripted review of the revised version. Historical findings remain part of the decision record.\nRival explanations: Baseline selling ability, manager selection, pipeline quality and territory opportunity.\nBusiness implications: These data do not support a program expansion/cancellation decision or an ROI estimate. A stronger evaluation would need a defensible comparison, baseline measures and appropriate cost and margin data.\nLimits: Fictional small sample; unknown missingness; no adjustment; assumptions unverified. A clean scripted consistency review does not validate the research.",
+      "artifact": "Claim linked to R1: In twelve complete synthetic records, the unadjusted association was 0.944 kUSD of next-month booked revenue per training hour (model-based 95% CI -0.748 to 2.636).\nRejected wording: “Creates dollars of profit” and “training has no benefit.”\nConsistency response: Accepted the unit, outcome, causality and omitted-uncertainty findings; corrected the saved artifact and requested a new scripted review of the revised version. Historical findings remain part of the decision record.\nRival explanations: Baseline selling ability, manager selection, pipeline quality and territory opportunity.\nBusiness implications: These data do not support a program expansion/cancellation decision or an ROI estimate. A stronger evaluation would need a defensible comparison, baseline measures and appropriate cost and margin data.\nLimits: Fictional small sample; unknown missingness; no adjustment; assumptions unverified. A clean scripted consistency review does not validate the research.\n\nExtended decision record:\nConclusion v1: Training creates profit, or has no value.\nConclusion v2: Imprecise synthetic revenue association; no ROI, causal effect or expansion/cancellation recommendation.\nThe simulated consistency review flags causal wording, a revenue/profit mismatch and selective omission of R2. Alex revises the conclusion and requests a new review; methodological uncertainty remains.\nExploratory R2: Highest complete exposure omitted after the primary result was known; 11 records, slope 0.909 (model-based 95% CI -1.154 to 2.972). Units match R1. This is not an independent replication, a prespecified test or proof of robustness. Primary R1 remains reported.",
       "understanding": "An executive audience needs the uncertainty and correct business measure just as much as an academic reader. Neither a positive point estimate nor an interval crossing zero settles a management decision.",
       "review": "Fictional supervisor: The revised summary aligns with the protocol and recorded output. Do not translate this teaching result into advice for a real firm.",
-      "carry": "The final report keeps the correct units, interval, competing explanations and unanswered managerial question alongside the result.",
+      "carry": "The final report keeps the correct units, interval, competing explanations and unanswered managerial question alongside the result. Conclusion v2: Imprecise synthetic revenue association; no ROI, causal effect or expansion/cancellation recommendation.",
       "challenge": {
         "question": "The interval crosses zero. What conclusion is justified?",
         "choices": [
@@ -247,12 +576,55 @@
         ],
         "correct": 1,
         "feedback": "Failure to establish a precise positive association is not evidence of equivalence or zero value. This model also lacks the design and measures needed for program evaluation."
+      },
+      "tasks": [
+        {
+          "id": "workspace",
+          "title": "Answer the question and explain the limitations",
+          "description": "Use recorded results to answer the refined question, relate findings to the literature, and consider alternative explanations.",
+          "example": "Connect R1, R2 and the conflicting teaching literature without claiming a management decision has been established."
+        },
+        {
+          "id": "consistency",
+          "title": "Check alignment with the study (optional AI check)",
+          "description": "Compare saved decisions and outputs; investigate findings and record your response.",
+          "example": "Record responses to the unit, causality and uncertainty findings and check the revised version. A clean check does not supply missing costs or baseline data."
+        }
+      ],
+      "checkpoint": false,
+      "depth": {
+        "complication": "An uncertain association is mistaken for a cancellation decision",
+        "prompt": "One reader calls the slope proof of profit, while another calls the zero-crossing primary interval proof the program has no value. The qualitative teaching excerpt describes barriers to transferring training into work.",
+        "options": [
+          [
+            "Recommend cancellation because the interval crosses zero",
+            "An imprecise association is not an equivalence test or a causal estimate of program value."
+          ],
+          [
+            "Convert booked revenue directly into ROI",
+            "Attributable incremental benefits, costs and margins are missing."
+          ],
+          [
+            "Explain uncertainty and competing mechanisms",
+            "Alex preserves the measured outcome, units, both analyses and implementation explanations, and states what a future evaluation needs."
+          ]
+        ],
+        "correct": 2,
+        "decision": "The simulated consistency review flags causal wording, a revenue/profit mismatch and selective omission of R2. Alex revises the conclusion and requests a new review; methodological uncertainty remains.",
+        "tasks": [
+          "Connect R1, R2 and the conflicting teaching literature without claiming a management decision has been established.",
+          "Record responses to the unit, causality and uncertainty findings and check the revised version. A clean check does not supply missing costs or baseline data."
+        ],
+        "revision": [
+          "Conclusion v1: Training creates profit, or has no value.",
+          "Conclusion v2: Imprecise synthetic revenue association; no ROI, causal effect or expansion/cancellation recommendation."
+        ]
       }
     },
     {
       "id": "writing",
-      "title": "Write, review and share the research",
-      "where": "Write and explain your decisions → Supervisor checkpoint → Export project → Readable report or project backup; Data / Analysis tasks → Download reproduction bundle",
+      "title": "Write, review and share your research",
+      "where": "Assemble and revise the research report → Check alignment with the study (optional AI check) → Review the final report with your supervisor → Export the research package",
       "input": "The research package combines the question, mechanism and rival explanation, protocol, audit, actual R results and corrected business claim. Writing and literature review can begin earlier and continue throughout; this phase assembles and reviews the complete package.",
       "turns": [
         [
@@ -274,21 +646,145 @@
         [
           "Alex · researcher",
           "My final summary says the example illustrates an uncertain association and does not answer whether the company should invest in training. The research process has clarified what we need to learn next."
+        ],
+        [
+          "Alex · researcher",
+          "A complication to work through: The executive summary quietly drops the caveats."
+        ],
+        [
+          "Research guide · simulated agent",
+          "The academic report discloses missingness and sponsor-requested exploration, but the executive summary omits both. A final review also finds an older draft’s ROI wording in the abstract."
+        ],
+        [
+          "Alex · researcher",
+          "The fictional supervisor reviews the saved final version. The executive summary retains uncertainty and the unresolved investment question. Demo downloads are practice materials, not actual supervisor approval or an importable project backup."
         ]
       ],
-      "artifact": "TEACHING REPORT — fictional company and synthetic employee records\nTitle: Employee training and subsequent sales revenue: a reproducible observational demonstration.\nMotivation: Explore a skill-development hypothesis while considering manager selection and territory opportunity. No verified literature contribution is claimed.\nMethods: Fourteen synthetic representatives; April training hours and May revenue in kUSD; unadjusted simple regression; twelve complete cases and two exclusions. Authored tutorial, not preregistered research.\nResults: Slope 0.944 kUSD/hour (model-based 95% CI -0.748 to 2.636). Exact outputs, code and environment attached.\nDiscussion: Imprecise, noncausal association; baseline performance and selection are unmeasured. No profitability or ROI estimate is possible.\nExecutive summary: This fictional exercise does not establish that training changes revenue or pays for itself. It also does not establish that training has no value. A stronger evaluation is needed to answer the managerial question.\nTransparency: All company records, source excerpts, conversations and reviews are invented. R computed the bundled numerical outputs.\nPackage: Walkthrough and decisions, teaching sources, original CSV, selected input, script, tables, diagnostics, figure, log and session information.",
+      "artifact": "TEACHING REPORT — fictional company and synthetic employee records\nTitle: Employee training and subsequent sales revenue: a reproducible observational demonstration.\nMotivation: Explore a skill-development hypothesis while considering manager selection and territory opportunity. No verified literature contribution is claimed.\nMethods: Fourteen synthetic representatives; April training hours and May revenue in kUSD; unadjusted simple regression; twelve complete cases and two exclusions. Authored tutorial, not preregistered research.\nResults: Slope 0.944 kUSD/hour (model-based 95% CI -0.748 to 2.636). Exact outputs, code and environment attached.\nDiscussion: Imprecise, noncausal association; baseline performance and selection are unmeasured. No profitability or ROI estimate is possible.\nExecutive summary: This fictional exercise does not establish that training changes revenue or pays for itself. It also does not establish that training has no value. A stronger evaluation is needed to answer the managerial question.\nTransparency: All company records, source excerpts, conversations and reviews are invented. R computed the bundled numerical outputs.\nPackage: Walkthrough and decisions, teaching sources, original CSV, selected input, script, tables, diagnostics, figure, log and session information.\n\nExtended decision record:\nReport v1: Executive summary omits uncertainty and exploration; review requests revision.\nReport v2: Academic and executive accounts agree; full provenance retained; fictional final approval.\nThe fictional supervisor reviews the saved final version. The executive summary retains uncertainty and the unresolved investment question. Demo downloads are practice materials, not actual supervisor approval or an importable project backup.\nExploratory R2: Highest complete exposure omitted after the primary result was known; 11 records, slope 0.909 (model-based 95% CI -1.154 to 2.972). Units match R1. This is not an independent replication, a prespecified test or proof of robustness. Primary R1 remains reported.\nExtended package: Four synthetic CSVs and their roles, reproducible preparation script, transformation log, two separately approved R plans and runs, fictional search/screening decisions, and versioned decision records. Both the primary and exploratory result must remain visible.",
       "understanding": "The scholarly report and executive summary can differ in length and emphasis, but they must agree about what was measured, what was estimated and what remains unknown.",
       "review": "Fictional supervisor: Complete for teaching, not a real approval, company evaluation or submission-ready dissertation.",
-      "carry": "Download the example and return to your notebook. To practice, import the training-sales CSV under Run analysis and review your own plan before execution."
+      "carry": "Download the example and return to your notebook. To practice, import the training-sales CSV under Run analysis and review your own plan before execution. Report v2: Academic and executive accounts agree; full provenance retained; fictional final approval.",
+      "tasks": [
+        {
+          "id": "workspace",
+          "title": "Assemble and revise the research report",
+          "description": "Bring earlier writing, results and limitations together. Add data/code availability and contribution statements; explain key decisions for final review.",
+          "example": "Assemble a teaching report and executive summary with identical estimates, units and limitations, including the exploratory analysis and sponsor influence."
+        },
+        {
+          "id": "consistency",
+          "title": "Check alignment with the study (optional AI check)",
+          "description": "Compare saved decisions and outputs; investigate findings and record your response.",
+          "example": "Check question, design, recorded results, abstract and executive summary together; correct stale ROI wording."
+        },
+        {
+          "id": "review",
+          "title": "Review the final report with your supervisor",
+          "description": "Resolve outstanding concerns and record the reviewer’s decision on the saved research package.",
+          "example": "Record revision and final review of the saved package; optional discussions in earlier steps were not mandatory checkpoints."
+        },
+        {
+          "id": "export",
+          "title": "Export the research package",
+          "description": "Download a readable report and a project backup with supporting materials.",
+          "example": "Export the walkthrough and computation bundle. In the live app use project backup for restoration, Open project to switch, and New project to start a separate study."
+        }
+      ],
+      "checkpoint": true,
+      "depth": {
+        "complication": "The executive summary quietly drops the caveats",
+        "prompt": "The academic report discloses missingness and sponsor-requested exploration, but the executive summary omits both. A final review also finds an older draft’s ROI wording in the abstract.",
+        "options": [
+          [
+            "Approve only the academic report and leave the summary",
+            "Both outputs communicate the study and need to agree on the outcome, uncertainty and limitations."
+          ],
+          [
+            "Revise both outputs and renew final review",
+            "The revised report, executive summary, decisions, four CSVs, preparation code and both runs form the handoff."
+          ],
+          [
+            "Use a reproduction bundle to overwrite the active project",
+            "That bundle is not a project backup. A real backup import creates a separate project; opening a demo should never overwrite active work."
+          ]
+        ],
+        "correct": 1,
+        "decision": "The fictional supervisor reviews the saved final version. The executive summary retains uncertainty and the unresolved investment question. Demo downloads are practice materials, not actual supervisor approval or an importable project backup.",
+        "tasks": [
+          "Assemble a teaching report and executive summary with identical estimates, units and limitations, including the exploratory analysis and sponsor influence.",
+          "Check question, design, recorded results, abstract and executive summary together; correct stale ROI wording.",
+          "Record revision and final review of the saved package; optional discussions in earlier steps were not mandatory checkpoints.",
+          "Export the walkthrough and computation bundle. In the live app use project backup for restoration, Open project to switch, and New project to start a separate study."
+        ],
+        "revision": [
+          "Report v1: Executive summary omits uncertainty and exploration; review requests revision.",
+          "Report v2: Academic and executive accounts agree; full provenance retained; fictional final approval."
+        ]
+      }
+    }
+  ],
+  "edition": 2,
+  "search": {
+    "disclosure": "Authored catalogue exercise only. No live search, real publication, DOI, repository deposit or access permission is implied.",
+    "results": [
+      {
+        "id": "L1",
+        "label": "S1 · observational association",
+        "status": "Inspected fictional passage; limited support for association."
+      },
+      {
+        "id": "L2",
+        "label": "S2 · selection / confounding",
+        "status": "Inspected fictional passage; retained as a competing explanation."
+      },
+      {
+        "id": "L3",
+        "label": "S3 · arXiv-style preprint candidate",
+        "status": "Inspected fictional passage; preprint status retained, not assumed peer reviewed."
+      },
+      {
+        "id": "L4",
+        "label": "Duplicate listing of S3",
+        "status": "Merged with L3; not another independent study."
+      },
+      {
+        "id": "L5",
+        "label": "Abstract-only candidate",
+        "status": "Full text unavailable in the scenario; awaiting inspection, not used to support full-text claims."
+      },
+      {
+        "id": "L6",
+        "label": "S4 · qualitative counterpoint",
+        "status": "Inspected fictional passage; explains contextual differences, not an effect-size estimate."
+      }
+    ]
+  },
+  "publicCandidates": [
+    {
+      "title": "Annual firm sales aggregates",
+      "decision": "Reject for primary analysis: incompatible observational unit and time scale; no participant linkage."
+    },
+    {
+      "title": "Restricted employee development survey",
+      "decision": "Defer: access and reuse conditions unresolved; no file downloaded or permission inferred."
+    },
+    {
+      "title": "Regional business context",
+      "decision": "Context only: illustrated by synthetic D3. This file is authored locally, not retrieved from a repository."
     }
   ],
   "csv": "training_hours,next_month_sales_kusd\n1,44\n2,61\n3,49\n4,67\n5,48\n6,65\n7,53\n8,72\n9,55\n10,69\n11,51\n12,64\n13,NA\n,60\n",
-  "builtAt": "2026-09-09T18:44:23.981Z",
+  "builtAt": "2026-09-09T22:49:05.808Z",
   "computation": {
     "dataset": {
       "id": "D1",
       "name": "synthetic-training-sales.csv",
       "permission": "Author-created fictional observations for a public teaching demonstration; no real participants.",
+      "origin": {
+        "kind": "upload",
+        "filename": ""
+      },
+      "notes": "",
       "csv": "training_hours,next_month_sales_kusd\n1,44\n2,61\n3,49\n4,67\n5,48\n6,65\n7,53\n8,72\n9,55\n10,69\n11,51\n12,64\n13,NA\n,60\n",
       "sha256": "8b9d7de8b4f9af214bfd81f65cde4ca0c8a79a7a0e7a579c0722682083b68a87",
       "columns": [
@@ -308,7 +804,7 @@
         }
       ],
       "rowCount": 14,
-      "at": "2026-09-09T18:44:20.705Z"
+      "at": "2026-09-09T22:48:59.262Z"
     },
     "plan": {
       "id": "P1",
@@ -341,24 +837,24 @@
         }
       ],
       "model": null,
-      "at": "2026-09-09T18:44:20.705Z",
+      "at": "2026-09-09T22:48:59.262Z",
       "approvals": [
         {
-          "id": "549fbf88-4372-4458-bb50-380b22adfd04",
-          "planHash": "8bc81dd12299d7dcd6ede1e80785f9ee87cbe0cc0f2fc5f9a9ef17441683bbaa",
+          "id": "e060116f-5ba3-4b54-a633-9ef8c305e3b9",
+          "planHash": "5b7c3077b14c418219c789c1650834dc93ad90a3927e9ad214f5c3e0c74d7be3",
           "name": "Demo build · synthetic data only",
           "note": "The tutorial author reviewed the fixed template and synthetic variable mapping. This build approval is not a real researcher or supervisor approval.",
-          "at": "2026-09-09T18:44:20.705Z",
+          "at": "2026-09-09T22:48:59.262Z",
           "authenticated": false
         }
       ],
-      "planHash": "8bc81dd12299d7dcd6ede1e80785f9ee87cbe0cc0f2fc5f9a9ef17441683bbaa"
+      "planHash": "5b7c3077b14c418219c789c1650834dc93ad90a3927e9ad214f5c3e0c74d7be3"
     },
     "run": {
       "id": "R1",
       "planId": "P1",
-      "planHash": "8bc81dd12299d7dcd6ede1e80785f9ee87cbe0cc0f2fc5f9a9ef17441683bbaa",
-      "approvalId": "549fbf88-4372-4458-bb50-380b22adfd04",
+      "planHash": "5b7c3077b14c418219c789c1650834dc93ad90a3927e9ad214f5c3e0c74d7be3",
+      "approvalId": "e060116f-5ba3-4b54-a633-9ef8c305e3b9",
       "datasetId": "D1",
       "datasetHash": "8b9d7de8b4f9af214bfd81f65cde4ca0c8a79a7a0e7a579c0722682083b68a87",
       "scriptHash": "9535d21718a770574a4b775d96f23bd501df0aad205d18d8c5c883e3b2de9583",
@@ -382,8 +878,8 @@
           "version": 1
         }
       ],
-      "startedAt": "2026-09-09T18:44:20.705Z",
-      "finishedAt": "2026-09-09T18:44:23.980Z",
+      "startedAt": "2026-09-09T22:48:59.262Z",
+      "finishedAt": "2026-09-09T22:49:02.697Z",
       "status": "succeeded",
       "engine": "webR 0.6.0",
       "rVersion": "R version 4.6.0 (2026-04-24)",
@@ -397,6 +893,285 @@
         "coefficients.csv": "\"term\",\"estimate\",\"std_error\",\"statistic\",\"p_value\",\"lower_95\",\"upper_95\"\n\"(Intercept)\",52.0303030303031,5.58752369061181,9.31187157518897,3.04319455870644e-06,39.5805244088572,64.480081651749\n\"x\",0.944055944055942,0.759194970314233,1.24349604643086,0.242047113781113,-0.747535865533766,2.63564775364565\n",
         "fit.csv": "\"n\",\"r_squared\",\"residual_sd\",\"residual_df\"\n12,0.133920370347691,9.07865140986872,10\n",
         "diagnostics.csv": "\"fitted\",\"residual\"\n52.9743589743589,-8.97435897435894\n53.9184149184149,7.08158508158507\n54.8624708624709,-5.86247086247088\n55.8065268065268,11.1934731934732\n56.7505827505828,-8.75058275058276\n57.6946386946387,7.3053613053613\n58.6386946386946,-5.63869463869464\n59.5827505827506,12.4172494172494\n60.5268065268065,-5.52680652680653\n61.4708624708625,7.52913752913753\n62.4149184149184,-11.4149184149184\n63.3589743589744,0.641025641025649\n"
+      }
+    },
+    "datasets": [
+      {
+        "id": "D1",
+        "name": "synthetic-training-sales.csv",
+        "permission": "Author-created fictional observations for a public teaching demonstration; no real participants.",
+        "origin": {
+          "kind": "upload",
+          "filename": ""
+        },
+        "notes": "",
+        "csv": "training_hours,next_month_sales_kusd\n1,44\n2,61\n3,49\n4,67\n5,48\n6,65\n7,53\n8,72\n9,55\n10,69\n11,51\n12,64\n13,NA\n,60\n",
+        "sha256": "8b9d7de8b4f9af214bfd81f65cde4ca0c8a79a7a0e7a579c0722682083b68a87",
+        "columns": [
+          {
+            "index": 0,
+            "name": "training_hours",
+            "numeric": true,
+            "missing": 1,
+            "observed": 13
+          },
+          {
+            "index": 1,
+            "name": "next_month_sales_kusd",
+            "numeric": true,
+            "missing": 1,
+            "observed": 13
+          }
+        ],
+        "rowCount": 14,
+        "at": "2026-09-09T22:48:59.262Z"
+      },
+      {
+        "id": "D2",
+        "name": "raw-register.csv",
+        "permission": "Author-created fictional observations for a public teaching demonstration; no real participants or repository download.",
+        "origin": {
+          "kind": "upload",
+          "filename": ""
+        },
+        "notes": "D2: Synthetic raw register with one exact duplicate and a documented mixed-unit record. Prepared outside the app using the bundled script.",
+        "csv": "record_id,exposure,exposure_unit,outcome,outcome_unit\n1,1,hours,44,kUSD\n2,2,hours,61000,USD\n3,3,hours,49,kUSD\n4,4,hours,67,kUSD\n5,5,hours,48,kUSD\n6,6,hours,65,kUSD\n7,7,hours,53,kUSD\n8,8,hours,72,kUSD\n9,9,hours,55,kUSD\n10,10,hours,69,kUSD\n11,11,hours,51,kUSD\n12,12,hours,64,kUSD\n13,13,hours,NA,kUSD\n14,,hours,60,kUSD\n2,2,hours,61000,USD\n",
+        "sha256": "bf92e74fe464324ab74c5a95da46c923e79b6802c50657bd2b2ed7cf8eab09ec",
+        "columns": [
+          {
+            "index": 0,
+            "name": "record_id",
+            "numeric": true,
+            "missing": 0,
+            "observed": 15
+          },
+          {
+            "index": 1,
+            "name": "exposure",
+            "numeric": true,
+            "missing": 1,
+            "observed": 14
+          },
+          {
+            "index": 2,
+            "name": "exposure_unit",
+            "numeric": false,
+            "missing": 0,
+            "observed": 0
+          },
+          {
+            "index": 3,
+            "name": "outcome",
+            "numeric": true,
+            "missing": 1,
+            "observed": 14
+          },
+          {
+            "index": 4,
+            "name": "outcome_unit",
+            "numeric": false,
+            "missing": 0,
+            "observed": 0
+          }
+        ],
+        "rowCount": 15,
+        "at": "2026-09-09T22:49:02.699Z"
+      },
+      {
+        "id": "D3",
+        "name": "context-aggregates.csv",
+        "permission": "Author-created fictional observations for a public teaching demonstration; no real participants or repository download.",
+        "origin": {
+          "kind": "upload",
+          "filename": ""
+        },
+        "notes": "D3: Locally authored synthetic context, not a repository download. Different observational unit; no supported participant linkage. Not included in either regression.",
+        "csv": "region,annual_market_index,reporting_year\nEast,103,2025\nWest,98,2025\nCentral,106,2025\n",
+        "sha256": "01923d29fd5faddea4a88798f7178b04fcf59aad7a000e9e23b4003885c650f6",
+        "columns": [
+          {
+            "index": 0,
+            "name": "region",
+            "numeric": false,
+            "missing": 0,
+            "observed": 0
+          },
+          {
+            "index": 1,
+            "name": "annual_market_index",
+            "numeric": true,
+            "missing": 0,
+            "observed": 3
+          },
+          {
+            "index": 2,
+            "name": "reporting_year",
+            "numeric": true,
+            "missing": 0,
+            "observed": 3
+          }
+        ],
+        "rowCount": 3,
+        "at": "2026-09-09T22:49:02.700Z"
+      },
+      {
+        "id": "D4",
+        "name": "exploratory-subset.csv",
+        "permission": "Author-created fictional observations for a public teaching demonstration; no real participants or repository download.",
+        "origin": {
+          "kind": "upload",
+          "filename": ""
+        },
+        "notes": "D4: D1 with the highest complete exposure omitted for a post-hoc sensitivity demonstration. Original incomplete records retained; not an error correction or independent sample.",
+        "csv": "training_hours,next_month_sales_kusd\n1,44\n2,61\n3,49\n4,67\n5,48\n6,65\n7,53\n8,72\n9,55\n10,69\n11,51\n13,NA\n,60\n",
+        "sha256": "5bf07562b67a7b1e0f80b505f371c4e4ca9be69a4a07deed894e6187330f383b",
+        "columns": [
+          {
+            "index": 0,
+            "name": "training_hours",
+            "numeric": true,
+            "missing": 1,
+            "observed": 12
+          },
+          {
+            "index": 1,
+            "name": "next_month_sales_kusd",
+            "numeric": true,
+            "missing": 1,
+            "observed": 12
+          }
+        ],
+        "rowCount": 13,
+        "at": "2026-09-09T22:49:02.700Z"
+      }
+    ],
+    "preparation": {
+      "script": "// Synthetic tutorial only. Run: node prepare.mjs raw-register.csv primary-rebuilt.csv\nimport { readFile, writeFile } from 'node:fs/promises';\nfunction prepareDemoRaw(csv, headers, expectedOutcomeUnit) {\n  const lines = csv.trimEnd().split(/\\r?\\n/);\n  if (lines.shift() !== 'record_id,exposure,exposure_unit,outcome,outcome_unit')\n    throw new Error('Unexpected teaching raw-register header.');\n  const seen = new Map();\n  const log = [];\n  const output = [headers];\n  for (const line of lines) {\n    const cells = line.split(',');\n    if (cells.length !== 5 || cells.some((c) => c.includes('\"')))\n      throw new Error('This teaching script accepts only its documented unquoted format.');\n    const [id, x, xUnit, y, yUnit] = cells;\n    if (!id) throw new Error('Missing record ID.');\n    if (seen.has(id)) {\n      if (seen.get(id) !== line)\n        throw new Error(`Conflicting duplicate ${id}; human review required.`);\n      log.push(`${id}: removed exact duplicate; first record retained.`);\n      continue;\n    }\n    seen.set(id, line);\n    if (!['hours', 'minutes'].includes(xUnit) || ![expectedOutcomeUnit, 'USD'].includes(yUnit))\n      throw new Error(`Unknown unit for ${id}.`);\n    const convert = (value, divisor) => {\n      if (value === '' || value === 'NA') return value;\n      if (!Number.isFinite(Number(value))) throw new Error(`Invalid numeric value for ${id}.`);\n      return String(Number(value) / divisor);\n    };\n    const cleanX = convert(x, xUnit === 'minutes' ? 60 : 1);\n    if (xUnit === 'minutes') log.push(`${id}: ${x} minutes converted to ${cleanX} hours.`);\n    if (yUnit === 'USD' && expectedOutcomeUnit !== 'kUSD')\n      throw new Error('Incompatible outcome unit.');\n    const cleanY = convert(y, yUnit === 'USD' ? 1000 : 1);\n    if (yUnit === 'USD') log.push(`${id}: ${y} USD converted to ${cleanY} kUSD.`);\n    output.push(`${cleanX},${cleanY}`);\n  }\n  return { csv: output.join('\\n') + '\\n', log };\n}\nconst [input, output] = process.argv.slice(2);\nif (!input || !output || input === output) throw new Error('Provide distinct input and output paths.');\nconst result = prepareDemoRaw(await readFile(input, 'utf8'), \"training_hours,next_month_sales_kusd\", \"kUSD\");\nawait writeFile(output, result.csv, { flag: 'wx' });\nconsole.log(result.log.join('\\n'));\n",
+      "log": [
+        "2: 61000 USD converted to 61 kUSD.",
+        "2: removed exact duplicate; first record retained."
+      ],
+      "scope": "Executed at demo build time. The script handles only the supplied simple unquoted format. It is an external preparation example, not an automated app cleaning operation."
+    },
+    "sensitivity": {
+      "dataset": {
+        "id": "D4",
+        "name": "exploratory-subset.csv",
+        "permission": "Author-created fictional observations for a public teaching demonstration; no real participants or repository download.",
+        "origin": {
+          "kind": "upload",
+          "filename": ""
+        },
+        "notes": "D4: D1 with the highest complete exposure omitted for a post-hoc sensitivity demonstration. Original incomplete records retained; not an error correction or independent sample.",
+        "csv": "training_hours,next_month_sales_kusd\n1,44\n2,61\n3,49\n4,67\n5,48\n6,65\n7,53\n8,72\n9,55\n10,69\n11,51\n13,NA\n,60\n",
+        "sha256": "5bf07562b67a7b1e0f80b505f371c4e4ca9be69a4a07deed894e6187330f383b",
+        "columns": [
+          {
+            "index": 0,
+            "name": "training_hours",
+            "numeric": true,
+            "missing": 1,
+            "observed": 12
+          },
+          {
+            "index": 1,
+            "name": "next_month_sales_kusd",
+            "numeric": true,
+            "missing": 1,
+            "observed": 12
+          }
+        ],
+        "rowCount": 13,
+        "at": "2026-09-09T22:49:02.700Z"
+      },
+      "plan": {
+        "id": "P2",
+        "datasetId": "D4",
+        "datasetHash": "5bf07562b67a7b1e0f80b505f371c4e4ca9be69a4a07deed894e6187330f383b",
+        "method": "linear",
+        "outcome": 1,
+        "predictor": 0,
+        "rationale": "Post-hoc teaching sensitivity check: omit the highest complete exposure while preserving primary R1. This is not a prespecified test, error correction or independent replication.",
+        "missingPolicy": "complete_cases",
+        "script": "# ResearchGuide analysis template v1; input.csv uses y (outcome) and optional x (predictor).\n# Complete-case analysis: blank/NA values are excluded and counts are recorded.\noptions(warn=1)\nd <- read.csv('input.csv', na.strings='NA', check.names=FALSE)\noriginal_n <- nrow(d)\nd <- d[complete.cases(d), , drop=FALSE]\nif (nrow(d) < 3) stop('Too few complete observations.')\nwrite.csv(data.frame(total=original_n, used=nrow(d), excluded=original_n-nrow(d)), 'counts.csv', row.names=FALSE)\ndescribe <- function(v) c(n=length(v), mean=mean(v), sd=sd(v), median=median(v), min=min(v), max=max(v))\nwrite.csv(data.frame(variable=names(d), t(vapply(d,describe,numeric(6))), check.names=FALSE), 'descriptives.csv', row.names=FALSE)\nif (length(unique(d$x)) < 2 || length(unique(d$y)) < 2) stop('Regression requires variation in both variables.')\nfit <- lm(y ~ x, data=d)\nif (fit$rank < 2) stop('The regression design is rank deficient.')\nsm <- summary(fit)\nci <- confint(fit,level=0.95)\nwrite.csv(data.frame(term=rownames(sm$coefficients), estimate=sm$coefficients[,1], std_error=sm$coefficients[,2], statistic=sm$coefficients[,3], p_value=sm$coefficients[,4], lower_95=ci[,1], upper_95=ci[,2]), 'coefficients.csv', row.names=FALSE)\nwrite.csv(data.frame(n=nrow(d), r_squared=sm$r.squared, residual_sd=sm$sigma, residual_df=df.residual(fit)), 'fit.csv', row.names=FALSE)\nwrite.csv(data.frame(fitted=fitted(fit), residual=residuals(fit)), 'diagnostics.csv', row.names=FALSE)\nprint(sm)\nprint(ci)\n\n# A reproducible SVG histogram generated from R-computed bin counts.\nh <- hist(d$y, plot=FALSE)\nheight <- 240; width <- 480\nbars <- vapply(seq_along(h$counts), function(i) {\n bh <- if(max(h$counts)>0) h$counts[i]/max(h$counts)*180 else 0\n sprintf('<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"#214f42\"/>', 40+(i-1)*400/length(h$counts), 200-bh, 390/length(h$counts),bh)\n}, character(1))\nsvg <- paste0('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 480 240\"><rect width=\"480\" height=\"240\" fill=\"#f7f5ed\"/><text x=\"40\" y=\"20\">Outcome distribution (complete cases)</text>',paste(bars,collapse=''),sprintf('<text x=\"40\" y=\"225\">Range: %.4g to %.4g; n = %d</text>',min(d$y),max(d$y),nrow(d)),'</svg>')\nwriteLines(svg,'figure.svg')\nwrite.csv(data.frame(lower=head(h$breaks,-1), upper=tail(h$breaks,-1), count=h$counts),'histogram.csv',row.names=FALSE)\nwriteLines(capture.output(sessionInfo()),'session.txt')\nprint(data.frame(total=original_n,used=nrow(d),excluded=original_n-nrow(d)))\n",
+        "scriptHash": "9535d21718a770574a4b775d96f23bd501df0aad205d18d8c5c883e3b2de9583",
+        "templateVersion": 1,
+        "contextVersions": [
+          {
+            "id": "question",
+            "version": 1
+          },
+          {
+            "id": "evidence",
+            "version": 1
+          },
+          {
+            "id": "design",
+            "version": 1
+          },
+          {
+            "id": "data",
+            "version": 1
+          }
+        ],
+        "model": null,
+        "at": "2026-09-09T22:49:02.700Z",
+        "approvals": [
+          {
+            "id": "88a3f455-4084-452a-9553-621a89670107",
+            "planHash": "ae796c908ffd154851f8bd2fc71a0d6d727a2389cf394f02d09116d00b3a5f87",
+            "name": "Demo build · exploratory synthetic analysis",
+            "note": "The tutorial author reviewed the separate D4 mapping, omission rule and exact script. This is a build approval, not a real supervisor decision.",
+            "at": "2026-09-09T22:49:02.700Z",
+            "authenticated": false
+          }
+        ],
+        "planHash": "ae796c908ffd154851f8bd2fc71a0d6d727a2389cf394f02d09116d00b3a5f87"
+      },
+      "run": {
+        "id": "R2",
+        "planId": "P2",
+        "planHash": "ae796c908ffd154851f8bd2fc71a0d6d727a2389cf394f02d09116d00b3a5f87",
+        "approvalId": "88a3f455-4084-452a-9553-621a89670107",
+        "datasetId": "D4",
+        "datasetHash": "5bf07562b67a7b1e0f80b505f371c4e4ca9be69a4a07deed894e6187330f383b",
+        "scriptHash": "9535d21718a770574a4b775d96f23bd501df0aad205d18d8c5c883e3b2de9583",
+        "script": "# ResearchGuide analysis template v1; input.csv uses y (outcome) and optional x (predictor).\n# Complete-case analysis: blank/NA values are excluded and counts are recorded.\noptions(warn=1)\nd <- read.csv('input.csv', na.strings='NA', check.names=FALSE)\noriginal_n <- nrow(d)\nd <- d[complete.cases(d), , drop=FALSE]\nif (nrow(d) < 3) stop('Too few complete observations.')\nwrite.csv(data.frame(total=original_n, used=nrow(d), excluded=original_n-nrow(d)), 'counts.csv', row.names=FALSE)\ndescribe <- function(v) c(n=length(v), mean=mean(v), sd=sd(v), median=median(v), min=min(v), max=max(v))\nwrite.csv(data.frame(variable=names(d), t(vapply(d,describe,numeric(6))), check.names=FALSE), 'descriptives.csv', row.names=FALSE)\nif (length(unique(d$x)) < 2 || length(unique(d$y)) < 2) stop('Regression requires variation in both variables.')\nfit <- lm(y ~ x, data=d)\nif (fit$rank < 2) stop('The regression design is rank deficient.')\nsm <- summary(fit)\nci <- confint(fit,level=0.95)\nwrite.csv(data.frame(term=rownames(sm$coefficients), estimate=sm$coefficients[,1], std_error=sm$coefficients[,2], statistic=sm$coefficients[,3], p_value=sm$coefficients[,4], lower_95=ci[,1], upper_95=ci[,2]), 'coefficients.csv', row.names=FALSE)\nwrite.csv(data.frame(n=nrow(d), r_squared=sm$r.squared, residual_sd=sm$sigma, residual_df=df.residual(fit)), 'fit.csv', row.names=FALSE)\nwrite.csv(data.frame(fitted=fitted(fit), residual=residuals(fit)), 'diagnostics.csv', row.names=FALSE)\nprint(sm)\nprint(ci)\n\n# A reproducible SVG histogram generated from R-computed bin counts.\nh <- hist(d$y, plot=FALSE)\nheight <- 240; width <- 480\nbars <- vapply(seq_along(h$counts), function(i) {\n bh <- if(max(h$counts)>0) h$counts[i]/max(h$counts)*180 else 0\n sprintf('<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"#214f42\"/>', 40+(i-1)*400/length(h$counts), 200-bh, 390/length(h$counts),bh)\n}, character(1))\nsvg <- paste0('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 480 240\"><rect width=\"480\" height=\"240\" fill=\"#f7f5ed\"/><text x=\"40\" y=\"20\">Outcome distribution (complete cases)</text>',paste(bars,collapse=''),sprintf('<text x=\"40\" y=\"225\">Range: %.4g to %.4g; n = %d</text>',min(d$y),max(d$y),nrow(d)),'</svg>')\nwriteLines(svg,'figure.svg')\nwrite.csv(data.frame(lower=head(h$breaks,-1), upper=tail(h$breaks,-1), count=h$counts),'histogram.csv',row.names=FALSE)\nwriteLines(capture.output(sessionInfo()),'session.txt')\nprint(data.frame(total=original_n,used=nrow(d),excluded=original_n-nrow(d)))\n",
+        "inputCsv": "y,x\n44,1\n61,2\n49,3\n67,4\n48,5\n65,6\n53,7\n72,8\n55,9\n69,10\n51,11\nNA,13\n60,NA\n",
+        "contextVersions": [
+          {
+            "id": "question",
+            "version": 1
+          },
+          {
+            "id": "evidence",
+            "version": 1
+          },
+          {
+            "id": "design",
+            "version": 1
+          },
+          {
+            "id": "data",
+            "version": 1
+          }
+        ],
+        "startedAt": "2026-09-09T22:49:02.700Z",
+        "finishedAt": "2026-09-09T22:49:05.807Z",
+        "status": "succeeded",
+        "engine": "webR 0.6.0",
+        "rVersion": "R version 4.6.0 (2026-04-24)",
+        "log": "\nCall:\nlm(formula = y ~ x, data = d)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-11.182  -7.318  -5.364   7.545  12.546 \n\nCoefficients:\n            Estimate Std. Error t value Pr(>|t|)    \n(Intercept)  52.1818     6.1863   8.435 1.45e-05 ***\nx             0.9091     0.9121   0.997    0.345    \n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\nResidual standard error: 9.566 on 9 degrees of freedom\nMultiple R-squared:  0.0994,\tAdjusted R-squared:  -0.0006627 \nF-statistic: 0.9934 on 1 and 9 DF,  p-value: 0.345\n\n                2.5 %    97.5 %\n(Intercept) 38.187497 66.176140\nx           -1.154259  2.972441\n  total used excluded\n1    13   11        2",
+        "files": {
+          "counts.csv": "\"total\",\"used\",\"excluded\"\n13,11,2\n",
+          "descriptives.csv": "\"variable\",\"n\",\"mean\",\"sd\",\"median\",\"min\",\"max\"\n\"y\",11,57.6363636363636,9.56318699255355,55,44,72\n\"x\",11,6,3.3166247903554,6,1,11\n",
+          "histogram.csv": "\"lower\",\"upper\",\"count\"\n40,45,1\n45,50,2\n50,55,3\n55,60,0\n60,65,2\n65,70,2\n70,75,1\n",
+          "figure.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 480 240\"><rect width=\"480\" height=\"240\" fill=\"#f7f5ed\"/><text x=\"40\" y=\"20\">Outcome distribution (complete cases)</text><rect x=\"40.00\" y=\"140.00\" width=\"55.71\" height=\"60.00\" fill=\"#214f42\"/><rect x=\"97.14\" y=\"80.00\" width=\"55.71\" height=\"120.00\" fill=\"#214f42\"/><rect x=\"154.29\" y=\"20.00\" width=\"55.71\" height=\"180.00\" fill=\"#214f42\"/><rect x=\"211.43\" y=\"200.00\" width=\"55.71\" height=\"0.00\" fill=\"#214f42\"/><rect x=\"268.57\" y=\"80.00\" width=\"55.71\" height=\"120.00\" fill=\"#214f42\"/><rect x=\"325.71\" y=\"80.00\" width=\"55.71\" height=\"120.00\" fill=\"#214f42\"/><rect x=\"382.86\" y=\"140.00\" width=\"55.71\" height=\"60.00\" fill=\"#214f42\"/><text x=\"40\" y=\"225\">Range: 44 to 72; n = 11</text></svg>\n",
+          "session.txt": "R version 4.6.0 (2026-04-24)\nPlatform: wasm32-unknown-emscripten (32-bit)\nRunning under: emscripten\n\nMatrix products: default\n  LAPACK version 3.12.1\n\nlocale:\n[1] en_US.UTF-8 C           en_US.UTF-8 en_US.UTF-8 en_US.UTF-8 C          \n\ntime zone: America/New_York\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] webr_0.6.0\n",
+          "coefficients.csv": "\"term\",\"estimate\",\"std_error\",\"statistic\",\"p_value\",\"lower_95\",\"upper_95\"\n\"(Intercept)\",52.1818181818182,6.18627290472952,8.43509799606872,1.44632568771259e-05,38.1874966193599,66.1761397442765\n\"x\",0.909090909090908,0.912116178381358,0.996683241277643,0.344958860049189,-1.15425923713861,2.97244105532042\n",
+          "fit.csv": "\"n\",\"r_squared\",\"residual_sd\",\"residual_df\"\n11,0.0994035785288271,9.56635518445513,9\n",
+          "diagnostics.csv": "\"fitted\",\"residual\"\n53.0909090909091,-9.09090909090908\n54,7\n54.9090909090909,-5.90909090909091\n55.8181818181818,11.1818181818182\n56.7272727272727,-8.72727272727273\n57.6363636363636,7.36363636363636\n58.5454545454545,-5.54545454545455\n59.4545454545455,12.5454545454545\n60.3636363636364,-5.36363636363636\n61.2727272727273,7.72727272727273\n62.1818181818182,-11.1818181818182\n"
+        }
       }
     }
   }

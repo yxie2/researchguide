@@ -78,6 +78,29 @@
 .demo-outputs {
   margin-top: 2rem;
 }
+.demo-task-sequence {
+  margin-block: 1.5rem 2.5rem;
+}
+.demo-task-sequence > details {
+  border-top: 1px solid var(--line);
+  padding-block: 1rem;
+}
+.demo-task-sequence summary {
+  font-family: Georgia, serif;
+  font-size: 1.2rem;
+}
+.demo-task-sequence details p {
+  margin-top: 0.8rem;
+  max-width: 75ch;
+}
+.demo-datasets {
+  margin-top: 2rem;
+  overflow-wrap: anywhere;
+}
+.demo-decision [role='status'] {
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
 #demo h1:focus {
   outline: none;
 }
