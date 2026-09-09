@@ -1,5 +1,13 @@
 # From prototype to research pilot
 
+## v0.10 — A natural research sequence (implemented)
+
+- Preliminary research interest followed by literature synthesis and an explicitly refined question.
+- Concepts/theory, feasible contribution and optional hypotheses precede study design; planning includes sampling, access and safeguards.
+- Data acquisition/preparation, analysis, contextual interpretation and report assembly have distinct purposes. Collection and advanced methods remain outside the app.
+- Guidance and consistency checks distinguish the initial direction from the literature-informed question. Analysis context now includes literature versions.
+- Existing milestone IDs and saved work are retained. Legacy analysis plans without literature context require a new plan review; earlier runs remain historical records.
+
 ## v0.9 — Unified research workflow (implemented)
 
 - A tailored vertical task sequence within each of the seven research steps, replacing the tool-tab matrix.

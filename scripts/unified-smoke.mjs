@@ -20,7 +20,7 @@ try {
   assert.equal(await page.locator('.workflow-task').count(), 4);
   await page.getByRole('button', { name: 'Go to suggested action', exact: true }).click();
   await page
-    .getByLabel('Research brief')
+    .getByLabel('Research direction')
     .fill(
       'A fictional association question: among first-year students in a synthetic class dataset, how are reported weekly study hours associated with quiz scores? This observational comparison cannot establish causation.',
     );
@@ -34,7 +34,7 @@ try {
     .getByLabel('Where are you getting stuck?')
     .fill('Keep this unsent mentor question while I check my document.');
   await openTask(page, 'workspace');
-  assert.match(await page.getByLabel('Research brief').inputValue(), /fictional association/);
+  assert.match(await page.getByLabel('Research direction').inputValue(), /fictional association/);
   await openTask(page, 'guide');
   assert.match(
     await page.getByLabel('Where are you getting stuck?').inputValue(),
@@ -49,8 +49,8 @@ try {
       'The question is suitably bounded for a synthetic workflow test and states its limitations.',
     );
   await page.getByRole('button', { name: 'Approve this version', exact: true }).click();
-  await page.getByRole('button', { name: 'Continue to Evidence →', exact: true }).click();
-  await page.getByRole('heading', { name: 'Understand the evidence', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Continue to Literature & question →', exact: true }).click();
+  await page.getByRole('heading', { name: 'Review the literature and refine your question', exact: true }).waitFor();
   assert.equal(await page.locator('.workflow-task').count(), 6);
   await page.getByText('What carries forward into this step', { exact: true }).click();
   assert.match(await page.locator('.workflow-context').textContent(), /fictional association/);
@@ -58,7 +58,7 @@ try {
   await openTask(page, 'execution');
   assert.equal(await page.locator('.workflow-shared').count(), 1);
   assert.equal(
-    await page.getByRole('heading', { name: 'Understand the evidence', exact: true }).count(),
+    await page.getByRole('heading', { name: 'Review the literature and refine your question', exact: true }).count(),
     1,
   );
   await page.getByRole('button', { name: 'Return to this step’s tasks', exact: true }).click();

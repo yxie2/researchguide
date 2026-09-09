@@ -17,7 +17,7 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(base);
   await openTask(page, 'workspace');
-  await page.getByLabel('Research brief').fill('A synthetic saved question for project switching.');
+  await page.getByLabel('Research direction').fill('A synthetic saved question for project switching.');
   await page.getByRole('button', { name: 'Save your work', exact: true }).click();
   await page.getByText('Saved on this computer', { exact: true }).waitFor();
   await page.getByRole('button', { name: 'Export project', exact: true }).click();
@@ -34,16 +34,16 @@ try {
   await page.getByRole('button', { name: 'Open My first research project', exact: true }).click();
   await openTask(page, 'workspace');
   assert.equal(
-    await page.getByLabel('Research brief').inputValue(),
+    await page.getByLabel('Research direction').inputValue(),
     'A synthetic saved question for project switching.',
   );
-  await page.getByLabel('Research brief').fill('Unsaved changes should be protected.');
+  await page.getByLabel('Research direction').fill('Unsaved changes should be protected.');
   await page.getByRole('button', { name: 'Open project', exact: true }).click();
   page.once('dialog', (d) => d.dismiss());
   await page.getByRole('button', { name: 'Open Second synthetic project', exact: true }).click();
   await page.getByRole('button', { name: 'Back to current project', exact: true }).click();
   assert.equal(
-    await page.getByLabel('Research brief').inputValue(),
+    await page.getByLabel('Research direction').inputValue(),
     'Unsaved changes should be protected.',
   );
   await page.getByRole('button', { name: 'Save your work', exact: true }).click();
@@ -62,7 +62,7 @@ try {
   await page.getByText('Backup imported as a separate project.', { exact: true }).waitFor();
   await openTask(page, 'workspace');
   assert.equal(
-    await page.getByLabel('Research brief').inputValue(),
+    await page.getByLabel('Research direction').inputValue(),
     'A synthetic saved question for project switching.',
   );
   await page.reload();

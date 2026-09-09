@@ -16,7 +16,7 @@ try {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto(`http://127.0.0.1:${app.address().port}`);
-  await page.getByRole('heading', { name: 'Frame your question', exact: true }).waitFor();
+  await page.getByRole('heading', { name: 'Explore your research interest', exact: true }).waitFor();
   await page.getByRole('button', { name: 'New project', exact: true }).click();
   await page.getByLabel('Project title').fill('Feedback & learning: a first study');
   await page
@@ -27,7 +27,7 @@ try {
   await page.getByRole('button', { name: 'Create research notebook' }).click();
   await openTask(page, 'workspace');
   await page
-    .getByLabel('Research brief')
+    .getByLabel('Research direction')
     .fill(
       'Research question: How is feedback frequency associated with end-of-term scores among first-year students?\n\nPopulation: First-year university students.\n\nDesign: Secondary analysis of a permitted dataset.\n\nBoundary: This observational comparison cannot establish that feedback causes better outcomes.',
     );
@@ -63,7 +63,7 @@ try {
   await page
     .getByText('Local approval recorded. The next milestone is available.', { exact: true })
     .waitFor();
-  await page.getByRole('button', { name: '02 Evidence' }).click();
+  await page.getByRole('button', { name: '02 Literature & question' }).click();
   await openTask(page, 'sources');
   await page.getByLabel('Paper or resource title').fill('Illustrative source record');
   await page.getByLabel('Source URL').fill('https://example.org/study');
@@ -80,10 +80,10 @@ try {
   await page.getByRole('link', { name: 'Download readable report (.md)' }).click();
   const download = await downloadPromise;
   assert.equal(download.suggestedFilename(), 'researchguide-project.md');
-  await page.getByRole('button', { name: '✓ Question' }).click();
+  await page.getByRole('button', { name: '✓ Research interest' }).click();
   await openTask(page, 'workspace');
   await page
-    .getByLabel('Research brief')
+    .getByLabel('Research direction')
     .fill(
       'Updated research question and population. This change requires a fresh review of the current milestone and any approved downstream artifacts. Causal claims remain outside the scope of this study.',
     );
@@ -91,8 +91,8 @@ try {
   await page.getByText('Saved on this computer', { exact: true }).waitFor();
   await page.reload();
   await openTask(page, 'workspace');
-  await page.getByLabel('Research brief').waitFor();
-  assert.match(await page.getByLabel('Research brief').inputValue(), /Updated research question/);
+  await page.getByLabel('Research direction').waitFor();
+  assert.match(await page.getByLabel('Research direction').inputValue(), /Updated research question/);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('#notice').evaluate((node) => {
     node.textContent = '';

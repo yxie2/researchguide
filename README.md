@@ -25,15 +25,15 @@ This application intentionally listens on loopback only. It is a single-user loc
 
 The seven research steps are the main navigation. Each page now presents a vertical sequence of tasks, with one task expanded at a time; there is no separate row of tool tabs. Follow **Discuss → Write → Check → Review**, with specialized tasks embedded where needed:
 
-| Step             | Embedded work                                                                                                                             |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Question         | Discuss, write the brief, get mentor feedback, request review                                                                             |
-| Evidence         | Discuss, inspect sources, check claims, write the evidence map, get feedback, request review                                              |
-| Design           | Discuss, write the protocol, get methods feedback, check alignment, request review                                                        |
-| Data             | Discuss, import/profile data if appropriate, document decisions, check alignment, request review                                          |
-| Analysis         | Discuss, review and approve the analysis plan, run and inspect results, document reasoning, get feedback, check alignment, request review |
-| Interpretation   | Discuss, write conclusions, inspect supporting claims, check alignment, get feedback, request review                                      |
-| Research package | Discuss, assemble the report, check alignment, request final review, export                                                               |
+| Step                                              | Purpose and output                                                                                                                                       |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Explore your research interest                 | Agree a preliminary direction, motivation, reading priorities and practical constraints. No final question is required.                                  |
+| 2. Review the literature and refine your question | Synthesize inspected studies, concepts and theories; justify a feasible contribution; save the refined question and objectives. Hypotheses are optional. |
+| 3. Plan the study and methods                     | Select design, sampling, measures, data access/collection, analysis and safeguards from the refined question.                                            |
+| 4. Obtain and prepare your data                   | Obtain existing data or collect new material outside the app under the agreed protocol; document preparation, quality and deviations.                    |
+| 5. Analyze your data                              | Apply planned methods, inspect outputs and record uncertainty, checks and exploratory changes.                                                           |
+| 6. Interpret findings in context                  | Answer the refined question, relate findings to literature and theory, and explain alternatives and limitations.                                         |
+| 7. Write, review and share your research          | Assemble writing developed throughout, review the full report and prepare appropriate sharing materials.                                                 |
 
 **Your next action** explains a suggestion based on saved workflow state. These suggestions are deterministic navigation guidance; adaptive scientific conversation still comes from your configured model. **What carries forward** exposes saved documents from earlier steps. **Project materials** opens the shared source library, literature claim ledger, datasets and runs, consistency records, and project history without changing the selected research step.
 
@@ -61,7 +61,7 @@ Maintainers can regenerate both checked-in computations with `npm run build:demo
 
 New projects and milestones now open **Discuss this step with your guide**. Configure Ollama or a hosted API, then click **Start guiding me**, or type what you know. You do not need to fill in an artifact first.
 
-The guide uses your project, saved work, sources, and earlier answers to choose a focused follow-up question. Later milestones carry forward earlier artifacts, explanations, review status, and the most recent 12 conversation turns per earlier milestone. The saved research brief takes precedence over the original project interest. Open “What carries forward into this step” to inspect the earlier artifacts, then choose “Continue from earlier work”. Accepting a draft makes it available downstream; it does not grant supervisor approval. It explains gaps and can propose a complete milestone draft. Ask it to revise anything inaccurate, then click **Accept draft into notebook** when it reflects your decisions. Acceptance saves a versioned artifact; it preserves your own explanation and renews affected review requirements. Outdated proposals cannot overwrite newer artifacts.
+The guide uses your project, saved work, sources, and earlier answers to choose a focused follow-up question. Later milestones carry forward earlier artifacts, explanations, review status, and the most recent 12 conversation turns per earlier milestone. The initial research direction is provisional. For later steps, an explicitly refined question in the saved literature review takes precedence over that direction; if no refinement is stated, the guide asks for clarification. Open “What carries forward into this step” to inspect the earlier artifacts, then choose “Continue from earlier work”. Accepting a draft makes it available downstream; it does not grant supervisor approval. It explains gaps and can propose a complete milestone draft. Ask it to revise anything inaccurate, then click **Accept draft into notebook** when it reflects your decisions. Acceptance saves a versioned artifact; it preserves your own explanation and renews affected review requirements. Outdated proposals cannot overwrite newer artifacts.
 
 Open **Write and explain your decisions** to explain the reasoning in your own words and request supervisor review. The conversational guide is available across all seven milestones; the original three-role feedback remains under **Get mentor feedback**. Each conversational turn uses one model call with a validated structured response. It does not independently search, execute analyses, approve work, or certify rigor.
 
@@ -72,7 +72,7 @@ Example: tell the guide, “I want to study AI use and learning, but I only have
 ## Try the complete workflow
 
 1. Choose **New project** and describe what you want to investigate.
-2. In **Write and explain your decisions**, use the outline or write your own research brief. Explain your choices in your own words.
+2. In **Write and explain your decisions**, use the outline or write your initial research direction. Explain your choices in your own words.
 3. Open **Get mentor feedback** and run the demo guide. Inspect the coordinator, specialist, reviewer, and next-step messages.
 4. Save your work and request a supervisor review. The minimum lengths check completeness only, not rigor or understanding.
 5. In **Supervisor checkpoint**, enter a name and a substantive note to approve or request changes. This is an explicitly labeled local role demonstration, not an authenticated supervisor account.
@@ -98,13 +98,13 @@ Original PDFs live in `data/papers/`, named by SHA-256. **Export project → Dow
 
 ## Check consistency across the study
 
-Open **Check alignment with the study** in Design or later steps, or use **Project materials → Cross-step review records** and click **Run consistency review**. Save artifacts in at least two of the reviewed milestones first. The app compares the current research brief, design, data report, analysis record, interpretation (conclusions), and research package, including student explanations. It uses the saved research brief rather than the initial broad project interest. Unsaved workspace edits are saved before the request.
+Open **Check alignment with the study** in Design or later steps, or use **Project materials → Cross-step review records** and click **Run consistency review**. Save artifacts in at least two of the reviewed milestones first. The app compares all seven documents: initial direction, literature review and refined question, design, data preparation, analysis, interpretation and report, including student explanations. It distinguishes the preliminary direction from the refined question and treats justified refinement as normal research development. Unsaved workspace edits are saved before the request.
 
-The model looks for mismatched populations or measurements, causal claims unsupported by the design, unexplained analysis-plan deviations, conclusions that conflict with estimates or uncertainty, and overstated generalizability. It returns up to six priority findings. Each mismatch must quote at least two different milestones, and the server verifies every quotation against the exact saved text. Missing question, design, analysis, or interpretation artifacts are explicitly listed as a partial review. No findings means no issue was identified by the model, not that the study is scientifically sound.
+The model looks for mismatched populations or measurements, causal claims unsupported by the design, unexplained analysis-plan deviations, conclusions that conflict with estimates or uncertainty, and overstated generalizability. It returns up to six priority findings. Each mismatch must quote at least two different milestones, and the server verifies every quotation against the exact saved text. Missing initial direction, literature/refined question, design, analysis, or interpretation documents are explicitly listed as a partial review. No findings means no issue was identified by the model, not that the study is scientifically sound.
 
 Inspect the quoted passages, open their linked milestone workspaces, and record agreement, disagreement, or unresolved status with your own explanation. A researcher response does not automatically fix a finding or grant supervisor approval. Edit the relevant artifacts and run a fresh review. Changes to any reviewed artifact or explanation make an old report outdated; unrelated source changes or recording a response do not. Decisions can be added only to the newest report while it still matches the saved work.
 
-Reports preserve the reviewed text and versions, model information, findings, and local unauthenticated researcher responses. History remains visible and is included in Markdown/JSON exports. Conversational guidance receives the latest report, labeled current or outdated. Limits: 20 reports per notebook and 20 responses per finding. Each run makes one model call and sends the six milestone artifacts and explanations to the configured provider. It does not inspect external documents or independently rerun calculations. When available, it also compares the latest three recorded successful R output summaries; it does not guarantee an exhaustive audit.
+Reports preserve the reviewed text and versions, model information, findings, and local unauthenticated researcher responses. History remains visible and is included in Markdown/JSON exports. Conversational guidance receives the latest report, labeled current or outdated. Limits: 20 reports per notebook and 20 responses per finding. Each run makes one model call and sends the seven milestone artifacts and explanations to the configured provider. It does not inspect external documents or independently rerun calculations. When available, it also compares the latest three recorded successful R output summaries; it does not guarantee an exhaustive audit.
 
 ## Run a reproducible analysis
 
@@ -156,7 +156,7 @@ Project text and up to 20 source records are sent to your configured endpoint. H
 
 ## Implemented versus planned
 
-| Available in v0.9                                            | Planned, not implemented                              |
+| Available in v0.10                                           | Planned, not implemented                              |
 | ------------------------------------------------------------ | ----------------------------------------------------- |
 | Seven milestone templates and worked examples                | Validated adaptive teaching and competence assessment |
 | Student explanations and supervisor checkpoints              | Authenticated roles and remote collaboration          |
@@ -196,6 +196,8 @@ Node HTTP server (loopback only)
 No arbitrary code execution or automatic external publication is implemented. Browser content is rendered with text nodes rather than interpreted HTML. The server uses a strict static-file allowlist, request-size limits, origin/host checks, and a content security policy.
 
 ## Data and backup
+
+Existing notebooks retain their saved content and internal milestone IDs. The labels and guidance now distinguish initial direction from the literature-informed question. Analysis plans created before v0.10 lack a literature snapshot and require renewed planning/approval; previous execution records remain available. Old consistency reports likewise need a new seven-step comparison. Literature or question changes preserve the existing downstream invalidation behavior.
 
 Use the four project actions in the toolbar:
 

@@ -106,7 +106,7 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.screenshot({ path: 'docs/images/conversation.png', fullPage: true });
-  await page.getByRole('button', { name: '02 Evidence' }).click();
+  await page.getByRole('button', { name: '02 Literature & question' }).click();
   await page.getByText('What carries forward into this step', { exact: true }).waitFor();
   await page.getByRole('button', { name: 'Continue from earlier work', exact: true }).click();
   await page.getByText('Your guide has responded.', { exact: true }).waitFor();

@@ -1,4 +1,4 @@
-import { workflowFor, recommendTask } from './workflow-flow.js';
+import { workflowFor, recommendTask, studyContextCurrent } from './workflow-flow.js';
 const $ = (selector) => document.querySelector(selector);
 const root = $('#app');
 let project,
@@ -1129,11 +1129,7 @@ function executionPanel() {
   const dataset = datasets.find((d) => d.id === analysisDatasetId) || datasets.at(-1);
   const availablePlans = plans.filter((p) => p.datasetId === dataset?.id);
   const plan = availablePlans.find((p) => p.id === analysisPlanId) || availablePlans.at(-1);
-  const current =
-    plan &&
-    plan.contextVersions.every(
-      (s) => project.milestones.find((m) => m.id === s.id).version === s.version,
-    );
+  const current = plan && studyContextCurrent(project, plan);
   const approval = plan?.approvals.at(-1);
   const select = (id, values, value, onChange) => {
     const node = el(
@@ -1216,7 +1212,7 @@ function executionPanel() {
           el(
             'p',
             { className: 'small muted' },
-            'CSV files stay on this computer and are included in JSON exports and reproduction bundles. Plan generation sends column names, types, counts, and saved question/design/data text to your model; individual rows are not sent for planning.',
+            'CSV files stay on this computer and are included in JSON exports and reproduction bundles. Plan generation sends column names, types, counts, and saved direction/literature/design/data text to your model; individual rows are not sent for planning.',
           ),
           el('button', { type: 'submit', className: 'button', disabled: busy }, 'Import CSV'),
         ),
@@ -1376,7 +1372,7 @@ function executionPanel() {
           'p',
           { className: 'status' },
           current
-            ? 'Matches question, design and data report'
+            ? 'Matches direction, literature, design and data report'
             : 'Outdated — create a new plan after reviewing your changes',
         ),
         el(
@@ -1497,13 +1493,11 @@ function executionPanel() {
               { className: 'small' },
               `${run.rVersion || run.engine} · ${date(run.finishedAt)}`,
             ),
-            !run.contextVersions.every(
-              (s) => project.milestones.find((m) => m.id === s.id).version === s.version,
-            ) &&
+            !studyContextCurrent(project, run) &&
               el(
                 'p',
                 { className: 'note warn' },
-                'Question, design or data report changed since this plan. This is a historical run.',
+                'The study context changed or this plan predates literature tracking. Keep this historical run and review a new plan before rerunning.',
               ),
             run.status === 'succeeded' && [
               el('h4', {}, 'Observation counts'),
@@ -1579,11 +1573,12 @@ function executionPanel() {
   );
 }
 function consistencyPanel() {
-  const ids = ['question', 'design', 'data', 'analysis', 'interpretation', 'writing'];
+  const ids = ['question', 'evidence', 'design', 'data', 'analysis', 'interpretation', 'writing'];
   const reports = project.consistencyReports || [];
   const report = reports.find((r) => r.id === selectedConsistencyId) || reports.at(-1);
   const currentReport =
     report &&
+    report.snapshot.some((s) => s.id === 'evidence') &&
     Boolean(report.snapshot.find((s) => s.id === 'execution')) ===
       Boolean((project.analysisRuns || []).some((r) => r.status === 'succeeded')) &&
     report.snapshot.every((s) => {
@@ -1632,7 +1627,7 @@ function consistencyPanel() {
         { className: 'small muted' },
         mode === 'demo'
           ? 'Connect a model in LLM settings to run a review.'
-          : `This sends the six saved milestone artifacts and explanations to ${modelSettings.baseUrl}. Unsaved workspace edits will be saved first. Recorded R output summaries are included when available. No source PDFs or external files are inspected.`,
+          : `This sends the seven saved milestone artifacts and explanations to ${modelSettings.baseUrl}. Unsaved workspace edits will be saved first. Recorded R output summaries are included when available. No source PDFs or external files are inspected.`,
       ),
       !report &&
         el(
@@ -2778,7 +2773,24 @@ function unifiedWorkflow(panels) {
           : tasks.find(([id]) => id === suggestion.id)?.[1],
       ),
       el('p', {}, suggestion.reason),
+      el(
+        'p',
+        { className: 'small' },
+        selected === 'question'
+          ? 'This first checkpoint agrees a direction for reading, not a final question. Refine the question in the literature step.'
+          : selected === 'evidence'
+            ? 'Here, literature means prior studies and theory—not results from your own study. Save your refined question in this document before planning the study.'
+            : 'Research is iterative: revisit earlier steps when reading, feasibility or findings justify a change. Writing can develop throughout.',
+      ),
       button('Go to suggested action', () => selectTask(suggestion.id), 'quiet'),
+      selected === 'evidence' &&
+        button('Revisit the initial direction', () => navigate('question'), 'quiet'),
+      selected === 'data' &&
+        el(
+          'p',
+          { className: 'small' },
+          'Obtain or collect data outside the app under your protocol and permissions. CSV profiling is available here; interviews, fieldwork and advanced preparation are not automated.',
+        ),
       el(
         'p',
         { className: 'small muted' },

@@ -64,6 +64,12 @@ const flows = {
   ],
 };
 export const workflowFor = (id) => flows[id];
+export const studyContextCurrent = (project, record) =>
+  ['question', 'evidence', 'design', 'data'].every(
+    (id) =>
+      record.contextVersions.find((s) => s.id === id)?.version ===
+      project.milestones.find((m) => m.id === id).version,
+  );
 export function recommendTask(project, id, provider) {
   const m = project.milestones.find((s) => s.id === id);
   if (m.status === 'approved')
@@ -96,7 +102,8 @@ export function recommendTask(project, id, provider) {
   if (id === 'evidence' && !project.sources.length)
     return {
       id: 'sources',
-      reason: 'The evidence map needs an inspected source passage before it can be submitted.',
+      reason:
+        'The literature review needs an inspected source passage before it can be submitted. Use reading to develop and justify the refined question.',
     };
   if (!m.explanation.trim())
     return {
@@ -107,11 +114,7 @@ export function recommendTask(project, id, provider) {
     id === 'analysis' &&
     (project.datasets || []).length &&
     !(project.analysisRuns || []).some(
-      (r) =>
-        r.status === 'succeeded' &&
-        r.contextVersions.every(
-          (s) => project.milestones.find((m) => m.id === s.id)?.version === s.version,
-        ),
+      (r) => r.status === 'succeeded' && studyContextCurrent(project, r),
     )
   )
     return {
@@ -123,11 +126,12 @@ export function recommendTask(project, id, provider) {
   if (
     workflowFor(id).some(([task]) => task === 'consistency') &&
     report &&
-    report.snapshot.some((s) =>
-      s.id === 'execution'
-        ? s.version !== (project.analysisRuns || []).length
-        : project.milestones.find((m) => m.id === s.id)?.version !== s.version,
-    )
+    (!report.snapshot.some((s) => s.id === 'evidence') ||
+      report.snapshot.some((s) =>
+        s.id === 'execution'
+          ? s.version !== (project.analysisRuns || []).length
+          : project.milestones.find((m) => m.id === s.id)?.version !== s.version,
+      ))
   )
     return {
       id: 'consistency',

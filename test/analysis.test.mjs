@@ -90,6 +90,20 @@ test('CSV profiles preserve input identity and reject malformed or unsafe select
   );
   assert.throws(() => approvedRunInput(p, plan.id, 'none'), /Approve/);
   const approval = approve(p, plan);
+  const refined = structuredClone(p);
+  refined.milestones.find((m) => m.id === 'evidence').version += 1;
+  assert.equal(
+    planCurrent(refined, plan),
+    false,
+    'Refining the literature-informed question makes the analysis plan stale',
+  );
+  const legacy = structuredClone(plan);
+  legacy.contextVersions = legacy.contextVersions.filter((s) => s.id !== 'evidence');
+  assert.equal(
+    planCurrent(p, legacy),
+    false,
+    'Legacy plans need renewed review of literature context',
+  );
   assert.match(approvedRunInput(p, plan.id, approval).csv, /y,x/);
   const changed = structuredClone(p);
   changed.analysisPlans[0].outcome = 0;

@@ -27,7 +27,12 @@ test('suggestions distinguish unaccepted drafts, missing run evidence and stale 
   m.conversation[0].accepted = true;
   p.datasets = [{ id: 'D1' }];
   assert.equal(recommendTask(p, 'analysis', 'api').id, 'execution');
-  p.analysisRuns = [{ status: 'succeeded', contextVersions: [{ id: 'design', version: 0 }] }];
+  p.analysisRuns = [
+    {
+      status: 'succeeded',
+      contextVersions: ['question', 'evidence', 'design', 'data'].map((id) => ({ id, version: 0 })),
+    },
+  ];
   p.consistencyReports = [{ snapshot: [{ id: 'question', version: 99 }] }];
   assert.equal(recommendTask(p, 'analysis', 'api').id, 'consistency');
   assert.equal(m.status, 'draft');

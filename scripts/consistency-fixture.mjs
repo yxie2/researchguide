@@ -2,6 +2,8 @@ import { createProject } from '../lib/workflow.mjs';
 export function consistencyFixture() {
   const p = createProject('Synthetic consistency study', 'Is study time associated with scores?');
   const artifacts = {
+    evidence:
+      'Literature review: prior achievement may confound study time and scores. Refined question: among first-year students in one course, is weekly study time associated with final exam scores? This synthetic fixture makes no verified novelty claim.',
     question:
       'Among first-year students in one course, is weekly study time associated with final exam scores?',
     design:

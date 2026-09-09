@@ -7,10 +7,10 @@ const business = new URLSearchParams(location.search).get('case') === 'business'
 const key = business ? 'researchguide-business-case-v1' : 'researchguide-teaching-case-v1';
 const researcher = () => data.researcher || 'Maya';
 const documentNames = {
-  question: 'research brief',
-  evidence: 'evidence map',
+  question: 'research direction',
+  evidence: 'literature review and research question',
   design: 'study protocol',
-  data: 'data quality report',
+  data: 'data preparation and quality report',
   analysis: 'analysis record',
   interpretation: 'conclusions and limitations',
   writing: 'research report',

@@ -6,7 +6,7 @@
   "stages": [
     {
       "id": "question",
-      "title": "Frame the question",
+      "title": "Explore a research interest",
       "where": "Discuss this step with your guide → Write and explain your decisions → Supervisor checkpoint",
       "input": "Maya starts with an interest in study habits and an eight-row synthetic class dataset.",
       "turns": [
@@ -16,40 +16,40 @@
         ],
         [
           "Methods mentor · simulated agent",
-          "First, what do you actually measure, and did anyone assign the study time?"
+          "Let’s begin with the problem and why it matters. We do not need a final research question yet. What interests you, and what do you need to learn from existing research?"
         ],
         [
           "Maya · researcher",
-          "Weekly self-reported study hours and a quiz score out of 15. Nobody assigned study hours. These are invented records for practice."
+          "I’m interested in study habits and learning. A possible teaching dataset has self-reported hours and quiz scores, but I need to understand what those measures can establish."
         ],
         [
           "Methods mentor · simulated agent",
-          "Then ask about an association, not an improvement caused by studying. Limit the question to this sample and this quiz. A weak or negative relationship must also be an acceptable answer."
+          "Study habits and learning give us a preliminary direction. In the literature review, examine how studies measure learning, what theories they use and what confounding they address before settling on a question."
         ],
         [
           "Maya · researcher",
-          "My question is: In this synthetic class sample, how are weekly study hours associated with quiz scores? Prior knowledge and motivation may explain the relationship. I accept this revised draft."
+          "I accept an initial research direction, not a final question. I will read about study time, prior achievement and learning measures, then refine an answerable question. I still need to justify the scope and contribution."
         ]
       ],
-      "artifact": "Research question: In this synthetic class sample, how are weekly self-reported study hours associated with quiz scores?\nPopulation: Eight fictional first-year students in one fictional class.\nExposure: Study hours in the week before the quiz.\nOutcome: Quiz score, 0–15 points.\nData: Author-created synthetic records; no real participants or personal data.\nBoundary: A descriptive, unadjusted association. No causal claim or inference about universities generally.",
-      "understanding": "My measurements can describe an association, but cannot tell me what would happen if the same student were made to study longer.",
-      "review": "Dr. Rivera · fictional supervisor: Accept the bounded question for this exercise. Real work also requires confirmation of access, ethics requirements and an adequate design.",
-      "carry": "The population, variable definitions and noncausal scope now constrain the evidence search, design and final claims.",
+      "artifact": "Initial research direction: Study habits and learning in a fictional university class.\nMotivation: Understand how students study and how their learning is assessed.\nTentative interest: Whether time spent studying relates to learning outcomes.\nReading priorities: Key concepts, possible mechanisms, outcome definitions, selection and alternative explanations.\nPossible access: Synthetic records are available for the tutorial; a real project would need access and permissions.\nOpen decisions: The refined question, scope, literature contribution and design will follow reading. No novel gap or causal conclusion is claimed.",
+      "understanding": "This direction is a starting point. The literature may change my concepts, scope and question; supervisor feedback here does not freeze them.",
+      "review": "Fictional supervisor: The initial direction is suitable for exploratory reading. A final question, confirmed dataset and research gap are not required at this checkpoint.",
+      "carry": "Carry the motivation and open questions into the literature review. Return to this direction if the reading changes the scope.",
       "challenge": {
-        "question": "Which question matches the available design?",
+        "question": "What should this first step establish?",
         "choices": [
-          "Does extra studying cause better learning?",
-          "How are recorded study hours associated with quiz scores?"
+          "A final question and a proven research gap before reading",
+          "An initial direction and the questions the literature review should explore"
         ],
         "correct": 1,
-        "feedback": "The second question matches an observational comparison. Writing a causal question does not make the data causal."
+        "feedback": "Agree a useful direction first. Reading then helps refine the question and assess whether a contribution is defensible."
       }
     },
     {
       "id": "evidence",
-      "title": "Read and challenge the evidence",
+      "title": "Review literature and refine the question",
       "where": "Inspect sources and save passages → Check claims against source passages → Write and explain your decisions",
-      "input": "The saved question determines the concepts to search: study time, quiz performance and observational university studies.",
+      "input": "The initial direction is study habits and learning. Reading helps define concepts, examine explanations and refine the question; this is existing literature, not results from the new study.",
       "turns": [
         [
           "Maya · researcher",
@@ -70,6 +70,10 @@
         [
           "Maya · researcher",
           "I reject my causal claim. I record a narrower claim and mark its support as limited to the quoted teaching passage. A real project needs verified papers and a documented search."
+        ],
+        [
+          "Maya · researcher",
+          "After considering those concepts and limitations, I refine my question: In this synthetic class sample, how are weekly self-reported study hours associated with quiz scores? This tiny synthetic exercise illustrates methods, not a verified new contribution to the literature."
         ]
       ],
       "sources": [
@@ -86,14 +90,23 @@
           "limitation": "Illustrates a competing explanation; it is not real empirical evidence."
         }
       ],
-      "artifact": "Search plan for real work: Search appropriate scholarly databases for (study time OR study hours) AND (quiz OR academic performance) AND university; record database, date, query and inclusion decisions. No real search was performed in this demo.\nS1: A fictional unadjusted association; inspected passage does not justify causation.\nS2: A fictional example challenging the simple story through prior-achievement adjustment.\nClaim C1: S1 describes an association in its fictional sample. Decision: Accept this narrow reading only.\nRejected claim: S1 proves study hours improve learning.\nGap: This exercise explores a small dataset; it establishes no novel literature gap.",
-      "understanding": "Counting positive passages is not an evidence synthesis. Design differences and competing explanations matter more than whether a passage agrees with me.",
-      "review": "Fictional supervisor: The evidence logic is adequate for a tutorial. These excerpts cannot be cited in a real manuscript; conduct and verify a real literature search.",
-      "carry": "Possible confounding becomes an explicit protocol limitation and later reappears in the interpretation."
+      "artifact": "Search plan for real work: Search appropriate scholarly databases for (study time OR study hours) AND (quiz OR academic performance) AND university; record database, date, query and inclusion decisions. No real search was performed in this demo.\nS1: A fictional unadjusted association; inspected passage does not justify causation.\nS2: A fictional example challenging the simple story through prior-achievement adjustment.\nClaim C1: S1 describes an association in its fictional sample. Decision: Accept this narrow reading only.\nRejected claim: S1 proves study hours improve learning.\nGap: This exercise explores a small dataset; it establishes no novel literature gap.\nConceptual framing: Study time is a possible correlate of performance; prior achievement and motivation are rival explanations. A single quiz does not represent all learning.\nRefined research question: In this synthetic class sample, how are weekly self-reported study hours associated with quiz scores?\nObjective: Describe an unadjusted association with uncertainty, without making a causal claim.\nContribution: A worked teaching example only; no verified literature gap or empirical novelty.\nHypotheses: No confirmatory hypothesis test or preregistration is claimed.\nRefinement: Narrowed a broad practical interest to measured variables in one synthetic sample.",
+      "understanding": "Reading changed a broad interest into a bounded question by clarifying concepts, measurements and alternative explanations. Real work would need verified literature and a defensible contribution.",
+      "review": "Fictional supervisor: The evidence logic is adequate for a tutorial. These excerpts cannot be cited in a real manuscript; conduct and verify a real literature search. The checkpoint now considers the explicit refined question, concepts and feasibility; it does not certify a novel gap from invented sources.",
+      "carry": "The explicit refined question and conceptual limitations now guide the study protocol. If further reading changes them, revise this step and renew affected downstream reviews.",
+      "challenge": {
+        "question": "Which question matches the available design?",
+        "choices": [
+          "Does extra studying cause better learning?",
+          "How are recorded study hours associated with quiz scores?"
+        ],
+        "correct": 1,
+        "feedback": "The second question matches an observational comparison. Writing a causal question does not make the data causal."
+      }
     },
     {
       "id": "design",
-      "title": "Choose the design before the result",
+      "title": "Plan the study and methods",
       "where": "Discuss this step with your guide → Write and explain your decisions → Supervisor checkpoint",
       "input": "The saved question asks for an association; the evidence map identifies prior achievement as a possible confounder.",
       "turns": [
@@ -122,9 +135,9 @@
     },
     {
       "id": "data",
-      "title": "Inspect the data and document exclusions",
+      "title": "Obtain and prepare the data",
       "where": "Data / Analysis tasks → Import a permitted CSV dataset → Write and explain your decisions",
-      "input": "The protocol specifies two numeric variables and complete-case analysis.",
+      "input": "The protocol specifies two numeric variables and complete-case analysis. In this example the data are already available synthetic records; new data collection would take place outside the app after the relevant permissions and protocol decisions.",
       "turns": [
         [
           "Maya · researcher",
@@ -199,7 +212,7 @@
     },
     {
       "id": "interpretation",
-      "title": "Catch an unsupported conclusion",
+      "title": "Interpret findings in context",
       "where": "Write and explain your decisions → Consistency review → Researcher response",
       "input": "The question and protocol are noncausal. R1 estimates an unadjusted slope from six synthetic complete cases.",
       "turns": [
@@ -240,9 +253,9 @@
     },
     {
       "id": "writing",
-      "title": "Assemble the complete research package",
+      "title": "Write, review and share the research",
       "where": "Write and explain your decisions → Supervisor checkpoint → Export project → Readable report or project backup; Data / Analysis tasks → Download reproduction bundle",
-      "input": "The final package combines the bounded question, source limitations, frozen decisions, actual R outputs and revised interpretation.",
+      "input": "The final package combines the bounded question, source limitations, frozen decisions, actual R outputs and revised interpretation. Writing and literature review can begin earlier and continue throughout; this phase assembles and reviews the complete package.",
       "turns": [
         ["Maya · researcher", "Can we turn this into a paper now?"],
         [
@@ -268,8 +281,9 @@
       "carry": "Download the materials below, then return to your notebook. To practice execution, import the synthetic CSV under Run analysis and review your own plan before running it."
     }
   ],
+  "overview": "Maya starts with a practical interest, reads teaching excerpts to clarify concepts and refine a question, plans a study, prepares synthetic data, reviews an R analysis, interprets its limits and assembles a report. The walkthrough shows a suggested route; real research involves revisiting earlier decisions.",
   "csv": "study_hours,quiz_score\n1,2\n2,4\n3,5\n4,8\n5,9\n6,12\n7,NA\n,10\n",
-  "builtAt": "2026-09-09T17:44:49.376Z",
+  "builtAt": "2026-09-09T18:44:20.700Z",
   "computation": {
     "dataset": {
       "id": "D1",
@@ -294,7 +308,7 @@
         }
       ],
       "rowCount": 8,
-      "at": "2026-09-09T17:44:46.075Z"
+      "at": "2026-09-09T18:44:17.735Z"
     },
     "plan": {
       "id": "P1",
@@ -314,6 +328,10 @@
           "version": 1
         },
         {
+          "id": "evidence",
+          "version": 1
+        },
+        {
           "id": "design",
           "version": 1
         },
@@ -323,24 +341,24 @@
         }
       ],
       "model": null,
-      "at": "2026-09-09T17:44:46.075Z",
+      "at": "2026-09-09T18:44:17.735Z",
       "approvals": [
         {
-          "id": "8fc84ac0-d083-48ca-bc8c-a9787f1f4235",
-          "planHash": "e83372202e0b3275749d9aeb8dfbd81a026cd888ca483250ca340502700612f5",
+          "id": "36bc8f0c-e033-47b5-9ef8-a3c5c8b1ff4b",
+          "planHash": "2cf2ef8a5e5f2937169e7b15baeb82aa2f5ce4d962a197e4583059d283f86385",
           "name": "Demo build · synthetic data only",
           "note": "The tutorial author reviewed the fixed template and synthetic variable mapping. This build approval is not a real researcher or supervisor approval.",
-          "at": "2026-09-09T17:44:46.075Z",
+          "at": "2026-09-09T18:44:17.736Z",
           "authenticated": false
         }
       ],
-      "planHash": "e83372202e0b3275749d9aeb8dfbd81a026cd888ca483250ca340502700612f5"
+      "planHash": "2cf2ef8a5e5f2937169e7b15baeb82aa2f5ce4d962a197e4583059d283f86385"
     },
     "run": {
       "id": "R1",
       "planId": "P1",
-      "planHash": "e83372202e0b3275749d9aeb8dfbd81a026cd888ca483250ca340502700612f5",
-      "approvalId": "8fc84ac0-d083-48ca-bc8c-a9787f1f4235",
+      "planHash": "2cf2ef8a5e5f2937169e7b15baeb82aa2f5ce4d962a197e4583059d283f86385",
+      "approvalId": "36bc8f0c-e033-47b5-9ef8-a3c5c8b1ff4b",
       "datasetId": "D1",
       "datasetHash": "915cec4f2b06f820cda8fc75c8647645eb5ad477f9eaf8aaebef5ea3e2cff876",
       "scriptHash": "9535d21718a770574a4b775d96f23bd501df0aad205d18d8c5c883e3b2de9583",
@@ -352,6 +370,10 @@
           "version": 1
         },
         {
+          "id": "evidence",
+          "version": 1
+        },
+        {
           "id": "design",
           "version": 1
         },
@@ -360,8 +382,8 @@
           "version": 1
         }
       ],
-      "startedAt": "2026-09-09T17:44:46.076Z",
-      "finishedAt": "2026-09-09T17:44:49.375Z",
+      "startedAt": "2026-09-09T18:44:17.736Z",
+      "finishedAt": "2026-09-09T18:44:20.699Z",
       "status": "succeeded",
       "engine": "webR 0.6.0",
       "rVersion": "R version 4.6.0 (2026-04-24)",

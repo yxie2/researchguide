@@ -29,7 +29,7 @@ try {
   const original = await (await fetch(`${base}/api/project`)).json();
   await page.goto(base);
   await openTask(page, 'workspace');
-  await page.getByLabel('Research brief').fill('Unsaved work must survive exploring the demo.');
+  await page.getByLabel('Research direction').fill('Unsaved work must survive exploring the demo.');
   const popup = context.waitForEvent('page');
   await page.getByRole('link', { name: 'Explore demo case' }).click();
   const demo = await popup;
@@ -113,14 +113,14 @@ try {
   if (business) {
     assert.equal((await demo.locator('#demo').textContent()).includes('Maya'), false);
     await demo.getByRole('link', { name: 'Education · Study habits', exact: true }).click();
-    await demo.getByRole('heading', { name: 'Frame the question', exact: true }).waitFor();
+    await demo.getByRole('heading', { name: 'Explore a research interest', exact: true }).waitFor();
     assert.equal(await demo.locator('.demo-transcript article').count(), 2);
     await demo.getByRole('link', { name: 'Business · Training and sales', exact: true }).click();
     await demo.getByRole('heading', { name: teachingCase.title, exact: true }).waitFor();
     await demo.getByText('0 of 7 phase conversations explored', { exact: false }).waitFor();
   }
   assert.equal(
-    await page.getByLabel('Research brief').inputValue(),
+    await page.getByLabel('Research direction').inputValue(),
     'Unsaved work must survive exploring the demo.',
   );
   assert.deepEqual(await (await fetch(`${base}/api/project`)).json(), original);

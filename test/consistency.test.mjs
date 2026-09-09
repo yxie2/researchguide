@@ -37,7 +37,7 @@ test('consistency report binds findings to exact saved text and becomes stale af
   assert.equal(report.findings.length, 2);
   assert.deepEqual(report.missing, []);
   assert.equal(state.calls.length, 1);
-  assert.equal(JSON.parse(state.calls[0].messages[1].content).milestones.length, 6);
+  assert.equal(JSON.parse(state.calls[0].messages[1].content).milestones.length, 7);
   p = appendConsistency(p, report);
   assert.equal(consistencyIsCurrent(p, report), true);
   const action = {

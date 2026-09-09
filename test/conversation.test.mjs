@@ -114,11 +114,32 @@ test('conversation remembers answers, persists, and accepts a draft through norm
   assert.equal(handoff.previousMilestones[0].recentConversation[1].draftAccepted, true);
   assert.notEqual(handoff.previousMilestones[0].status, 'approved');
   assert.equal(handoff.conversation.length, 0);
+  r = await post('/api/action', {
+    type: 'save',
+    stageId: 'evidence',
+    revision: 4,
+    artifact:
+      'Literature synthesis and refined question: describe grade variation within one course; no claim about AI use.',
+    explanation: 'Reading narrowed the initial direction to measurements actually available.',
+  });
+  assert.equal(r.status, 200);
+  r = await post('/api/conversation', {
+    stageId: 'design',
+    question: 'Plan from the refined question',
+    revision: 5,
+    settingsRevision: 0,
+  });
+  assert.equal(r.status, 200);
+  assert.match(
+    JSON.parse(calls.at(-1).messages[1].content).literatureAndRefinedQuestion,
+    /describe grade variation/,
+  );
+  assert.match(calls.at(-1).messages[0].content, /in preference to the initial direction/);
   malformed = true;
   r = await post('/api/conversation', {
     stageId: 'question',
     question: 'Continue',
-    revision: 4,
+    revision: 6,
     settingsRevision: 0,
   });
   assert.equal(r.status, 502);
@@ -126,7 +147,7 @@ test('conversation remembers answers, persists, and accepts a draft through norm
   app = await createApp({ dataDir: dir });
   await new Promise((r) => app.listen(0, '127.0.0.1', r));
   data = await (await fetch(`http://127.0.0.1:${app.address().port}/api/project`)).json();
-  assert.equal(data.project.revision, 4);
+  assert.equal(data.project.revision, 6);
   assert.equal(data.project.milestones[0].conversation.length, 2);
   assert.equal(data.project.milestones[0].conversation[1].accepted, true);
 });
