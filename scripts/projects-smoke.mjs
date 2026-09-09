@@ -17,7 +17,9 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(base);
   await openTask(page, 'workspace');
-  await page.getByLabel('Research direction').fill('A synthetic saved question for project switching.');
+  await page
+    .getByLabel('Research direction')
+    .fill('A synthetic saved question for project switching.');
   await page.getByRole('button', { name: 'Save your work', exact: true }).click();
   await page.getByText('Saved on this computer', { exact: true }).waitFor();
   await page.getByRole('button', { name: 'Export project', exact: true }).click();
@@ -68,7 +70,7 @@ try {
   await page.reload();
   await page.getByRole('button', { name: 'Open project', exact: true }).click();
   await page.locator('.saved-project').nth(2).waitFor();
-  assert.equal(await page.locator('.saved-project').count(), 3);
+  assert.equal(await page.locator('.saved-project:not(.demo-project)').count(), 3);
   await page.screenshot({ path: 'docs/images/projects.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);

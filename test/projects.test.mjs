@@ -6,7 +6,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { createApp } from '../server.mjs';
 import { createProject } from '../lib/workflow.mjs';
-import { parseBackup } from '../lib/projects.mjs';
+import { parseBackup, savedProjects, trashProject } from '../lib/projects.mjs';
 
 async function setup(t, initial) {
   const dataDir = await mkdtemp(path.join(os.tmpdir(), 'researchguide-projects-'));
@@ -29,6 +29,113 @@ async function setup(t, initial) {
       }),
   };
 }
+
+test('project management renames, deletes all listed revisions and protects demos', async (t) => {
+  const { get, post, dataDir } = await setup(t);
+  let p = (await get('/api/project')).project;
+  const firstId = p.id;
+  const manage = (action, target, extra = {}) =>
+    post(`/api/projects/${action}`, {
+      id: target.id,
+      revision: p.revision,
+      targetRevision: target.revision,
+      ...extra,
+    });
+  let response = await manage('rename', p, { title: 'Renamed study' });
+  assert.equal(response.status, 200);
+  p = (await response.json()).project;
+  assert.equal(p.title, 'Renamed study');
+  const first = structuredClone(p);
+  p = (await (await post('/api/new', { title: 'Keep this study', revision: p.revision })).json())
+    .project;
+  response = await manage('rename', first, { title: 'Archived study renamed' });
+  assert.equal(response.status, 200);
+  let list = (await response.json()).projects;
+  let archived = list.find((s) => s.id === firstId);
+  assert.equal(archived.title, 'Archived study renamed');
+  assert.equal((await manage('delete', first, { confirmTitle: first.title })).status, 409);
+  assert.equal((await manage('delete', archived, { confirmTitle: 'wrong title' })).status, 400);
+  assert.equal((await manage('delete', archived, { confirmTitle: archived.title })).status, 200);
+  assert.ok(!(await get('/api/projects')).projects.some((s) => s.id === firstId));
+  assert.equal(
+    (await post('/api/projects/open', { id: firstId, revision: p.revision })).status,
+    404,
+  );
+  const recovery = JSON.parse(
+    await readFile(path.join(dataDir, 'trash', firstId, 'project.json'), 'utf8'),
+  );
+  assert.equal(recovery.title, archived.title);
+  const oldId = p.id,
+    oldRevision = p.revision;
+  response = await manage('delete', p, { confirmTitle: p.title });
+  assert.equal(response.status, 200);
+  p = (await response.json()).project;
+  assert.notEqual(p.id, oldId);
+  assert.ok(p.revision > oldRevision);
+  assert.equal((await get('/api/projects')).projects.length, 1);
+  assert.equal(
+    (
+      await post('/api/action', {
+        type: 'save',
+        revision: oldRevision,
+        stageId: 'question',
+        artifact: 'stale',
+      })
+    ).status,
+    409,
+  );
+  for (const id of ['maya-first-study', 'alex-business-study']) {
+    assert.equal((await post('/api/projects/delete', { id, revision: p.revision })).status, 403);
+    assert.equal(
+      (await post('/api/projects/rename', { id, revision: p.revision, title: 'Wrong' })).status,
+      403,
+    );
+  }
+  // Surviving historical archives do not resurrect deleted projects after rereading disk.
+  const disk = JSON.parse(await readFile(path.join(dataDir, 'project.json'), 'utf8'));
+  assert.deepEqual([...(await savedProjects(dataDir, disk)).keys()], [p.id]);
+});
+
+test('protected demo flag is enforced and startup recovers an interrupted active deletion', async (t) => {
+  const demo = { ...createProject('Protected example'), isDemo: true };
+  const { get, post } = await setup(t, demo);
+  for (const action of ['rename', 'delete'])
+    assert.equal(
+      (
+        await post(`/api/projects/${action}`, {
+          id: demo.id,
+          revision: demo.revision,
+          targetRevision: demo.revision,
+          title: 'Changed',
+          confirmTitle: demo.title,
+        })
+      ).status,
+      403,
+    );
+  assert.equal((await get('/api/projects')).projects[0].protected, true);
+  const dataDir = await mkdtemp(path.join(os.tmpdir(), 'researchguide-deleted-startup-'));
+  const deleted = createProject('Deleted before process stopped');
+  await writeFile(path.join(dataDir, 'project.json'), JSON.stringify(deleted));
+  await trashProject(dataDir, deleted);
+  const recovered = await createApp({ dataDir });
+  await new Promise((r) => recovered.listen(0, '127.0.0.1', r));
+  try {
+    const current = (
+      await (await fetch(`http://127.0.0.1:${recovered.address().port}/api/project`)).json()
+    ).project;
+    assert.notEqual(current.id, deleted.id);
+    assert.ok(current.revision > deleted.revision);
+  } finally {
+    await new Promise((r) => recovered.close(r));
+    const resolved = path.resolve(dataDir);
+    if (
+      !resolved.startsWith(path.resolve(os.tmpdir()) + path.sep) ||
+      !path.basename(resolved).startsWith('researchguide-deleted-startup-')
+    )
+      throw Error('Unexpected cleanup path');
+    await rm(resolved, { recursive: true, force: true });
+  }
+});
 
 test('saved projects reopen latest work, retain the other project, and reject stale-tab edits', async (t) => {
   const { get, post } = await setup(t);

@@ -21,6 +21,7 @@ let project,
   noticeTimer;
 let selectedConsistencyId, analysisDatasetId, analysisPlanId;
 let materialsOpen = false;
+let editingProjectId = null;
 const taskFormMemory = new Map();
 const discoveryQueries = new Map();
 const literatureQueries = new Map();
@@ -356,6 +357,39 @@ function adoptProject(next) {
   importFilename = '';
 }
 function projectPanel() {
+  const renameSaved = (saved, title) =>
+    perform(async () => {
+      const response = await api('/api/projects/rename', {
+        id: saved.id,
+        title,
+        revision: project.revision,
+        targetRevision: saved.revision,
+      });
+      project = response.project;
+      savedProjectList = response.projects;
+      editingProjectId = null;
+    }, 'Project title updated.');
+  const deleteSaved = (saved) => {
+    if (
+      !confirm(
+        `Delete “${saved.title}” from your projects? A recovery copy will be kept in local Trash. Shared PDFs and downloaded backups are retained.${saved.active ? ' The current project will close.' : ''}${saved.active && isDirty() ? ' Unsaved edits to this project will be discarded.' : ''}`,
+      )
+    )
+      return;
+    perform(async () => {
+      const response = await api('/api/projects/delete', {
+        id: saved.id,
+        confirmTitle: saved.title,
+        revision: project.revision,
+        targetRevision: saved.revision,
+      });
+      if (saved.active) adoptProject(response.project);
+      else project = response.project;
+      savedProjectList = response.projects;
+      editingProjectId = null;
+      projectView = 'open';
+    }, 'Project deleted from the list. A recovery copy is kept in local Trash.');
+  };
   const heading = { open: 'Open project', export: 'Export project', import: 'Import project' }[
     projectView
   ];
@@ -389,7 +423,7 @@ function projectPanel() {
         savedProjectList.map((saved) =>
           el(
             'article',
-            { className: 'saved-project' },
+            { className: 'saved-project', 'data-project-id': saved.id },
             el(
               'div',
               {},
@@ -399,21 +433,74 @@ function projectPanel() {
                 { className: 'small muted' },
                 `${saved.active ? 'Currently open · ' : ''}${saved.imported ? 'Imported copy · ' : ''}${saved.finished ?? saved.approved} of 7 steps completed · Last activity ${date(saved.updatedAt)} · ID ${saved.id.slice(0, 8)}`,
               ),
+              editingProjectId === saved.id &&
+                !saved.protected &&
+                el(
+                  'form',
+                  {
+                    onSubmit: (e) => {
+                      e.preventDefault();
+                      renameSaved(
+                        saved,
+                        document.getElementById(`project-title-${saved.id}`).value,
+                      );
+                    },
+                  },
+                  field(
+                    `project-title-${saved.id}`,
+                    'Project title',
+                    'Use 1–160 characters. Research documents and review history will stay the same.',
+                    saved.title,
+                    false,
+                    { required: true, maxlength: 160 },
+                  ),
+                  el(
+                    'button',
+                    { type: 'submit', className: 'button', disabled: busy },
+                    'Save title',
+                  ),
+                  button(
+                    'Cancel title edit',
+                    () => {
+                      editingProjectId = null;
+                      render();
+                    },
+                    'quiet',
+                  ),
+                ),
             ),
-            button(
-              saved.active ? 'Currently open' : `Open ${saved.title}`,
-              () => {
-                if (!discardUnsaved()) return;
-                perform(async () => {
-                  const response = await api('/api/projects/open', {
-                    id: saved.id,
-                    revision: project.revision,
-                  });
-                  adoptProject(response.project);
-                }, 'Saved project opened.');
-              },
-              'quiet',
-              { disabled: busy || saved.active },
+            el(
+              'div',
+              { className: 'project-actions' },
+              button(
+                saved.active ? 'Currently open' : `Open ${saved.title}`,
+                () => {
+                  if (!discardUnsaved()) return;
+                  perform(async () => {
+                    const response = await api('/api/projects/open', {
+                      id: saved.id,
+                      revision: project.revision,
+                    });
+                    adoptProject(response.project);
+                  }, 'Saved project opened.');
+                },
+                'quiet',
+                { disabled: busy || saved.active },
+              ),
+              saved.protected
+                ? el('p', { className: 'small muted' }, 'Demo project · read-only')
+                : [
+                    button(
+                      'Edit title',
+                      () => {
+                        editingProjectId = saved.id;
+                        render();
+                        document.getElementById(`project-title-${saved.id}`).focus();
+                      },
+                      'quiet',
+                    ),
+                    button('Delete project', () => deleteSaved(saved), 'quiet'),
+                  ],
             ),
           ),
         ),
@@ -422,6 +509,46 @@ function projectPanel() {
         'p',
         { className: 'small muted' },
         'This list includes earlier archived projects. A backup downloaded elsewhere can be added with Import project.',
+      ),
+      el(
+        'p',
+        { className: 'small muted' },
+        'Deletion removes all saved revisions from this list and keeps a recovery copy in data/trash. It does not erase shared PDF attachments or exported backups.',
+      ),
+      el('h2', {}, 'Demo projects · read-only'),
+      el(
+        'p',
+        {},
+        'Built-in examples can be explored, but their titles and contents cannot be edited or deleted here.',
+      ),
+      el(
+        'div',
+        { className: 'project-list' },
+        [
+          ['Education · Study habits', '/demo'],
+          ['Business · Training and sales', '/demo?case=business'],
+        ].map(([title, url]) =>
+          el(
+            'article',
+            { className: 'saved-project demo-project' },
+            el(
+              'div',
+              {},
+              el('h3', {}, title),
+              el('p', { className: 'small muted' }, 'Protected demo'),
+            ),
+            el(
+              'a',
+              {
+                className: 'button quiet',
+                href: url,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+              },
+              'Explore demo ↗',
+            ),
+          ),
+        ),
       ),
     ],
     projectView === 'export' && [

@@ -8,6 +8,10 @@ ResearchGuide is an early, local-first prototype for beginning PhD students and 
 
 ## Run locally
 
+**Manage saved projects:** In **Open project**, use **Edit title** to rename a project without changing its research work, or **Delete project** to remove it from the list after confirmation. Built-in education and business demos are read-only. Deleting the open project switches to another saved project, or creates a blank workspace if none remain. Unsaved edits to a deleted open project are discarded only after the confirmation states this.
+
+Deletion is recoverable, not secure erasure: the latest saved project is copied to `data/trash/<project-id>/project.json`, and a deletion marker hides all archived revisions. Historical archive files and shared PDFs remain on disk. To recover the saved work, use **Import project** with that recovery JSON; it opens as a separate project. Exported backups are unaffected. Renaming and deleting check both the current workspace revision and the selected project’s revision to reject stale actions.
+
 **Public dataset discovery:** Step 4 now includes live Harvard Dataverse search, optional AI keyword suggestions and fit assessments, and a saved researcher shortlist alongside your own CSV uploads. See the [public datasets guide](docs/public-datasets.md) for the workflow and coverage limits.
 
 Requires **Node.js 22.13 or newer**. Run `npm ci` once to install the pinned PDF.js, CSV parser, and webR dependencies. There is no build step.

@@ -103,6 +103,19 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.saved-project > div:first-child {
+  flex: 1;
+}
+.project-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  max-width: 45%;
+}
+.saved-project .project-actions .button,
+.saved-project form .button {
+  max-width: 100%;
+}
 .saved-project h2 {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
@@ -123,6 +136,9 @@
     flex-direction: column;
   }
   .saved-project .button {
+    max-width: 100%;
+  }
+  .project-actions {
     max-width: 100%;
   }
 }

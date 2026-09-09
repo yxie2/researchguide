@@ -7,6 +7,11 @@ import {
   projectSummary,
   savedProjects,
   switchProject,
+  editableProject,
+  renamedProject,
+  archiveProject,
+  projectDeleted,
+  trashProject,
 } from './lib/projects.mjs';
 import { proposeAnalysis, executeAnalysis } from './lib/analysis.mjs';
 import { reviewConsistency, appendConsistency } from './lib/consistency.mjs';
@@ -67,6 +72,11 @@ export async function createApp({
   }
   let writing = false,
     guiding = false;
+  // Recover cleanly if a previous process stopped after committing a deletion marker.
+  if (await projectDeleted(dataDir, project.id)) {
+    const next = switchProject(createProject(), project);
+    await persist(next);
+  }
   async function persist(next) {
     await writeFile(`${projectFile}.tmp`, JSON.stringify(next, null, 2));
     await rename(`${projectFile}.tmp`, projectFile);
@@ -278,6 +288,49 @@ export async function createApp({
         );
         if (!payload || typeof payload !== 'object' || Array.isArray(payload))
           throw new WorkflowError('Request must be a JSON object.');
+        if (['/api/projects/rename', '/api/projects/delete'].includes(pathname)) {
+          if (writing || guiding)
+            throw new WorkflowError('Wait for the current operation to finish.', 409);
+          if (payload.revision !== project.revision)
+            throw new WorkflowError('Project changed. Reload before managing projects.', 409);
+          editableProject({ id: payload.id });
+          writing = true;
+          try {
+            const saved = await savedProjects(dataDir, project);
+            const target = saved.get(payload.id)?.project;
+            if (!target)
+              throw new WorkflowError('Project not found. Refresh the project list.', 404);
+            editableProject(target);
+            if (payload.targetRevision !== target.revision)
+              throw new WorkflowError(
+                'This project changed. Refresh the list before editing or deleting it.',
+                409,
+              );
+            if (pathname.endsWith('/rename')) {
+              const renamed = renamedProject(target, payload.title);
+              if (target.id === project.id) await persist(renamed);
+              else await archiveProject(dataDir, renamed);
+            } else {
+              if (payload.confirmTitle !== target.title)
+                throw new WorkflowError('Confirm deletion using the current project title.');
+              await trashProject(dataDir, target);
+              if (target.id === project.id) {
+                const other = [...saved.values()]
+                  .filter((item) => item.project.id !== target.id)
+                  .sort((a, b) => b.project.revision - a.project.revision)[0]?.project;
+                await persist(switchProject(other || createProject(), project));
+              }
+            }
+            return send(200, {
+              project,
+              projects: [...(await savedProjects(dataDir, project)).values()].map((v) =>
+                projectSummary(v.project, v.active),
+              ),
+            });
+          } finally {
+            writing = false;
+          }
+        }
         if (['/api/projects/open', '/api/projects/import'].includes(pathname)) {
           if (writing || guiding)
             throw new WorkflowError('Wait for the current operation to finish.', 409);
