@@ -55,7 +55,9 @@ try {
     await demo.getByRole('button', { name: 'Reveal next exchange' }).click();
     assert.equal(await demo.locator('.demo-transcript article').count(), 2);
     await demo.getByRole('button', { name: 'Show full phase' }).click();
-    await demo.getByRole('heading', { name: 'The accepted teaching artifact' }).waitFor();
+    await demo
+      .getByRole('heading', { name: new RegExp(`^${business ? 'Alex' : 'Maya'}’s accepted `) })
+      .waitFor();
     if (i === 0) {
       await demo
         .getByRole('button', { name: teachingCase.stages[0].challenge.choices[0], exact: true })

@@ -6,6 +6,16 @@ let data,
 const business = new URLSearchParams(location.search).get('case') === 'business';
 const key = business ? 'researchguide-business-case-v1' : 'researchguide-teaching-case-v1';
 const researcher = () => data.researcher || 'Maya';
+const documentNames = {
+  question: 'research brief',
+  evidence: 'evidence map',
+  design: 'study protocol',
+  data: 'data quality report',
+  analysis: 'analysis record',
+  interpretation: 'conclusions and limitations',
+  writing: 'research report',
+};
+const documentHeading = (stage) => `${researcher()}’s accepted ${documentNames[stage.id]}`;
 const seen = new Set();
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
@@ -62,7 +72,7 @@ function notebook() {
           (s.sources || [])
             .map((s) => `### ${s.id}: ${s.title}\n\n> ${s.passage}\n\n${s.limitation}`)
             .join('\n\n') +
-          `\n\n### Accepted teaching artifact\n\n${s.artifact}\n\n${researcher()}’s explanation: ${s.understanding}\n\n${s.review}\n\nCarried forward: ${s.carry}\n`,
+          `\n\n### ${documentHeading(s)}\n\n${s.artifact}\n\n${researcher()}’s explanation: ${s.understanding}\n\n${s.review}\n\nCarried forward: ${s.carry}\n`,
       )
       .join('\n') +
     `\n## Reproduction\n\nR results built ${data.builtAt}. Save computation.run.inputCsv as input.csv and computation.run.script as analysis.R from the reproduction JSON, then run Rscript analysis.R in a clean directory. No external R packages are needed. This export is a teaching narrative, not an importable active notebook.\n`
@@ -226,7 +236,7 @@ function scene() {
               el('p', { class: 'small' }, source.limitation),
             ),
           ),
-          el('h2', {}, 'The accepted teaching artifact'),
+          el('h2', {}, documentHeading(s)),
           el('pre', { class: 'demo-artifact' }, s.artifact),
           el('h3', {}, `${researcher()} explains the reasoning`),
           el('p', {}, s.understanding),
@@ -315,7 +325,7 @@ function overview() {
         el(
           'p',
           {},
-          `Choose a phase in the sidebar or reveal the conversation one exchange at a time. Each phase shows the saved artifact, ${researcher()}’s explanation, a fictional supervisor checkpoint and what carries into the next phase.`,
+          `Choose a phase in the sidebar or reveal the conversation one exchange at a time. Each phase shows the research document ${researcher()} accepted, the reasoning behind it, a fictional supervisor checkpoint and what carries into the next phase.`,
         ),
         button('Start the seven-phase walkthrough', () => go(0)),
         el(
