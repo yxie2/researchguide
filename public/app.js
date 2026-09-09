@@ -1181,7 +1181,7 @@ function literaturePanel() {
     el(
       'p',
       {},
-      'The agent can turn your saved research interest into a search, retrieve real paper records, and suggest a reading order with reasons. Crossref provides broad disciplinary coverage; Europe PMC adds life-science and biomedical literature. This is a starting search, not an exhaustive literature review.',
+      'The agent can turn your saved research interest into a search, retrieve real paper records, and suggest a reading order with reasons. Search sources include Crossref, Europe PMC and arXiv. arXiv adds preprints and manuscripts; their publication status needs checking. This is a starting search, not an exhaustive literature review.',
     ),
     el(
       'p',
@@ -1295,6 +1295,17 @@ function literaturePanel() {
               `${paper.catalogues.join(' + ')} · ${paper.type || 'Publication type unknown'}${paper.doi ? ` · DOI ${paper.doi}` : ''}`,
             ),
             el('p', {}, paper.access),
+            paper.arxivUrl &&
+              el(
+                'p',
+                {},
+                el(
+                  'a',
+                  { href: paper.arxivUrl, target: '_blank', rel: 'noopener noreferrer' },
+                  'Read the arXiv version',
+                ),
+                ' — preprint/manuscript; publication status is not verified and a journal version may differ.',
+              ),
             paper.repositoryUrl &&
               el(
                 'a',

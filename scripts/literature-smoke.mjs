@@ -45,7 +45,7 @@ const app = await createApp({
     tokenParameter: 'max_tokens',
   },
   literatureSearch: async (query) => ({
-    catalogues: ['Crossref'],
+    catalogues: ['Crossref', 'arXiv'],
     warnings: ['Europe PMC was unavailable; this search has partial coverage.'],
     results:
       query === 'empty'
@@ -54,10 +54,11 @@ const app = await createApp({
             {
               id: 'paper-fixture',
               provider: 'Crossref',
-              catalogues: ['Crossref'],
+              catalogues: ['Crossref', 'arXiv'],
               title: 'Synthetic training and sales paper',
               doi: '10.1234/test',
               url: 'https://doi.org/10.1234/test',
+              arxivUrl: 'https://arxiv.org/abs/2401.12345v1',
               authors: 'Test Author',
               year: '2024',
               journal: 'Synthetic test journal',
@@ -85,6 +86,12 @@ try {
   await page.getByText('Tentative relevance based on the abstract.', { exact: true }).waitFor();
   assert.equal(await page.locator('#literature-query').inputValue(), 'employee training sales');
   assert.equal(calls, 2);
+  assert.equal(
+    await page
+      .getByRole('link', { name: 'Read the arXiv version', exact: true })
+      .getAttribute('href'),
+    'https://arxiv.org/abs/2401.12345v1',
+  );
   await page
     .locator('#reading-note-paper-fixture')
     .fill('Read the sampling description and confounding discussion.');
@@ -93,6 +100,7 @@ try {
   let p = (await (await fetch(base + '/api/project')).json()).project;
   assert.equal(p.sources.length, 0);
   assert.equal(p.literatureSearches[0].results[0].readingList, true);
+  assert.match(p.literatureSearches[0].results[0].arxivUrl, /2401.12345v1/);
   const stale = await fetch(base + '/api/literature-discovery', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

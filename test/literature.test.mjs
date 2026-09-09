@@ -4,38 +4,40 @@ import { searchLiterature, literatureAction } from '../lib/literature.mjs';
 import { createProject, exportMarkdown } from '../lib/workflow.mjs';
 import { validateProject, parseBackup } from '../lib/projects.mjs';
 const fetcher = async (url) =>
-  new Response(
-    JSON.stringify(
-      url.hostname === 'api.crossref.org'
-        ? {
-            message: {
-              items: [
-                {
-                  DOI: '10.1234/test',
-                  title: ['<b>Synthetic learning paper</b>'],
-                  author: [{ given: 'Test', family: 'Author' }],
-                  published: { 'date-parts': [[2024]] },
-                  type: 'journal-article',
+  url.hostname === 'export.arxiv.org'
+    ? new Response('<feed xmlns="http://www.w3.org/2005/Atom"/>')
+    : new Response(
+        JSON.stringify(
+          url.hostname === 'api.crossref.org'
+            ? {
+                message: {
+                  items: [
+                    {
+                      DOI: '10.1234/test',
+                      title: ['<b>Synthetic learning paper</b>'],
+                      author: [{ given: 'Test', family: 'Author' }],
+                      published: { 'date-parts': [[2024]] },
+                      type: 'journal-article',
+                    },
+                  ],
                 },
-              ],
-            },
-          }
-        : {
-            resultList: {
-              result: [
-                {
-                  id: '123',
-                  source: 'MED',
-                  doi: '10.1234/TEST',
-                  title: 'Synthetic learning paper',
-                  abstractText: '<p>Synthetic abstract.</p>',
-                  isOpenAccess: 'Y',
+              }
+            : {
+                resultList: {
+                  result: [
+                    {
+                      id: '123',
+                      source: 'MED',
+                      doi: '10.1234/TEST',
+                      title: 'Synthetic learning paper',
+                      abstractText: '<p>Synthetic abstract.</p>',
+                      isOpenAccess: 'Y',
+                    },
+                  ],
                 },
-              ],
-            },
-          },
-    ),
-  );
+              },
+        ),
+      );
 test('literature retrieval combines DOI duplicates and reports partial failures', async () => {
   const result = await searchLiterature('student learning', fetcher);
   assert.equal(result.results.length, 1);
