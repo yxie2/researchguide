@@ -92,7 +92,7 @@ try {
   assert.equal(JSON.parse(calls.at(-1).body.messages[1].content).conversation.length, 1);
   await page.getByRole('button', { name: 'Accept draft into notebook', exact: true }).click();
   await page
-    .getByText('Draft saved. Open Your workspace to explain your reasoning and request review.', {
+    .getByText('Draft saved. Continue to Write and explain your decisions, then request review.', {
       exact: true,
     })
     .waitFor();
