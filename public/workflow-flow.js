@@ -1,38 +1,22 @@
-// Presentation guidance only. Scientific decisions and server review gates remain separate.
-const discuss = [
-  'conversation',
-  'Discuss this step with your guide',
-  'Use earlier decisions to develop the work through conversation.',
-];
-const write = [
-  'workspace',
-  'Write and explain your decisions',
-  'Review the document, explain the reasoning in your own words, and save it.',
-];
-const critique = [
-  'guide',
-  'Get mentor feedback',
-  'Ask the research team to challenge assumptions and suggest improvements.',
-];
+// Shared progression policy; task suggestions are not scientific validation.
+export const requiresSupervisorReview = (id) => ['design', 'writing'].includes(id);
+export const milestoneFinished = (m) =>
+  m.status === 'approved' || (m.status === 'completed' && !requiresSupervisorReview(m.id));
+const document = (title, description) => ['workspace', title, description];
 const check = [
   'consistency',
-  'Check alignment with the study',
+  'Check alignment with the study (optional AI check)',
   'Compare saved decisions and outputs; investigate findings and record your response.',
 ];
 const review = [
   'review',
-  'Request and record supervisor review',
-  'Submit the saved version and keep the reviewer’s decision with it.',
+  'Review the final report with your supervisor',
+  'Resolve outstanding concerns and record the reviewer’s decision on the saved research package.',
 ];
 const sources = [
   'sources',
   'Inspect sources and save passages',
   'Upload papers or add source records, then preserve the passages you inspected.',
-];
-const claims = [
-  'claims',
-  'Check claims against source passages',
-  'Link literature claims to inspected excerpts and record your judgment.',
 ];
 const data = [
   'execution',
@@ -41,30 +25,71 @@ const data = [
 ];
 const analysis = [
   'execution',
-  'Review the plan and run the analysis',
-  'Review the exact script, approve execution, and inspect the recorded R results.',
+  'Run and inspect your analysis',
+  'For supported CSV analyses, review and approve the exact script, then inspect the R results. If you analyze elsewhere, record those methods and results in the next task.',
 ];
 const flows = {
-  question: [discuss, write, critique, review],
-  evidence: [discuss, sources, claims, write, critique, review],
-  design: [discuss, write, critique, check, review],
+  question: [
+    [
+      'conversation',
+      'Explore a topic with your guide (optional)',
+      'Discuss your interests and practical constraints, or go straight to recording your direction.',
+    ],
+    document(
+      'Save a direction for your reading',
+      'Record your interest, motivation and what you need to learn. Save and continue; a final question and supervisor sign-off are not required here.',
+    ),
+  ],
+  evidence: [
+    sources,
+    document(
+      'Synthesize the literature and refine your question',
+      'Connect inspected studies and theory, identify a feasible contribution, and save a clear question and objectives. Use the optional claim ledger for claims that need closer checking.',
+    ),
+  ],
+  design: [
+    document(
+      'Develop the study protocol',
+      'Specify sampling, measures, data access, planned analysis and safeguards. Explain the key methodological choices for your supervisor.',
+    ),
+    check,
+    [
+      'review',
+      'Review the protocol with your supervisor',
+      'Record approval of the current protocol before completing data preparation. This local checkpoint does not replace institutional ethics or access permissions.',
+    ],
+  ],
   data: [
-    discuss,
     [
       'discovery',
-      'Find relevant public datasets',
+      'Find relevant public datasets (optional)',
       'Search a public catalogue and assess candidates, or skip this task if you already have data.',
     ],
     data,
-    write,
-    check,
-    review,
+    document(
+      'Record preparation and data quality',
+      'Document cleaning, missingness, exclusions, access and deviations from the protocol. Save and continue when the data are ready; revisit the design if the methods change.',
+    ),
   ],
-  analysis: [discuss, analysis, write, critique, check, review],
-  interpretation: [discuss, write, claims, check, critique, review],
+  analysis: [
+    analysis,
+    document(
+      'Record results and analysis checks',
+      'Preserve outputs, uncertainty, diagnostics and departures from the plan. You can document analyses performed outside the app. Save and continue to interpretation.',
+    ),
+  ],
+  interpretation: [
+    document(
+      'Answer the question and explain the limitations',
+      'Use recorded results to answer the refined question, relate findings to the literature, and consider alternative explanations.',
+    ),
+    check,
+  ],
   writing: [
-    discuss,
-    write,
+    document(
+      'Assemble and revise the research report',
+      'Bring earlier writing, results and limitations together. Add data/code availability and contribution statements; explain key decisions for final review.',
+    ),
     check,
     review,
     [
@@ -83,10 +108,13 @@ export const studyContextCurrent = (project, record) =>
   );
 export function recommendTask(project, id, provider) {
   const m = project.milestones.find((s) => s.id === id);
-  if (m.status === 'approved')
+  if (milestoneFinished(m))
     return {
       id: id === 'writing' ? 'export' : 'continue',
-      reason: 'This version has a recorded local approval. Continue when you are ready.',
+      reason:
+        m.status === 'completed'
+          ? 'You marked this saved version ready to continue. This is researcher completion, not supervisor approval.'
+          : 'This version has a recorded local approval. Continue when you are ready.',
     };
   if (m.status === 'awaiting_review')
     return { id: 'review', reason: 'The saved document is awaiting a supervisor decision.' };
@@ -94,7 +122,7 @@ export function recommendTask(project, id, provider) {
     return {
       id: 'workspace',
       reason:
-        'This step needs renewed review after a change or reviewer feedback. Check the document and its reasoning first.',
+        'Earlier work or feedback changed. Revisit the saved document, address the changes and renew completion or review as appropriate.',
     };
   const latest = m.conversation?.at(-1);
   if (latest?.draft && latest.artifactVersion === m.version && !latest.accepted)
@@ -104,11 +132,18 @@ export function recommendTask(project, id, provider) {
     };
   if (!m.artifact.trim())
     return {
-      id: provider === 'demo' ? 'workspace' : 'conversation',
+      id:
+        id === 'question'
+          ? provider === 'demo'
+            ? 'workspace'
+            : 'conversation'
+          : id === 'evidence'
+            ? 'sources'
+            : id === 'data' || (id === 'analysis' && project.datasets?.length)
+              ? 'execution'
+              : 'workspace',
       reason:
-        provider === 'demo'
-          ? 'No model is connected. Start the document yourself, or connect a model in LLM settings for conversational guidance.'
-          : 'Begin with your guide. The conversation uses saved decisions from earlier steps.',
+        'Start with this stage’s research task. Your guide and mentor feedback are available when you need help; a separate AI conversation is not required.',
     };
   if (id === 'evidence' && !project.sources.length)
     return {
@@ -116,7 +151,7 @@ export function recommendTask(project, id, provider) {
       reason:
         'The literature review needs an inspected source passage before it can be submitted. Use reading to develop and justify the refined question.',
     };
-  if (!m.explanation.trim())
+  if (requiresSupervisorReview(id) && !m.explanation.trim())
     return {
       id: 'workspace',
       reason: 'Add your own explanation of why these research decisions are appropriate.',
@@ -135,7 +170,7 @@ export function recommendTask(project, id, provider) {
     };
   const report = project.consistencyReports?.at(-1);
   if (
-    workflowFor(id).some(([task]) => task === 'consistency') &&
+    ['design', 'data', 'analysis', 'interpretation', 'writing'].includes(id) &&
     report &&
     (!report.snapshot.some((s) => s.id === 'evidence') ||
       report.snapshot.some((s) =>
@@ -150,8 +185,9 @@ export function recommendTask(project, id, provider) {
         'Earlier consistency findings refer to changed versions. Run a fresh check on the saved study before relying on those findings.',
     };
   return {
-    id: 'review',
-    reason:
-      'Review the saved document and any relevant checks, then request a supervisor decision. This suggestion does not certify completeness or quality.',
+    id: requiresSupervisorReview(id) ? 'review' : 'workspace',
+    reason: requiresSupervisorReview(id)
+      ? 'Review the saved document and request a supervisor decision at this checkpoint. AI feedback cannot approve the study.'
+      : 'Check the saved work, then use Save and continue. Extra mentor feedback or supervisor review is available if you need it; completion does not certify scientific quality.',
   };
 }

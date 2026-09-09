@@ -92,9 +92,12 @@ try {
   assert.equal(JSON.parse(calls.at(-1).body.messages[1].content).conversation.length, 1);
   await page.getByRole('button', { name: 'Accept draft into notebook', exact: true }).click();
   await page
-    .getByText('Draft saved. Continue to Write and explain your decisions, then request review.', {
-      exact: true,
-    })
+    .getByText(
+      'Draft saved. Check the stage document and continue when ready; protocol and final report require supervisor review.',
+      {
+        exact: true,
+      },
+    )
     .waitFor();
   await openTask(page, 'workspace');
   assert.match(await page.locator('#artifact').inputValue(), /AI use is not measured/);
@@ -108,6 +111,7 @@ try {
   await page.screenshot({ path: 'docs/images/conversation.png', fullPage: true });
   await page.getByRole('button', { name: '02 Literature & question' }).click();
   await page.getByText('What carries forward into this step', { exact: true }).waitFor();
+  await openTask(page, 'conversation');
   await page.getByRole('button', { name: 'Continue from earlier work', exact: true }).click();
   await page.getByText('Your guide has responded.', { exact: true }).waitFor();
   const handoff = JSON.parse(calls.at(-1).body.messages[1].content);

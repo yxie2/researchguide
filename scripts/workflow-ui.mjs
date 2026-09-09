@@ -12,6 +12,9 @@ export async function openTask(page, id) {
   if (!(await materials.getAttribute('open')) && (await materials.getAttribute('open')) !== '')
     await materials.locator('summary').click();
   const labels = {
+    conversation: 'Ask your guide (optional)',
+    guide: 'Mentor feedback (optional)',
+    review: 'Supervisor review and history',
     sources: 'Source library',
     claims: 'Literature claim ledger',
     execution: 'Datasets and recorded analyses',

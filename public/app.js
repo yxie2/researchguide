@@ -1,4 +1,10 @@
-import { workflowFor, recommendTask, studyContextCurrent } from './workflow-flow.js';
+import {
+  workflowFor,
+  recommendTask,
+  studyContextCurrent,
+  requiresSupervisorReview,
+  milestoneFinished,
+} from './workflow-flow.js';
 const $ = (selector) => document.querySelector(selector);
 const root = $('#app');
 let project,
@@ -31,6 +37,7 @@ const labels = {
   needs_revision: 'Needs revision',
   awaiting_review: 'Awaiting review',
   approved: 'Approved',
+  completed: 'Ready to continue (researcher)',
 };
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
@@ -88,7 +95,7 @@ function isUnlocked(id) {
       0,
       stages.findIndex((s) => s.id === id),
     )
-    .every((m) => m.status === 'approved');
+    .every(milestoneFinished);
 }
 function date(value) {
   return new Date(value).toLocaleString(undefined, {
@@ -139,7 +146,7 @@ function navigate(id) {
     return;
   selected = id;
   draft = null;
-  tab = 'conversation';
+  tab = workflowFor(id)[0][0];
   newProject = false;
   projectView = null;
   render();
@@ -180,8 +187,12 @@ function heading() {
   );
 }
 function sidebar() {
-  const approved = project.milestones.filter((m) => m.status === 'approved').length;
-  const progress = el('progress', { value: approved, max: 7, 'aria-label': 'Approved milestones' });
+  const approved = project.milestones.filter(milestoneFinished).length;
+  const progress = el('progress', {
+    value: approved,
+    max: 7,
+    'aria-label': 'Completed research steps',
+  });
   return el(
     'aside',
     { className: 'sidebar' },
@@ -199,7 +210,7 @@ function sidebar() {
         el(
           'button',
           {
-            className: `stage-button ${selected === s.id ? 'active' : ''} ${project.milestones[i].status === 'approved' ? 'complete' : ''}`,
+            className: `stage-button ${selected === s.id ? 'active' : ''} ${milestoneFinished(project.milestones[i]) ? 'complete' : ''}`,
             type: 'button',
             onClick: () => navigate(s.id),
             'aria-current': selected === s.id ? 'step' : null,
@@ -208,7 +219,7 @@ function sidebar() {
           el(
             'span',
             { className: 'number' },
-            project.milestones[i].status === 'approved' ? '✓' : String(i + 1).padStart(2, '0'),
+            milestoneFinished(project.milestones[i]) ? '✓' : String(i + 1).padStart(2, '0'),
           ),
           el('span', { className: 'label' }, s.short),
         ),
@@ -218,7 +229,11 @@ function sidebar() {
       'div',
       { className: 'side-foot' },
       progress,
-      el('p', { className: 'small' }, `${approved} of 7 milestones approved locally`),
+      el(
+        'p',
+        { className: 'small' },
+        `${approved} of 7 steps completed · supervisor checkpoints at 3 and 7`,
+      ),
       el(
         'p',
         { className: 'small' },
@@ -319,9 +334,9 @@ function topbar() {
 function adoptProject(next) {
   taskFormMemory.clear();
   project = next;
-  selected = project.milestones.find((m) => m.status !== 'approved')?.id || 'writing';
+  selected = project.milestones.find((m) => !milestoneFinished(m))?.id || 'writing';
+  tab = workflowFor(selected)[0][0];
   draft = null;
-  tab = 'conversation';
   newProject = false;
   projectView = null;
   selectedPaperId = selectedConsistencyId = analysisDatasetId = analysisPlanId = undefined;
@@ -374,7 +389,7 @@ function projectPanel() {
               el(
                 'p',
                 { className: 'small muted' },
-                `${saved.active ? 'Currently open · ' : ''}${saved.imported ? 'Imported copy · ' : ''}${saved.approved} of 7 milestones approved · Last activity ${date(saved.updatedAt)} · ID ${saved.id.slice(0, 8)}`,
+                `${saved.active ? 'Currently open · ' : ''}${saved.imported ? 'Imported copy · ' : ''}${saved.finished ?? saved.approved} of 7 steps completed · Last activity ${date(saved.updatedAt)} · ID ${saved.id.slice(0, 8)}`,
               ),
             ),
             button(
@@ -578,7 +593,7 @@ function learningAside() {
     el(
       'p',
       { className: 'small muted' },
-      'Your explanation matters as much as your artifact. Ask your supervisor when the next decision needs expertise.',
+      'Keep the reasoning that helps someone understand your decisions. Ask for mentor or supervisor input when a decision needs expertise; routine steps do not require a separate feedback round.',
     ),
   );
 }
@@ -604,7 +619,7 @@ function workspace() {
   const explanation = field(
     'explanation',
     'Explain it in your own words',
-    s.understanding,
+    `${requiresSupervisorReview(selected) ? 'For supervisor review, explain the key choices in at least 80 characters.' : 'Optional reflection; you do not need to repeat reasoning already in the document. A separate explanation is needed only if you choose formal supervisor review.'} ${s.understanding}`,
     draft.explanation,
     true,
     {
@@ -626,7 +641,7 @@ function workspace() {
         el(
           'div',
           { className: 'note warn' },
-          'You can draft ahead. Submission opens after all earlier milestones are approved.',
+          'You can draft ahead. To complete this step, finish earlier steps; supervisor approval is required at the study protocol and final report checkpoints.',
         ),
       el(
         'div',
@@ -648,22 +663,36 @@ function workspace() {
       el(
         'p',
         { className: 'small muted' },
-        'Completeness checks use minimum text lengths only. They do not judge rigor or certify understanding.',
+        'Saving preserves your work. Continuing records your readiness, not scientific validation. Basic checks require a document of at least 120 characters and an inspected source for the literature step.',
       ),
       el(
         'div',
         { className: 'form-actions' },
         button('Save your work', () =>
-          perform(saveDraft, 'Saved. Changed versions require fresh reviews.'),
+          perform(saveDraft, 'Saved. Revisit completion or reviews affected by changes.'),
         ),
         button(
-          'Request supervisor review →',
+          requiresSupervisorReview(selected)
+            ? 'Request supervisor review →'
+            : 'Save and continue →',
           () =>
-            perform(async () => {
-              if (isDirty()) await saveDraft();
-              await mutate({ type: 'submit', stageId: selected });
-              tab = 'review';
-            }, 'Submitted for local review.'),
+            perform(
+              async () => {
+                if (isDirty()) await saveDraft();
+                if (requiresSupervisorReview(selected)) {
+                  await mutate({ type: 'submit', stageId: selected });
+                  tab = 'review';
+                } else {
+                  await mutate({ type: 'complete', stageId: selected });
+                  selected = stages[stages.findIndex((s) => s.id === selected) + 1].id;
+                  draft = null;
+                  tab = workflowFor(selected)[0][0];
+                }
+              },
+              requiresSupervisorReview(selected)
+                ? 'Submitted for local review.'
+                : 'Saved and marked ready by you. Earlier work carries forward into this step.',
+            ),
           'quiet',
           { disabled: busy || !isUnlocked(selected) },
         ),
@@ -716,7 +745,7 @@ function conversationPanel() {
         el(
           'div',
           { className: 'note' },
-          'Conversational guidance needs a model. Open LLM settings and choose Ollama or an API. Get mentor feedback offers a clearly labeled, scripted guide without a model.',
+          'Conversational guidance needs a model. Open LLM settings and choose Ollama or an API. Mentor feedback in Project materials also offers a clearly labeled, scripted guide without a model.',
         ),
       !turns.length &&
         el(
@@ -814,7 +843,7 @@ function conversationPanel() {
                   if (isDirty()) await saveDraft();
                   await mutate({ type: 'accept_draft', stageId: selected, turnId: latest.id });
                   draft = { artifact: current().artifact, explanation: current().explanation };
-                }, 'Draft saved. Continue to Write and explain your decisions, then request review.'),
+                }, 'Draft saved. Check the stage document and continue when ready; protocol and final report require supervisor review.'),
               '',
               { disabled: busy || latest.accepted || latest.artifactVersion !== current().version },
             ),
@@ -834,7 +863,7 @@ function conversationPanel() {
       el(
         'p',
         { className: 'small muted' },
-        'Continue to Write and explain your decisions to add your reasoning. Supervisor reviews still control progression. This conversation cannot search papers, execute analyses, or certify research quality.',
+        'Accepted drafts go into this stage’s document. Check their accuracy before saving and continuing. Mentor feedback is optional; supervisor checkpoints are at the protocol and final report. This conversation cannot certify research quality.',
       ),
     ),
   );
@@ -2479,7 +2508,7 @@ function sourcesPanel() {
       el(
         'p',
         { className: 'muted' },
-        'Import a paper or record a passage from a source link. Cite its ID in your research document, then continue to Check claims against source passages. Source links are not fetched automatically.',
+        'Import a paper or record a passage from a source link. Use inspected sources to synthesize the literature and refine your question in the next task. For closer claim checking, open the optional Literature claim ledger in Project materials. Source links are not fetched automatically.',
       ),
       paperLibrary(),
       project.sources.map((s) =>
@@ -2596,7 +2625,16 @@ function reviewPanel() {
     el(
       'aside',
       { className: 'guide-aside' },
-      el('p', { className: 'eyebrow' }, 'Supervisor checkpoint'),
+      el(
+        'p',
+        { className: 'eyebrow' },
+        requiresSupervisorReview(selected) ? 'Supervisor checkpoint' : 'Optional additional review',
+      ),
+      el(
+        'p',
+        { className: 'small' },
+        'Formal review needs a saved document and a separate explanation of at least 80 characters. Routine steps can instead use Save and continue without that extra explanation.',
+      ),
       el('h2', {}, 'Review the reasoning.'),
       el(
         'ul',
@@ -3053,6 +3091,9 @@ function unifiedWorkflow(panels) {
     stages.findIndex((s) => s.id === selected),
   );
   const shared = [
+    ['conversation', 'Ask your guide (optional)'],
+    ['guide', 'Mentor feedback (optional)'],
+    ['review', 'Supervisor review and history'],
     ['sources', 'Source library'],
     ['claims', 'Literature claim ledger'],
     ['execution', 'Datasets and recorded analyses'],
@@ -3111,14 +3152,15 @@ function unifiedWorkflow(panels) {
         {},
         suggestion.id === 'continue'
           ? 'Continue to the next research step'
-          : tasks.find(([id]) => id === suggestion.id)?.[1],
+          : tasks.find(([id]) => id === suggestion.id)?.[1] ||
+              shared.find(([id]) => id === suggestion.id)?.[1],
       ),
       el('p', {}, suggestion.reason),
       el(
         'p',
         { className: 'small' },
         selected === 'question'
-          ? 'This first checkpoint agrees a direction for reading, not a final question. Refine the question in the literature step.'
+          ? 'Save a provisional direction and move into reading. A final question and supervisor sign-off are not required at this stage.'
           : selected === 'evidence'
             ? 'Here, literature means prior studies and theory—not results from your own study. Save your refined question in this document before planning the study.'
             : 'Research is iterative: revisit earlier steps when reading, feasibility or findings justify a change. Writing can develop throughout.',
@@ -3135,7 +3177,7 @@ function unifiedWorkflow(panels) {
       el(
         'p',
         { className: 'small muted' },
-        'Suggestions reflect saved workflow status. Choose the tasks your study needs; tool use is not scientific approval.',
+        'Use the tasks your study needs. Mentor feedback is optional and available in Project materials. Save and continue through routine work; supervisor review is required for the protocol and final report. You can draft ahead and revisit earlier steps.',
       ),
     ),
     prior.length > 0 &&
@@ -3178,7 +3220,7 @@ function unifiedWorkflow(panels) {
       el(
         'p',
         { className: 'small' },
-        'Shared across all seven steps. Opening a record here does not move or duplicate it.',
+        'Optional help and shared records across all seven steps. Use mentor feedback or request an extra supervisor review when a difficult decision needs another perspective.',
       ),
       el(
         'div',
@@ -3231,7 +3273,7 @@ function unifiedWorkflow(panels) {
         panels[tab](),
         button('Return to this step’s tasks', () => selectTask(tasks[0][0]), 'quiet'),
       ),
-    current().status === 'approved' &&
+    milestoneFinished(current()) &&
       selected !== 'writing' &&
       el(
         'div',
@@ -3322,7 +3364,8 @@ async function load() {
     const data = await api('/api/project');
     ({ project, stages, mode, model } = data);
     modelSettings = data.settings;
-    selected = project.milestones.find((m) => m.status !== 'approved')?.id || 'writing';
+    selected = project.milestones.find((m) => !milestoneFinished(m))?.id || 'writing';
+    tab = workflowFor(selected)[0][0];
     render();
   } catch (error) {
     root.replaceChildren(

@@ -25,7 +25,7 @@ This application intentionally listens on loopback only. It is a single-user loc
 
 ### One workflow page per research step
 
-The seven research steps are the main navigation. Each page now presents a vertical sequence of tasks, with one task expanded at a time; there is no separate row of tool tabs. Follow **Discuss → Write → Check → Review**, with specialized tasks embedded where needed:
+The seven research steps are the main navigation. Each page presents tasks specific to the research work at that stage. **Mentor feedback and guide conversations are optional support**, accessible through Project materials. The main path no longer repeats a writing, explanation, mentor and supervisor cycle at every step:
 
 | Step                                              | Purpose and output                                                                                                                                       |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -39,7 +39,9 @@ The seven research steps are the main navigation. Each page now presents a verti
 
 **Your next action** explains a suggestion based on saved workflow state. These suggestions are deterministic navigation guidance; adaptive scientific conversation still comes from your configured model. **What carries forward** exposes saved documents from earlier steps. **Project materials** opens the shared source library, literature claim ledger, datasets and runs, consistency records, and project history without changing the selected research step.
 
-Opening a task does not mark it complete. Researcher draft acceptance, explicit execution approval, and supervisor review remain distinct. The **Continue to…** button appears after the step is approved locally; researchers may still draft ahead through the sidebar. Editing earlier work preserves the existing downstream review invalidation. Unsaved document edits and text entered into another task are retained when moving between tasks in the same step, but only saved work is backed up. File selections must be made again if their task is closed before upload.
+Steps **1, 2, 4, 5 and 6** use **Save and continue**. This saves the document and records researcher readiness without supervisor approval or a mandatory separate reflection. Basic checks require a document of at least 120 characters, completion of preceding steps, and an inspected source record for the literature step; these checks do not establish rigor. **Step 3 (protocol) and Step 7 (final report)** require a recorded supervisor decision and a separate explanation. Those local checkpoints do not replace institutional permissions. Extra supervisor review is available at any step; an already pending review must receive a decision, and a recorded revision request must be addressed in an updated version.
+
+Opening a task, accepting an AI draft, researcher completion, execution approval and supervisor approval remain distinct. Researchers may draft ahead through the sidebar. Editing earlier work flags affected completion and review statuses for reconsideration while preserving history. Unsaved document edits and text entered into another task are retained when moving between tasks in the same step, but only saved work is backed up. File selections must be made again if their task is closed before upload.
 
 Run `node scripts/unified-smoke.mjs` with Playwright configured to check task navigation, retained edits, review and continuation, shared materials and mobile layout.
 
@@ -61,11 +63,11 @@ Maintainers can regenerate both checked-in computations with `npm run build:demo
 
 ### Work on your own project
 
-New projects and milestones now open **Discuss this step with your guide**. Configure Ollama or a hosted API, then click **Start guiding me**, or type what you know. You do not need to fill in an artifact first.
+New projects offer **Explore a topic with your guide (optional)**. Later steps open their research task, such as inspecting sources or developing a protocol. At any step, open **Project materials → Ask your guide (optional)** for help. Configure Ollama or a hosted API, then click **Start guiding me**, or type what you know. You do not need to fill in a document first.
 
 The guide uses your project, saved work, sources, and earlier answers to choose a focused follow-up question. Later milestones carry forward earlier artifacts, explanations, review status, and the most recent 12 conversation turns per earlier milestone. The initial research direction is provisional. For later steps, an explicitly refined question in the saved literature review takes precedence over that direction; if no refinement is stated, the guide asks for clarification. Open “What carries forward into this step” to inspect the earlier artifacts, then choose “Continue from earlier work”. Accepting a draft makes it available downstream; it does not grant supervisor approval. It explains gaps and can propose a complete milestone draft. Ask it to revise anything inaccurate, then click **Accept draft into notebook** when it reflects your decisions. Acceptance saves a versioned artifact; it preserves your own explanation and renews affected review requirements. Outdated proposals cannot overwrite newer artifacts.
 
-Open **Write and explain your decisions** to explain the reasoning in your own words and request supervisor review. The conversational guide is available across all seven milestones; the original three-role feedback remains under **Get mentor feedback**. Each conversational turn uses one model call with a validated structured response. It does not independently search, execute analyses, approve work, or certify rigor.
+Open the stage’s document task to check an accepted draft and record decisions. Separate reflection is optional for routine completion and required for formal supervisor review. The conversational guide and **Mentor feedback (optional)** remain available across all seven steps in Project materials. Each conversational turn uses one model call with a validated structured response. It does not independently search, execute analyses, approve work, or certify rigor.
 
 Conversations persist and are included in JSON and Markdown exports. Each milestone supports up to 60 turns; the full saved conversation for that milestone is sent to the configured provider on subsequent turns. Demo mode does not simulate adaptive conversation. Existing notebooks work without migration.
 
@@ -74,20 +76,20 @@ Example: tell the guide, “I want to study AI use and learning, but I only have
 ## Try the complete workflow
 
 1. Choose **New project** and describe what you want to investigate.
-2. In **Write and explain your decisions**, use the outline or write your initial research direction. Explain your choices in your own words.
-3. Open **Get mentor feedback** and run the demo guide. Inspect the coordinator, specialist, reviewer, and next-step messages.
-4. Save your work and request a supervisor review. The minimum lengths check completeness only, not rigor or understanding.
-5. In **Supervisor checkpoint**, enter a name and a substantive note to approve or request changes. This is an explicitly labeled local role demonstration, not an authenticated supervisor account.
-6. Continue to the evidence milestone and add a source URL, location, and passage you inspected. Sources are user-provided and unverified.
-7. Work through design, data inspection, analysis, interpretation, and packaging. Export the saved notebook as Markdown or the complete record as JSON.
+2. **Save a direction for your reading**, then use **Save and continue**. You can request optional mentor feedback when you need help.
+3. Inspect literature, save source passages, and synthesize a refined question. Save and continue to the protocol.
+4. Develop the protocol and explain the key choices. Request supervisor review and record its decision. This is a local role demonstration, not an authenticated supervisor account.
+5. Obtain and prepare data, record quality and preparation decisions, and save and continue. Revisit the protocol if methods change.
+6. Run a separately approved analysis or document external results; then interpret the findings. Each stage has its own document and Save and continue action.
+7. Assemble the report, check alignment as needed, and record final supervisor review. Export the notebook and supporting materials.
 
-You can draft ahead, but submitting a milestone requires approvals on all preceding milestones. Changing an earlier artifact invalidates its approval and affected downstream statuses while preserving historical reviews. Adding evidence also triggers renewed review of the evidence milestone and its dependents.
+You can draft ahead. Completion follows the research sequence, using researcher completion for routine steps and supervisor approval at the two checkpoints. Changing earlier work invalidates affected completion and approval statuses while preserving historical reviews. The fictional demos include extra supervisor discussions to illustrate learning; those additional reviews are optional in your own project.
 
 ## Trace a claim back to evidence
 
 1. In Evidence, open **Inspect sources and save passages**. Upload a text-based PDF (up to 5 MB and 100 pages), or use the existing form to enter a source URL and an inspected passage. Source URLs are recorded, not automatically fetched.
 2. For a PDF, select an extracted page, compare it with the original, and copy a short exact passage. **Save page-linked passage** checks that the quotation occurs in the normalized extracted page text. File-page numbers may differ from printed labels. Multi-column extraction can change reading order; scans need OCR elsewhere.
-3. Open **Check claims against source passages**. Write a specific claim and attach 1–8 source passages. Save the claim.
+3. When closer checking is useful, open **Project materials → Literature claim ledger**. Write a specific claim and attach 1–8 source passages. Save the claim.
 4. Click **Assess linked evidence**. The configured model receives only that claim and its linked passages. It suggests whether those excerpts support, limit, or contradict the claim and may propose narrower wording. Responses containing unknown source IDs are rejected. A supported verdict is not full-paper verification or proof of scientific truth.
 5. Inspect the source context. Open **Record your inspection and decision**, explain your reasoning, and record agreement, disagreement, or unresolved status. This local researcher record is unauthenticated and does not grant supervisor approval.
 6. Revise the claim if needed and reassess. Editing a claim preserves history but makes earlier assessments outdated. Evidence changes renew affected milestone reviews.

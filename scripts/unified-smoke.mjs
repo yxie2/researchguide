@@ -17,7 +17,7 @@ try {
   await page.goto(`http://127.0.0.1:${app.address().port}`);
   await page.locator('.workflow-sequence').waitFor();
   assert.equal(await page.locator('.tabs').count(), 0);
-  assert.equal(await page.locator('.workflow-task').count(), 4);
+  assert.equal(await page.locator('.workflow-task').count(), 2);
   await page.getByRole('button', { name: 'Go to suggested action', exact: true }).click();
   await page
     .getByLabel('Research direction')
@@ -41,24 +41,25 @@ try {
     /Keep this unsent/,
   );
   await openTask(page, 'workspace');
-  await page.getByRole('button', { name: 'Request supervisor review →', exact: true }).click();
-  await page.getByLabel('Reviewer name').fill('Synthetic supervisor');
+  await page.getByLabel('Explain it in your own words').fill('');
+  await page.getByRole('button', { name: 'Save and continue →', exact: true }).click();
   await page
-    .getByLabel('Reason for your decision')
-    .fill(
-      'The question is suitably bounded for a synthetic workflow test and states its limitations.',
-    );
-  await page.getByRole('button', { name: 'Approve this version', exact: true }).click();
-  await page.getByRole('button', { name: 'Continue to Literature & question →', exact: true }).click();
-  await page.getByRole('heading', { name: 'Review the literature and refine your question', exact: true }).waitFor();
-  assert.equal(await page.locator('.workflow-task').count(), 6);
+    .getByRole('heading', { name: 'Review the literature and refine your question', exact: true })
+    .waitFor();
+  assert.equal(await page.locator('.workflow-task').count(), 2);
+  const saved = (await (await fetch(`http://127.0.0.1:${app.address().port}/api/project`)).json())
+    .project;
+  assert.equal(saved.milestones[0].status, 'completed');
+  assert.equal(saved.milestones[0].reviews.length, 0);
   await page.getByText('What carries forward into this step', { exact: true }).click();
   assert.match(await page.locator('.workflow-context').textContent(), /fictional association/);
   await page.screenshot({ path: 'docs/images/unified-workflow.png', fullPage: true });
   await openTask(page, 'execution');
   assert.equal(await page.locator('.workflow-shared').count(), 1);
   assert.equal(
-    await page.getByRole('heading', { name: 'Review the literature and refine your question', exact: true }).count(),
+    await page
+      .getByRole('heading', { name: 'Review the literature and refine your question', exact: true })
+      .count(),
     1,
   );
   await page.getByRole('button', { name: 'Return to this step’s tasks', exact: true }).click();
@@ -66,7 +67,7 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   assert.deepEqual(errors, []);
   console.log(
-    'Unified workflow smoke passed: tailored sequences, no tool tabs, draft/form retention, explicit review, next-step continuation, carried context, shared materials and mobile.',
+    'Unified workflow smoke passed: shorter stage sequences, optional mentor access, draft/form retention, save-and-continue without mandatory reflection or review, carried context, shared materials and mobile.',
   );
 } finally {
   await browser?.close();

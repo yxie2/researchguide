@@ -240,7 +240,13 @@ function scene() {
           el('pre', { class: 'demo-artifact' }, s.artifact),
           el('h3', {}, `${researcher()} explains the reasoning`),
           el('p', {}, s.understanding),
-          el('h3', {}, 'The review checkpoint'),
+          el(
+            'h3',
+            {},
+            ['design', 'writing'].includes(s.id)
+              ? 'The review checkpoint'
+              : 'Optional supervisor discussion in this example',
+          ),
           el('p', {}, s.review),
           index === 3 &&
             el(
@@ -325,7 +331,7 @@ function overview() {
         el(
           'p',
           {},
-          `Choose a phase in the sidebar or reveal the conversation one exchange at a time. Each phase shows the research document ${researcher()} accepted, the reasoning behind it, a fictional supervisor checkpoint and what carries into the next phase.`,
+          `Choose a phase in the sidebar or reveal the conversation one exchange at a time. Each phase shows the research document ${researcher()} accepted, the reasoning behind it and what carries forward. This teaching example includes extra supervisor discussions; your live project requires checkpoints only for the protocol and final report.`,
         ),
         button('Start the seven-phase walkthrough', () => go(0)),
         el(
