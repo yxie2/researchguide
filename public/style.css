@@ -849,6 +849,10 @@ details p {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.dataset-assessment {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 fieldset {
   border: 1px solid var(--line);
   margin: 1rem 0;

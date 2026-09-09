@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { discoveryAction, searchPublicData } from './lib/discovery.mjs';
 import {
   BACKUP_LIMIT,
   parseBackup,
@@ -35,6 +36,7 @@ export async function createApp({
   modelUrl = 'http://127.0.0.1:11434',
   llmSettings,
   guide = runGuide,
+  datasetSearch = searchPublicData,
 } = {}) {
   await mkdir(dataDir, { recursive: true });
   const settingsFile = path.join(dataDir, 'model-settings.json');
@@ -303,6 +305,25 @@ export async function createApp({
             return send(200, { project });
           } finally {
             writing = false;
+          }
+        }
+        if (pathname === '/api/data-discovery') {
+          if (writing || guiding)
+            throw new WorkflowError('Wait for the current operation to finish.', 409);
+          if (payload.revision !== project.revision)
+            throw new WorkflowError('Project changed. Reload before continuing.', 409);
+          if (
+            ['terms', 'assess'].includes(payload.action) &&
+            payload.settingsRevision !== settingsRevision
+          )
+            throw new WorkflowError('Model settings changed. Reload before continuing.', 409);
+          guiding = true;
+          try {
+            const result = await discoveryAction(project, payload, { ...settings }, datasetSearch);
+            if (result.project) await persist(result.project);
+            return send(200, result);
+          } finally {
+            guiding = false;
           }
         }
         if (

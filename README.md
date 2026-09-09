@@ -8,6 +8,8 @@ ResearchGuide is an early, local-first prototype for beginning PhD students and 
 
 ## Run locally
 
+**Public dataset discovery:** Step 4 now includes live Harvard Dataverse search, optional AI keyword suggestions and fit assessments, and a saved researcher shortlist alongside your own CSV uploads. See the [public datasets guide](docs/public-datasets.md) for the workflow and coverage limits.
+
 Requires **Node.js 22.13 or newer**. Run `npm ci` once to install the pinned PDF.js, CSV parser, and webR dependencies. There is no build step.
 
 ```bash

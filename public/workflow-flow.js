@@ -48,7 +48,18 @@ const flows = {
   question: [discuss, write, critique, review],
   evidence: [discuss, sources, claims, write, critique, review],
   design: [discuss, write, critique, check, review],
-  data: [discuss, data, write, check, review],
+  data: [
+    discuss,
+    [
+      'discovery',
+      'Find relevant public datasets',
+      'Search a public catalogue and assess candidates, or skip this task if you already have data.',
+    ],
+    data,
+    write,
+    check,
+    review,
+  ],
   analysis: [discuss, analysis, write, critique, check, review],
   interpretation: [discuss, write, claims, check, critique, review],
   writing: [

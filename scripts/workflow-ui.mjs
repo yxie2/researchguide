@@ -15,6 +15,7 @@ export async function openTask(page, id) {
     sources: 'Source library',
     claims: 'Literature claim ledger',
     execution: 'Datasets and recorded analyses',
+    discovery: 'Public dataset searches',
     consistency: 'Cross-step review records',
     activity: 'Project history',
   };

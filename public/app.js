@@ -16,6 +16,7 @@ let project,
 let selectedConsistencyId, analysisDatasetId, analysisPlanId;
 let materialsOpen = false;
 const taskFormMemory = new Map();
+const discoveryQueries = new Map();
 let projectView = null,
   savedProjectList = [],
   importBackup = null,
@@ -1122,6 +1123,178 @@ function outputTable(csv) {
     ),
   );
 }
+function discoveryPanel() {
+  const connected = mode !== 'demo';
+  const current = (record) =>
+    ['question', 'evidence', 'design'].every((id) => {
+      const m = project.milestones.find((m) => m.id === id);
+      const saved = record.context?.find((m) => m.id === id);
+      return saved?.version === m.version && saved.artifact === m.artifact;
+    });
+  const run = (payload, message) =>
+    perform(async () => {
+      const result = await api('/api/data-discovery', {
+        ...payload,
+        revision: project.revision,
+        settingsRevision: modelSettings.revision,
+      });
+      if (result.project) project = result.project;
+    }, message);
+  return el(
+    'section',
+    {},
+    el('h2', {}, 'Find data that could answer your question'),
+    el(
+      'p',
+      {},
+      'Search Harvard Dataverse across research disciplines. Results are catalogue matches, not verified recommendations. You can also skip this task and import your own permitted CSV in the next task.',
+    ),
+    el(
+      'p',
+      { className: 'muted' },
+      'Only the keywords you submit go to the public catalogue. Optional AI help sends saved research interest, literature and study design to your configured model; fit assessment also includes the selected catalogue record.',
+    ),
+    field(
+      'data-query',
+      'Search keywords',
+      'Use concepts, population or location. Review AI suggestions before searching; leave out confidential details.',
+      discoveryQueries.get(project.id) || '',
+      false,
+      { maxlength: 250, onInput: (e) => discoveryQueries.set(project.id, e.target.value) },
+    ),
+    button(
+      'Suggest keywords from my study',
+      () =>
+        perform(async () => {
+          const result = await api('/api/data-discovery', {
+            action: 'terms',
+            revision: project.revision,
+            settingsRevision: modelSettings.revision,
+          });
+          discoveryQueries.set(project.id, result.query);
+        }, 'Suggested keywords are ready to review before searching.'),
+      '',
+      { disabled: busy || !connected },
+    ),
+    button('Search public datasets', () =>
+      run(
+        { action: 'search', query: $('#data-query').value },
+        'Search saved. Inspect candidate records before deciding to use data.',
+      ),
+    ),
+    !connected &&
+      el(
+        'p',
+        { className: 'muted' },
+        'Search works without AI. Connect a model in LLM settings to suggest keywords and assess fit.',
+      ),
+    [...(project.dataSearches || [])].reverse().map((search) =>
+      el(
+        'details',
+        { open: search === project.dataSearches.at(-1) },
+        el(
+          'summary',
+          {},
+          `${search.query} · ${search.results.length} results · ${new Date(search.at).toLocaleString()}`,
+        ),
+        !current(search) &&
+          el(
+            'p',
+            {},
+            'Your research question or design has changed since this search. Reconsider these matches.',
+          ),
+        !search.results.length &&
+          el(
+            'p',
+            {},
+            'No matching datasets found. Try fewer terms, synonyms or a broader population. This catalogue does not cover all public data.',
+          ),
+        search.results.map((candidate) =>
+          el(
+            'article',
+            { className: 'card' },
+            el('h3', {}, candidate.title),
+            el(
+              'a',
+              { href: candidate.url, target: '_blank', rel: 'noopener noreferrer' },
+              'Inspect dataset in Harvard Dataverse',
+            ),
+            el('p', {}, candidate.description || 'No description provided.'),
+            el(
+              'p',
+              { className: 'muted' },
+              `${candidate.publisher} · Published ${candidate.publishedAt || 'date unknown'}`,
+            ),
+            el('p', {}, candidate.access),
+            candidate.citation &&
+              el(
+                'details',
+                {},
+                el('summary', {}, 'Catalogue citation'),
+                el('p', {}, candidate.citation),
+              ),
+            button(
+              'Assess fit with AI',
+              () =>
+                run(
+                  { action: 'assess', searchId: search.id, candidateId: candidate.id },
+                  'AI assessment saved. Verify it against the dataset documentation.',
+                ),
+              '',
+              { disabled: busy || !connected },
+            ),
+            candidate.assessment &&
+              el(
+                'div',
+                {},
+                el('h4', {}, 'AI assessment — requires researcher verification'),
+                !current(candidate.assessment) &&
+                  el(
+                    'p',
+                    {},
+                    'This assessment refers to an earlier research question or design. Assess fit again.',
+                  ),
+                el('p', { className: 'dataset-assessment' }, candidate.assessment.text),
+              ),
+            el(
+              'p',
+              {},
+              candidate.shortlisted
+                ? 'Shortlisted for inspection; not imported or approved.'
+                : 'Candidate only; not selected for use.',
+            ),
+            field(
+              `dataset-note-${candidate.id}`,
+              'Your dataset decision',
+              'Explain the fit or mismatch and what still needs checking: variables, population, dates, access and licence.',
+              candidate.note || '',
+              true,
+              { maxlength: 2000 },
+            ),
+            button(candidate.shortlisted ? 'Remove from shortlist' : 'Save to shortlist', () =>
+              run(
+                {
+                  action: 'shortlist',
+                  searchId: search.id,
+                  candidateId: candidate.id,
+                  shortlisted: !candidate.shortlisted,
+                  note: $(`#dataset-note-${candidate.id}`).value,
+                },
+                'Dataset decision saved.',
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+    el(
+      'p',
+      {},
+      'Before import: inspect the files and codebook, verify access and reuse permission, and record limitations in your Data preparation document. Download permitted data from the repository, then upload a CSV using the next task. The app does not download files automatically.',
+    ),
+  );
+}
+
 function executionPanel() {
   const datasets = project.datasets || [],
     plans = project.analysisPlans || [],
@@ -2716,6 +2889,7 @@ function unifiedWorkflow(panels) {
     ['sources', 'Source library'],
     ['claims', 'Literature claim ledger'],
     ['execution', 'Datasets and recorded analyses'],
+    ['discovery', 'Public dataset searches'],
     ['consistency', 'Cross-step review records'],
     ['activity', 'Project history'],
   ];
@@ -2913,6 +3087,7 @@ function render() {
     claims: claimsPanel,
     consistency: consistencyPanel,
     execution: executionPanel,
+    discovery: discoveryPanel,
     review: reviewPanel,
     activity: activityPanel,
     about: aboutPanel,
