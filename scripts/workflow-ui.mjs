@@ -16,6 +16,7 @@ export async function openTask(page, id) {
     guide: 'Mentor feedback (optional)',
     review: 'Supervisor review and history',
     sources: 'Source library',
+    literature: 'Literature searches and reading list',
     claims: 'Literature claim ledger',
     execution: 'Datasets and recorded analyses',
     discovery: 'Public dataset searches',

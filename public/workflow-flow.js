@@ -41,6 +41,11 @@ const flows = {
     ),
   ],
   evidence: [
+    [
+      'literature',
+      'Find literature for your research interest (optional)',
+      'Ask the agent to search public scholarly catalogues and suggest a reading order, or upload papers you already have in the next task.',
+    ],
     sources,
     document(
       'Synthesize the literature and refine your question',
@@ -142,7 +147,9 @@ export function recommendTask(project, id, provider) {
             ? 'workspace'
             : 'conversation'
           : id === 'evidence'
-            ? 'sources'
+            ? project.literatureSearches?.length || project.sources.length
+              ? 'sources'
+              : 'literature'
             : id === 'data' || (id === 'analysis' && project.datasets?.length)
               ? 'execution'
               : 'workspace',

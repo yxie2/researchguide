@@ -1,0 +1,16 @@
+# Discovering literature from your research interest
+
+Open **Step 2 → Find literature for your research interest (optional)**.
+
+1. Select **Find and suggest papers with AI**. With an empty keyword field, the agent derives terms from the saved research interest and literature draft, searches public scholarly catalogues, and assesses the retrieved records. If you enter keywords, it uses those terms instead.
+2. Review the saved query, paper records, AI reading priorities, relevance reasons and questions to investigate. Priorities suggest a reading order; they are not quality ratings. Where an abstract is absent, fit is tentative from metadata.
+3. Save useful candidates to your reading list and record notes. Searches and reading lists belong to the current project and survive reopening and backup import.
+4. Open the paper’s DOI or repository record. After reading, choose **Record a passage I have read** to prefill the existing source form, then supply the actual page/section and inspected passage. Alternatively, upload a permitted PDF using **Inspect sources and save passages**. Discovery does not automatically create inspected evidence, download full text, approve work or complete the literature review.
+
+**Search with my keywords** works without a model. **Assess these papers with AI** assesses a saved search against the current interest and literature draft. Earlier suggestions are flagged after those saved documents change. Suggestions are accepted only for retrieved paper IDs; unvalidated AI output cannot introduce new papers into the results. If AI assessment fails after retrieval, the records remain saved with a warning.
+
+The tool searches [Crossref’s public REST API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/) for journal-article metadata across disciplines and [Europe PMC’s public search service](https://dev.europepmc.org/RestfulWebService) for additional life-science and biomedical literature. It requests up to six records from each service and combines DOI duplicates within a search. Results may include records without abstracts, restricted full text or preprints. Inspect publication status, corrections and access conditions yourself. This limited discovery search is not an exhaustive or systematic literature review.
+
+Only search keywords go to the catalogues. AI discovery sends your saved project interest, research direction and literature draft to your configured local or API model, followed by retrieved metadata and available abstracts for assessment. Enter non-confidential keywords yourself if you need control over the external query. Source PDFs and full texts are not sent by this search feature. No catalogue API keys are required. The project supports up to 40 saved searches; searches, citations, reading-list notes and AI suggestions are included in project backups and Markdown exports. The conversation guide receives up to 12 selected reading candidates from the latest five searches, marked as candidates rather than inspected evidence.
+
+Verification: `npm test` and `node scripts/literature-smoke.mjs` (Playwright required). Automated browser tests use synthetic paper records and a mock model; live catalogue checks use generic, non-user search terms.

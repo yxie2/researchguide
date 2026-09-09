@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { literatureAction, searchLiterature } from './lib/literature.mjs';
 import { discoveryAction, searchPublicData } from './lib/discovery.mjs';
 import {
   BACKUP_LIMIT,
@@ -37,6 +38,7 @@ export async function createApp({
   llmSettings,
   guide = runGuide,
   datasetSearch = searchPublicData,
+  literatureSearch = searchLiterature,
 } = {}) {
   await mkdir(dataDir, { recursive: true });
   const settingsFile = path.join(dataDir, 'model-settings.json');
@@ -305,6 +307,30 @@ export async function createApp({
             return send(200, { project });
           } finally {
             writing = false;
+          }
+        }
+        if (pathname === '/api/literature-discovery') {
+          if (writing || guiding)
+            throw new WorkflowError('Wait for the current operation to finish.', 409);
+          if (payload.revision !== project.revision)
+            throw new WorkflowError('Project changed. Reload before continuing.', 409);
+          if (
+            ['discover', 'assess'].includes(payload.action) &&
+            payload.settingsRevision !== settingsRevision
+          )
+            throw new WorkflowError('Model settings changed. Reload before continuing.', 409);
+          guiding = true;
+          try {
+            const result = await literatureAction(
+              project,
+              payload,
+              { ...settings },
+              literatureSearch,
+            );
+            await persist(result.project);
+            return send(200, result);
+          } finally {
+            guiding = false;
           }
         }
         if (pathname === '/api/data-discovery') {

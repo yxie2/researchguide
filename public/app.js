@@ -23,6 +23,7 @@ let selectedConsistencyId, analysisDatasetId, analysisPlanId;
 let materialsOpen = false;
 const taskFormMemory = new Map();
 const discoveryQueries = new Map();
+const literatureQueries = new Map();
 let projectView = null,
   savedProjectList = [],
   importBackup = null,
@@ -1153,6 +1154,232 @@ function outputTable(csv) {
     ),
   );
 }
+function literaturePanel() {
+  const searches = project.literatureSearches || [];
+  const connected = mode !== 'demo';
+  const context = {
+    interest: project.question,
+    stages: project.milestones
+      .filter((m) => ['question', 'evidence'].includes(m.id))
+      .map((m) => ({ id: m.id, version: m.version, artifact: m.artifact })),
+  };
+  const current = (record) => JSON.stringify(record.context) === JSON.stringify(context);
+  const run = (payload, message) =>
+    perform(async () => {
+      const r = await api('/api/literature-discovery', {
+        ...payload,
+        revision: project.revision,
+        settingsRevision: modelSettings.revision,
+      });
+      project = r.project;
+      literatureQueries.set(project.id, project.literatureSearches.at(-1)?.query || '');
+    }, message);
+  return el(
+    'section',
+    {},
+    el('h2', {}, 'Find papers worth reading'),
+    el(
+      'p',
+      {},
+      'The agent can turn your saved research interest into a search, retrieve real paper records, and suggest a reading order with reasons. Crossref provides broad disciplinary coverage; Europe PMC adds life-science and biomedical literature. This is a starting search, not an exhaustive literature review.',
+    ),
+    el(
+      'p',
+      { className: 'muted' },
+      'AI discovery sends your saved interest and literature draft to your configured model, then sends search keywords to the catalogues. Retrieved titles, metadata and available abstracts go to the model for assessment. Enter your own non-confidential keywords below to control what is searched.',
+    ),
+    field(
+      'literature-query',
+      'Literature search keywords',
+      'Leave blank for AI to derive terms from your interest, or enter and refine your own terms.',
+      literatureQueries.get(project.id) || '',
+      false,
+      { maxlength: 250, onInput: (e) => literatureQueries.set(project.id, e.target.value) },
+    ),
+    button(
+      'Find and suggest papers with AI',
+      () =>
+        run(
+          { action: 'discover', query: $('#literature-query').value },
+          'Literature search saved. Review the suggestions and inspect papers before citing them.',
+        ),
+      '',
+      { disabled: busy || !connected },
+    ),
+    button('Search with my keywords', () =>
+      run(
+        { action: 'search', query: $('#literature-query').value },
+        'Paper records retrieved and saved. You can assess relevance or inspect them yourself.',
+      ),
+    ),
+    !connected &&
+      el(
+        'p',
+        { className: 'muted' },
+        'Keyword search works without AI. Connect a model for interest-based discovery and reading suggestions.',
+      ),
+    button('Upload papers or save inspected passages', () => {
+      tab = 'sources';
+      render();
+    }),
+    [...searches].reverse().map((search) => {
+      const ranked = search.assessment?.suggestions || [];
+      const papers = ranked.length
+        ? ranked.map((s) => search.results.find((p) => p.id === s.id)).filter(Boolean)
+        : search.results;
+      return el(
+        'details',
+        { open: search === searches.at(-1) },
+        el(
+          'summary',
+          {},
+          `${search.query} · ${search.results.length} papers · ${search.results.filter((p) => p.readingList).length} on reading list · ${date(search.at)}`,
+        ),
+        el(
+          'p',
+          { className: 'small' },
+          `Catalogues searched: ${search.catalogues.join(', ')}. DOI duplicates within this search are combined. Paper types and access vary; verify publication status and any corrections.`,
+        ),
+        search.warnings.map((w) => el('p', { className: 'note warn' }, w)),
+        !current(search) &&
+          el(
+            'p',
+            {},
+            'Your research interest or literature draft has changed since this search. Consider revising the search terms.',
+          ),
+        search.assessment &&
+          !current(search.assessment) &&
+          el(
+            'p',
+            {},
+            'These AI suggestions refer to earlier saved work. Reassess relevance before relying on them.',
+          ),
+        !papers.length &&
+          el(
+            'p',
+            {},
+            'No matching records found. Try fewer terms or synonyms, or use your library databases and upload papers.',
+          ),
+        button(
+          'Assess these papers with AI',
+          () =>
+            run(
+              { action: 'assess', searchId: search.id },
+              'Reading suggestions saved. They are based on metadata and available abstracts, not full-text inspection.',
+            ),
+          '',
+          { disabled: busy || !connected || !papers.length },
+        ),
+        papers.map((paper) => {
+          const suggestion = ranked.find((s) => s.id === paper.id);
+          return el(
+            'article',
+            { className: 'claim-record' },
+            el(
+              'h3',
+              {},
+              el(
+                'a',
+                { href: paper.url, target: '_blank', rel: 'noopener noreferrer' },
+                paper.title,
+              ),
+            ),
+            el(
+              'p',
+              {},
+              `${paper.authors || 'Authors not supplied'} (${paper.year || 'year unknown'}). ${paper.journal || ''}`,
+            ),
+            el(
+              'p',
+              { className: 'small' },
+              `${paper.catalogues.join(' + ')} · ${paper.type || 'Publication type unknown'}${paper.doi ? ` · DOI ${paper.doi}` : ''}`,
+            ),
+            el('p', {}, paper.access),
+            paper.repositoryUrl &&
+              el(
+                'a',
+                { href: paper.repositoryUrl, target: '_blank', rel: 'noopener noreferrer' },
+                'Open Europe PMC record',
+              ),
+            paper.abstract
+              ? el(
+                  'details',
+                  {},
+                  el('summary', {}, 'Repository abstract (may be truncated)'),
+                  el('p', {}, paper.abstract),
+                )
+              : el(
+                  'p',
+                  { className: 'muted' },
+                  'No abstract supplied. Any relevance assessment is tentative from metadata.',
+                ),
+            suggestion &&
+              el(
+                'div',
+                {},
+                el('h4', {}, `AI reading priority: ${suggestion.priority} — not a quality rating`),
+                el('p', {}, suggestion.reason),
+                el('p', {}, `Read to check: ${suggestion.readFor}`),
+              ),
+            el(
+              'p',
+              {},
+              paper.readingList
+                ? 'On your reading list. Inspected evidence is recorded separately.'
+                : 'Reading candidate only.',
+            ),
+            field(
+              `reading-note-${paper.id}`,
+              'Your reading note',
+              'Record why this paper may help, questions to investigate, or reasons to exclude it.',
+              paper.note,
+              true,
+              { maxlength: 2000 },
+            ),
+            button(paper.readingList ? 'Remove from reading list' : 'Save to reading list', () =>
+              run(
+                {
+                  action: 'reading_list',
+                  searchId: search.id,
+                  paperId: paper.id,
+                  selected: !paper.readingList,
+                  note: $(`#reading-note-${paper.id}`).value,
+                },
+                'Reading-list decision saved. Read the paper before using it as evidence.',
+              ),
+            ),
+            button('Save reading note', () =>
+              run(
+                {
+                  action: 'reading_list',
+                  searchId: search.id,
+                  paperId: paper.id,
+                  selected: paper.readingList,
+                  note: $(`#reading-note-${paper.id}`).value,
+                },
+                'Reading note saved.',
+              ),
+            ),
+            button('Record a passage I have read', () => {
+              tab = 'sources';
+              render();
+              $('#title').value = paper.title.slice(0, 300);
+              $('#url').value = paper.repositoryUrl || paper.url;
+              $('#location').focus();
+              $('#location').scrollIntoView({ block: 'center' });
+            }),
+          );
+        }),
+      );
+    }),
+    el(
+      'p',
+      { className: 'muted' },
+      'Discovery does not add inspected evidence or mark the literature step complete. Open and read the paper, then upload a permitted PDF or save the passage you inspected in the next task. Full-text downloads and library access happen outside this search tool.',
+    ),
+  );
+}
+
 function discoveryPanel() {
   const connected = mode !== 'demo';
   const current = (record) =>
@@ -3116,6 +3343,7 @@ function unifiedWorkflow(panels) {
     ['guide', 'Mentor feedback (optional)'],
     ['review', 'Supervisor review and history'],
     ['sources', 'Source library'],
+    ['literature', 'Literature searches and reading list'],
     ['claims', 'Literature claim ledger'],
     ['execution', 'Datasets and recorded analyses'],
     ['discovery', 'Public dataset searches'],
@@ -3314,6 +3542,7 @@ function render() {
     conversation: conversationPanel,
     guide: guidePanel,
     sources: sourcesPanel,
+    literature: literaturePanel,
     claims: claimsPanel,
     consistency: consistencyPanel,
     execution: executionPanel,

@@ -87,6 +87,8 @@ You can draft ahead. Completion follows the research sequence, using researcher 
 
 ## Trace a claim back to evidence
 
+Step 2 now offers **Find literature for your research interest (optional)** before paper inspection. The agent can generate search terms, retrieve actual records from Crossref and Europe PMC, and suggest a reading order with reasons. You can also search without AI, save a reading list, and upload papers you already have. Discovered records remain separate from inspected evidence. See the [literature discovery guide](docs/literature-discovery.md).
+
 At the design stage, **Can these methods answer your question?** is an optional prospective check of the research direction, literature/refined question and proposed methods. It does not inspect or request findings. Consistency reviews are scoped through the selected stage; later stages are excluded from the model input and missing-work list. Each saved report identifies its scope, and edits outside that scope do not make it stale. Existing reports retain their original whole-study scope.
 
 1. In Evidence, open **Inspect sources and save passages**. Upload a text-based PDF (up to 5 MB and 100 pages), or use the existing form to enter a source URL and an inspected passage. Source URLs are recorded, not automatically fetched.

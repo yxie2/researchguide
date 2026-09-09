@@ -46,7 +46,7 @@ try {
   await page
     .getByRole('heading', { name: 'Review the literature and refine your question', exact: true })
     .waitFor();
-  assert.equal(await page.locator('.workflow-task').count(), 2);
+  assert.equal(await page.locator('.workflow-task').count(), 3);
   const saved = (await (await fetch(`http://127.0.0.1:${app.address().port}/api/project`)).json())
     .project;
   assert.equal(saved.milestones[0].status, 'completed');
