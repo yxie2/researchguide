@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { reviewConsistency, appendConsistency } from './lib/consistency.mjs';
 import { extractPaper, assessClaim } from './lib/evidence.mjs';
 import { converse, appendConversation } from './lib/conversation.mjs';
 import { readFile, writeFile, mkdir, rename, stat } from 'node:fs/promises';
@@ -143,6 +144,26 @@ export async function createApp({
         );
         if (!payload || typeof payload !== 'object' || Array.isArray(payload))
           throw new WorkflowError('Request must be a JSON object.');
+        if (pathname === '/api/consistency') {
+          if (writing || guiding)
+            throw new WorkflowError('Wait for the current operation to finish.', 409);
+          if (
+            payload.revision !== project.revision ||
+            payload.settingsRevision !== settingsRevision
+          )
+            throw new WorkflowError(
+              'Project or model settings changed. Reload before reviewing.',
+              409,
+            );
+          guiding = true;
+          try {
+            const report = await reviewConsistency(project, { ...settings });
+            await persist(appendConsistency(project, report));
+            return send(200, { project });
+          } finally {
+            guiding = false;
+          }
+        }
         if (pathname === '/api/papers' || pathname === '/api/claims/assess') {
           if (writing || guiding)
             throw new WorkflowError('Wait for the current operation to finish.', 409);

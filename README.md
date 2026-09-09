@@ -58,6 +58,16 @@ PDF parsing is local and uses a worker with a 30-second timeout and a 256 MB Jav
 
 Original PDFs live in `data/papers/`, named by SHA-256. JSON exports include extracted pages and provenance, but not original PDF bytes. Back up `data/papers/` with the notebook to retain originals; creating a new project preserves files needed by archived notebooks. Uploaded papers are not automatically sent to an LLM. Selected excerpts are sent during claim assessment; guidance receives source records and the first 30 claim records.
 
+## Check consistency across the study
+
+Open **Consistency review** from any milestone and click **Run consistency review**. Save artifacts in at least two of the reviewed milestones first. The app compares the current research brief, design, data report, analysis record, interpretation (conclusions), and research package, including student explanations. It uses the saved research brief rather than the initial broad project interest. Unsaved workspace edits are saved before the request.
+
+The model looks for mismatched populations or measurements, causal claims unsupported by the design, unexplained analysis-plan deviations, conclusions that conflict with estimates or uncertainty, and overstated generalizability. It returns up to six priority findings. Each mismatch must quote at least two different milestones, and the server verifies every quotation against the exact saved text. Missing question, design, analysis, or interpretation artifacts are explicitly listed as a partial review. No findings means no issue was identified by the model, not that the study is scientifically sound.
+
+Inspect the quoted passages, open their linked milestone workspaces, and record agreement, disagreement, or unresolved status with your own explanation. A researcher response does not automatically fix a finding or grant supervisor approval. Edit the relevant artifacts and run a fresh review. Changes to any reviewed artifact or explanation make an old report outdated; unrelated source changes or recording a response do not. Decisions can be added only to the newest report while it still matches the saved work.
+
+Reports preserve the reviewed text and versions, model information, findings, and local unauthenticated researcher responses. History remains visible and is included in Markdown/JSON exports. Conversational guidance receives the latest report, labeled current or outdated. Limits: 20 reports per notebook and 20 responses per finding. Each run makes one model call and sends the six milestone artifacts and explanations to the configured provider. It does not inspect external documents, execute code, validate calculations, or guarantee an exhaustive audit.
+
 ## Choose a local model or hosted API
 
 Open **LLM settings** in the top bar. Choose:
@@ -91,7 +101,7 @@ Project text and up to 20 source records are sent to your configured endpoint. H
 
 ## Implemented versus planned
 
-| Available in v0.4                                            | Planned, not implemented                              |
+| Available in v0.5                                            | Planned, not implemented                              |
 | ------------------------------------------------------------ | ----------------------------------------------------- |
 | Seven milestone templates and worked examples                | Validated adaptive teaching and competence assessment |
 | Student explanations and supervisor checkpoints              | Authenticated roles and remote collaboration          |
@@ -117,6 +127,7 @@ Node HTTP server (loopback only)
   └── versioned notebook export
 ```
 
+- `lib/consistency.mjs`: cross-milestone comparisons, exact-quotation checks, and version-bound researcher responses.
 - `lib/evidence.mjs` and `lib/pdf-worker.mjs`: local PDF extraction, page matching, and bounded claim assessments.
 - `lib/workflow.mjs`: milestone definitions, transitions, approval gates, invalidation, and export.
 - `lib/conversation.mjs`: persistent conversational guidance and validated artifact proposals.
@@ -154,6 +165,7 @@ npx playwright install chromium
 node scripts/browser-smoke.mjs
 node scripts/settings-smoke.mjs
 node scripts/evidence-smoke.mjs
+node scripts/consistency-smoke.mjs
 ```
 
 It uses temporary data, walks project creation through review, checks export and revision invalidation, verifies mobile overflow, and regenerates the screenshots. The settings smoke test checks provider configuration, masked keys, connection testing, and guidance against a mock API; no real API credentials are required. Browser checks are not currently included in CI. `PLAYWRIGHT_MODULE` can point to an existing Playwright module URL instead of installing it here.

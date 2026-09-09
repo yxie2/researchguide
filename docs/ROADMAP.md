@@ -28,6 +28,14 @@
 - Cross-milestone claim context and exported evidence records.
 - OCR, automatic literature retrieval, publication authenticity checks, and full-paper verification remain future work.
 
+## v0.5 — Cross-milestone consistency (implemented)
+
+- Compare saved question, design, data, analysis, interpretation, and research package text.
+- Validate exact quoted references and require cross-milestone citations for mismatches.
+- Report missing core artifacts; preserve snapshots and mark old reports outdated after relevant edits.
+- Record researcher responses without granting approval; include reports in exports and guidance context.
+- Computational validation, exhaustive error detection, and research-quality evaluation remain future work.
+
 ## Next — A real pilot in one discipline
 
 Recruit beginning PhD students and supervisors before increasing scope. Review the templates with a domain-methods specialist. Choose a licensed public dataset and a narrow, answerable question.

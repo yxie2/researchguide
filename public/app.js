@@ -12,6 +12,7 @@ let project,
   busy = false,
   newProject = false,
   noticeTimer;
+let selectedConsistencyId;
 let selectedPaperId,
   selectedPaperPage = 1,
   claimEditor = { claim: '', sourceIds: [] };
@@ -93,10 +94,9 @@ async function mutate(action) {
 }
 async function perform(work, message) {
   if (busy) return;
-  const inputs = [...document.querySelectorAll('input[id], textarea[id]')].map((node) => [
-    node.id,
-    node.value,
-  ]);
+  const inputs = [...document.querySelectorAll('input[id], textarea[id], select[id]')]
+    .filter((node) => node.type !== 'file')
+    .map((node) => [node.id, node.value, node.type === 'checkbox' ? node.checked : null]);
   let failed = false;
   busy = true;
   render();
@@ -110,9 +110,12 @@ async function perform(work, message) {
     busy = false;
     render();
     if (failed)
-      for (const [id, value] of inputs) {
+      for (const [id, value, checked] of inputs) {
         const node = document.getElementById(id);
-        if (node) node.value = value;
+        if (node) {
+          node.value = value;
+          if (checked !== null) node.checked = checked;
+        }
       }
   }
 }
@@ -850,6 +853,251 @@ function paperLibrary() {
     ],
   );
 }
+function consistencyPanel() {
+  const ids = ['question', 'design', 'data', 'analysis', 'interpretation', 'writing'];
+  const reports = project.consistencyReports || [];
+  const report = reports.find((r) => r.id === selectedConsistencyId) || reports.at(-1);
+  const currentReport =
+    report &&
+    report.snapshot.every((s) => {
+      const m = project.milestones.find((m) => m.id === s.id);
+      return (
+        m.version === s.version && m.artifact === s.artifact && m.explanation === s.explanation
+      );
+    });
+  const canDecide = currentReport && report === reports.at(-1) && !isDirty();
+  const name = (id) => stages.find((s) => s.id === id).short;
+  return el(
+    'div',
+    { className: 'columns' },
+    el(
+      'section',
+      {},
+      el('h2', {}, 'Does the study tell one consistent story?'),
+      el(
+        'p',
+        { className: 'muted' },
+        'Compare the research brief, design, data report, analysis, conclusions, and research package. The guide flags mismatches and missing information; it does not execute analyses or certify rigor.',
+      ),
+      el(
+        'div',
+        { className: 'form-actions' },
+        button(
+          'Run consistency review',
+          () =>
+            perform(async () => {
+              if (isDirty()) await saveDraft();
+              const r = await api('/api/consistency', {
+                revision: project.revision,
+                settingsRevision: modelSettings.revision,
+              });
+              project = r.project;
+              selectedConsistencyId = project.consistencyReports.at(-1).id;
+            }, 'Consistency review saved. Inspect each finding against the quoted text.'),
+          '',
+          { disabled: busy || mode === 'demo' },
+        ),
+      ),
+      el(
+        'p',
+        { className: 'small muted' },
+        mode === 'demo'
+          ? 'Connect a model in LLM settings to run a review.'
+          : `This sends the six saved milestone artifacts and explanations to ${modelSettings.baseUrl}. Unsaved workspace edits will be saved first. No source PDFs or external files are inspected.`,
+      ),
+      !report &&
+        el(
+          'p',
+          { className: 'empty' },
+          'Save work in at least two review milestones, then compare it here. You can review an incomplete study; missing core milestones will be listed.',
+        ),
+      report && [
+        el(
+          'p',
+          { className: 'status' },
+          `${currentReport && !isDirty() ? 'Matches saved work' : 'Outdated or unsaved changes — rerun before relying on this report'} · ${report.model} · ${date(report.at)}`,
+        ),
+        el('p', { className: 'prewrap' }, report.summary),
+        report.missing.length > 0 &&
+          el(
+            'div',
+            { className: 'note warn' },
+            `Partial review: ${report.missing.map(name).join(', ')} had no saved artifact. A full comparison was not possible.`,
+          ),
+        !report.findings.length &&
+          el(
+            'p',
+            { className: 'note' },
+            'The model identified no specific issue in the supplied text. This does not establish that the study is complete or scientifically sound.',
+          ),
+        report.findings.map((f) =>
+          el(
+            'article',
+            { className: 'claim-record' },
+            el(
+              'p',
+              { className: 'eyebrow' },
+              `${f.id} · ${f.severity} priority · ${f.kind.replaceAll('_', ' ')} · ${f.dimension.replaceAll('_', ' ')}`,
+            ),
+            el('h3', {}, f.title),
+            el('p', {}, f.explanation),
+            f.references.map((ref) =>
+              el(
+                'div',
+                { className: 'consistency-reference' },
+                button(
+                  `${name(ref.stageId)} · v${ref.version} · ${ref.field}`,
+                  () => {
+                    navigate(ref.stageId);
+                    if (selected === ref.stageId) {
+                      tab = 'workspace';
+                      render();
+                    }
+                  },
+                  'quiet',
+                ),
+                el('blockquote', {}, ref.quote),
+                el(
+                  'p',
+                  { className: 'small muted' },
+                  'Exact quotation from the reviewed snapshot. The button opens the current workspace.',
+                ),
+              ),
+            ),
+            el(
+              'div',
+              { className: 'note' },
+              el('strong', {}, 'Suggested next action'),
+              el('p', {}, f.recommendation),
+            ),
+            f.decisions.map((d) =>
+              el(
+                'div',
+                { className: 'review' },
+                el('strong', {}, `${d.name} · ${d.decision} · ${date(d.at)}`),
+                el('p', {}, d.note),
+              ),
+            ),
+            canDecide &&
+              el(
+                'details',
+                {},
+                el('summary', {}, `Respond to ${f.id}`),
+                el(
+                  'form',
+                  {
+                    onSubmit: (e) => {
+                      e.preventDefault();
+                      const values = {
+                        name: $(`#consistency-name-${f.id}`).value,
+                        note: $(`#consistency-note-${f.id}`).value,
+                        decision: $(`#consistency-decision-${f.id}`).value,
+                      };
+                      perform(
+                        () =>
+                          mutate({
+                            type: 'consistency_decision',
+                            reportId: report.id,
+                            findingId: f.id,
+                            ...values,
+                          }),
+                        'Researcher response saved. This does not resolve the issue automatically or grant approval.',
+                      );
+                    },
+                  },
+                  field(`consistency-name-${f.id}`, 'Researcher name', '', '', false, {
+                    required: true,
+                    maxlength: 100,
+                  }),
+                  el('label', { for: `consistency-decision-${f.id}` }, 'Your assessment'),
+                  el(
+                    'select',
+                    { id: `consistency-decision-${f.id}`, disabled: busy },
+                    el('option', { value: 'unresolved' }, 'Still unresolved'),
+                    el('option', { value: 'agree' }, 'Agree with the finding'),
+                    el('option', { value: 'disagree' }, 'Disagree with the finding'),
+                  ),
+                  field(
+                    `consistency-note-${f.id}`,
+                    'Explain your response',
+                    'Describe what needs changing, or why the flagged difference is justified. At least 40 characters.',
+                    '',
+                    true,
+                    { required: true, minlength: 40, maxlength: 4000 },
+                  ),
+                  el(
+                    'button',
+                    { type: 'submit', className: 'button', disabled: busy },
+                    'Save finding response',
+                  ),
+                ),
+              ),
+          ),
+        ),
+        el(
+          'p',
+          { className: 'small muted' },
+          'Researcher responses are local and unauthenticated. Agreement acknowledges a finding; it does not fix it. Edit the relevant milestones and rerun the review to reassess.',
+        ),
+      ],
+    ),
+    el(
+      'aside',
+      { className: 'guide-aside' },
+      el('h2', {}, 'Review coverage'),
+      ids.map((id) => {
+        const m = project.milestones.find((m) => m.id === id);
+        return el(
+          'p',
+          {},
+          `${name(id)} · v${m.version} · ${m.artifact.trim() ? 'saved text available' : 'no saved artifact'}`,
+        );
+      }),
+      el(
+        'p',
+        { className: 'small' },
+        'Checks population and measurement, design and causal claims, planned versus reported analysis, results and conclusions, and limitations. Up to six priority findings per run; not an exhaustive audit.',
+      ),
+      report &&
+        el(
+          'details',
+          {},
+          el('summary', {}, 'Text examined in this report'),
+          report.snapshot.map((s) =>
+            el(
+              'section',
+              {},
+              el('h3', {}, `${name(s.id)} · v${s.version}`),
+              el('p', { className: 'prewrap' }, s.artifact || '(No artifact)'),
+              el('p', { className: 'prewrap small' }, s.explanation || '(No student explanation)'),
+            ),
+          ),
+        ),
+      reports.length > 0 && [
+        el('h3', {}, 'Review history'),
+        reports
+          .slice()
+          .reverse()
+          .map((r) =>
+            button(
+              `${date(r.at)} · ${r.findings.length} findings`,
+              () => {
+                selectedConsistencyId = r.id;
+                render();
+              },
+              'quiet',
+              { 'aria-pressed': report.id === r.id },
+            ),
+          ),
+      ],
+      el(
+        'p',
+        { className: 'small muted' },
+        'Reports and researcher responses are included in notebook exports. Any edit to a reviewed artifact or explanation makes the report outdated. Earlier reports remain available.',
+      ),
+    ),
+  );
+}
 function claimsPanel() {
   const claims = project.claims || [];
   return el(
@@ -1391,7 +1639,7 @@ function aboutPanel() {
     el(
       'p',
       {},
-      'Seven guided milestones, editable artifacts, understanding prompts, source records, version history, local review decisions, dependency invalidation, exports, PDF text extraction, a claim–evidence ledger with AI suggestions and researcher decisions, and optional guidance using Ollama or an OpenAI-compatible API.',
+      'Seven guided milestones, editable artifacts, understanding prompts, source records, version history, local review decisions, dependency invalidation, exports, PDF text extraction, a claim–evidence ledger, cross-milestone consistency reviews with quoted findings and researcher decisions, and optional guidance using Ollama or an OpenAI-compatible API.',
     ),
     el('h3', {}, 'What is still ahead'),
     el(
@@ -1716,6 +1964,7 @@ function render() {
     guide: guidePanel,
     sources: sourcesPanel,
     claims: claimsPanel,
+    consistency: consistencyPanel,
     review: reviewPanel,
     activity: activityPanel,
     about: aboutPanel,
@@ -1727,6 +1976,7 @@ function render() {
     ['guide', 'Research team'],
     ['sources', 'Sources'],
     ['claims', 'Claims & evidence'],
+    ['consistency', 'Consistency review'],
     ['review', 'Supervisor review'],
     ['activity', 'History'],
   ];
