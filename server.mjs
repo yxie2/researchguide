@@ -381,7 +381,11 @@ export async function createApp({
             );
           guiding = true;
           try {
-            const report = await reviewConsistency(project, { ...settings });
+            const report = await reviewConsistency(
+              project,
+              { ...settings },
+              payload.throughStage || 'writing',
+            );
             await persist(appendConsistency(project, report));
             return send(200, { project });
           } finally {

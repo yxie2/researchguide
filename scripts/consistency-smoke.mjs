@@ -10,11 +10,24 @@ const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const dir = await mkdtemp(path.join(os.tmpdir(), 'researchguide-consistency-ui-'));
 await writeFile(path.join(dir, 'project.json'), JSON.stringify(consistencyFixture()));
 const provider = http.createServer(async (req, res) => {
-  for await (const chunk of req) {
-  }
+  let body = '';
+  for await (const chunk of req) body += chunk;
+  const context = JSON.parse(JSON.parse(body).messages[1].content);
   res.setHeader('Content-Type', 'application/json');
   res.end(
-    JSON.stringify({ choices: [{ message: { content: JSON.stringify(consistencyReply()) } }] }),
+    JSON.stringify({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify(
+              context.throughStage === 'design'
+                ? { summary: 'Planning fit checked without findings.', findings: [] }
+                : consistencyReply(),
+            ),
+          },
+        },
+      ],
+    }),
   );
 });
 await new Promise((r) => provider.listen(0, '127.0.0.1', r));
@@ -37,6 +50,19 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   const url = `http://127.0.0.1:${app.address().port}`;
   await page.goto(url);
+  await page.locator('.stage-button').nth(2).click();
+  await openTask(page, 'consistency');
+  await page.getByRole('button', { name: 'Check question–methods fit', exact: true }).click();
+  await page.getByText('Planning fit checked without findings.', { exact: true }).waitFor();
+  const designReport = (
+    await (await page.request.get(url + '/api/project')).json()
+  ).project.consistencyReports.at(-1);
+  assert.deepEqual(
+    designReport.snapshot.map((s) => s.id),
+    ['question', 'evidence', 'design'],
+  );
+  assert.deepEqual(designReport.missing, []);
+  await page.locator('.stage-button').nth(6).click();
   await openTask(page, 'consistency');
   await page.getByRole('button', { name: 'Run consistency review', exact: true }).click();
   await page
@@ -64,6 +90,7 @@ try {
     .waitFor();
   await page.screenshot({ path: 'docs/images/consistency.png', fullPage: true });
   await page.reload();
+  await page.locator('.stage-button').nth(6).click();
   await openTask(page, 'consistency');
   await page.getByText(/Example researcher · agree/).waitFor();
   await page.setViewportSize({ width: 390, height: 844 });
@@ -82,7 +109,10 @@ try {
       'The observational analysis does not establish a causal effect. The interval includes zero, so the direction of the association is uncertain.',
     );
   await page.getByRole('button', { name: 'Save your work', exact: true }).click();
-  await page.getByText('Saved. Changed versions require fresh reviews.', { exact: true }).waitFor();
+  await page
+    .getByText('Saved. Revisit completion or reviews affected by changes.', { exact: true })
+    .waitFor();
+  await page.locator('.stage-button').nth(6).click();
   await openTask(page, 'consistency');
   await page.getByText(/Outdated or unsaved changes/).waitFor();
   assert.equal(await page.getByText('Respond to F1', { exact: true }).count(), 0);

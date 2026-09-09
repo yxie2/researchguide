@@ -145,6 +145,7 @@ function navigate(id) {
   if (isDirty() && !confirm('Discard unsaved edits to this milestone? Save first to keep them.'))
     return;
   selected = id;
+  selectedConsistencyId = undefined;
   draft = null;
   tab = workflowFor(id)[0][0];
   newProject = false;
@@ -1942,14 +1943,18 @@ function executionPanel() {
   );
 }
 function consistencyPanel() {
+  const planning = ['question', 'evidence', 'design'].includes(selected);
   const ids = ['question', 'evidence', 'design', 'data', 'analysis', 'interpretation', 'writing'];
   const reports = project.consistencyReports || [];
-  const report = reports.find((r) => r.id === selectedConsistencyId) || reports.at(-1);
+  const report =
+    reports.find((r) => r.id === selectedConsistencyId) ||
+    reports.findLast((r) => (r.throughStage || 'writing') === selected);
   const currentReport =
     report &&
     report.snapshot.some((s) => s.id === 'evidence') &&
-    Boolean(report.snapshot.find((s) => s.id === 'execution')) ===
-      Boolean((project.analysisRuns || []).some((r) => r.status === 'succeeded')) &&
+    (ids.indexOf(report.throughStage || 'writing') < ids.indexOf('analysis') ||
+      Boolean(report.snapshot.find((s) => s.id === 'execution')) ===
+        Boolean((project.analysisRuns || []).some((r) => r.status === 'succeeded'))) &&
     report.snapshot.every((s) => {
       if (s.id === 'execution') return s.version === project.analysisRuns.length;
       const m = project.milestones.find((m) => m.id === s.id);
@@ -1966,23 +1971,32 @@ function consistencyPanel() {
     el(
       'section',
       {},
-      el('h2', {}, 'Does the study tell one consistent story?'),
+      el(
+        'h2',
+        {},
+        planning
+          ? 'Can your proposed methods answer your question?'
+          : 'Does the study tell one consistent story?',
+      ),
       el(
         'p',
         { className: 'muted' },
-        'Compare the research brief, design, data report, analysis, conclusions, and research package. The guide flags mismatches and missing information; it does not execute analyses or certify rigor.',
+        planning
+          ? 'Compare your research direction, refined question and proposed methods. Check the planned sample, measurements, analysis and feasibility. Findings and conclusions are not expected at this stage.'
+          : `Compare saved work through ${stage().short}. Later stages are excluded, so unfinished future work is not flagged as missing. The guide does not execute analyses or certify rigor.`,
       ),
       el(
         'div',
         { className: 'form-actions' },
         button(
-          'Run consistency review',
+          planning ? 'Check question–methods fit' : 'Run consistency review',
           () =>
             perform(async () => {
               if (isDirty()) await saveDraft();
               const r = await api('/api/consistency', {
                 revision: project.revision,
                 settingsRevision: modelSettings.revision,
+                throughStage: selected,
               });
               project = r.project;
               selectedConsistencyId = project.consistencyReports.at(-1).id;
@@ -1996,7 +2010,7 @@ function consistencyPanel() {
         { className: 'small muted' },
         mode === 'demo'
           ? 'Connect a model in LLM settings to run a review.'
-          : `This sends the seven saved milestone artifacts and explanations to ${modelSettings.baseUrl}. Unsaved workspace edits will be saved first. Recorded R output summaries are included when available. No source PDFs or external files are inspected.`,
+          : `This sends saved documents through ${stage().short} to ${modelSettings.baseUrl}. Unsaved workspace edits will be saved first. Recorded R summaries are included only from the analysis stage onward. No source PDFs or external files are inspected.`,
       ),
       !report &&
         el(
@@ -2005,6 +2019,11 @@ function consistencyPanel() {
           'Save work in at least two review milestones, then compare it here. You can review an incomplete study; missing core milestones will be listed.',
         ),
       report && [
+        el(
+          'p',
+          { className: 'small' },
+          `Saved report scope: through ${name(report.throughStage || 'writing')}.${report.throughStage !== selected ? ' This is a historical report with a different scope; run the check above for this stage.' : ''}`,
+        ),
         el(
           'p',
           { className: 'status' },
@@ -2143,7 +2162,7 @@ function consistencyPanel() {
       'aside',
       { className: 'guide-aside' },
       el('h2', {}, 'Review coverage'),
-      ids.map((id) => {
+      ids.slice(0, ids.indexOf(selected) + 1).map((id) => {
         const m = project.milestones.find((m) => m.id === id);
         return el(
           'p',
@@ -2154,7 +2173,9 @@ function consistencyPanel() {
       el(
         'p',
         { className: 'small' },
-        'Checks population and measurement, design and causal claims, planned versus reported analysis, results and conclusions, and limitations. Up to six priority findings per run; not an exhaustive audit.',
+        planning
+          ? 'Checks whether the planned sample, measures, comparisons and analysis can answer the question. No findings are needed for this planning check.'
+          : 'Checks only the stages listed above. Results and conclusions are compared when they fall within this scope. Up to six priority findings per run; not an exhaustive audit.',
       ),
       report &&
         el(
@@ -2178,13 +2199,13 @@ function consistencyPanel() {
           .reverse()
           .map((r) =>
             button(
-              `${date(r.at)} · ${r.findings.length} findings`,
+              `${date(r.at)} · through ${name(r.throughStage || 'writing')} · ${r.findings.length} findings`,
               () => {
                 selectedConsistencyId = r.id;
                 render();
               },
               'quiet',
-              { 'aria-pressed': report.id === r.id },
+              { 'aria-pressed': report?.id === r.id },
             ),
           ),
       ],

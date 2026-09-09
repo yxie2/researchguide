@@ -30,6 +30,28 @@ async function model(t) {
     },
   };
 }
+test('design review excludes future stages, results and missing-finding complaints', async (t) => {
+  const { state, config } = await model(t);
+  const p = consistencyFixture();
+  state.reply = { summary: 'The proposed methods need researcher inspection.', findings: [] };
+  const report = await reviewConsistency(p, config, 'design');
+  const sent = JSON.parse(state.calls.at(-1).messages[1].content);
+  assert.deepEqual(
+    sent.milestones.map((s) => s.id),
+    ['question', 'evidence', 'design'],
+  );
+  assert.deepEqual(report.missing, []);
+  assert.equal(report.throughStage, 'design');
+  assert.match(state.calls.at(-1).messages[0].content, /prospective question/);
+  p.milestones.find((m) => m.id === 'interpretation').artifact += ' Later findings changed.';
+  assert.ok(consistencyIsCurrent(p, report));
+  p.milestones.find((m) => m.id === 'evidence').artifact += ' Question changed.';
+  assert.equal(consistencyIsCurrent(p, report), false);
+  state.reply = consistencyReply();
+  await assert.rejects(reviewConsistency(p, config, 'design'), /quotation|finding/);
+  await assert.rejects(reviewConsistency(p, config, 'unknown'), /valid research stage/);
+});
+
 test('consistency report binds findings to exact saved text and becomes stale after relevant edits', async (t) => {
   const { state, config } = await model(t);
   let p = consistencyFixture();

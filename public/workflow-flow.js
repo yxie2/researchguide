@@ -52,7 +52,11 @@ const flows = {
       'Develop the study protocol',
       'Specify sampling, measures, data access, planned analysis and safeguards. Explain the key methodological choices for your supervisor.',
     ),
-    check,
+    [
+      'consistency',
+      'Can these methods answer your question? (optional)',
+      'Check the proposed sample, measures and analysis against the refined question. This is a planning check; findings are not expected yet.',
+    ],
     [
       'review',
       'Review the protocol with your supervisor',

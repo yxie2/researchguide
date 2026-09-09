@@ -120,6 +120,7 @@ try {
   assert.equal(bundle.run.status, 'succeeded');
   assert.match(bundle.run.files['coefficients.csv'], /1.942857/);
   assert.equal(bundle.dataset.csv, analysisCSV);
+  await page.locator('.stage-button').nth(6).click();
   await openTask(page, 'consistency');
   await page.getByRole('button', { name: 'Run consistency review', exact: true }).click();
   await page
