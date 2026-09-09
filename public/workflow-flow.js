@@ -36,8 +36,8 @@ const flows = {
       'Discuss your interests and practical constraints, or go straight to recording your direction.',
     ],
     document(
-      'Save a direction for your reading',
-      'Record your interest, motivation and what you need to learn. Save and continue; a final question and supervisor sign-off are not required here.',
+      'Review your research starting point',
+      'Check the summary from your conversation, adjust anything inaccurate, then continue to the literature review. An accepted AI draft is already saved; you do not need to write it again.',
     ),
   ],
   evidence: [

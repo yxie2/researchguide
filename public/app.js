@@ -738,7 +738,9 @@ function workspace() {
   const artifact = field(
     'artifact',
     s.deliverable,
-    'Record your decisions, supporting evidence, and what remains uncertain.',
+    selected === 'question'
+      ? 'Check your topic, motivation, tentative scope and what you want to learn. If you accepted an AI draft, it is already saved here. If you skipped the conversation, write a brief starting point yourself.'
+      : 'Record your decisions, supporting evidence, and what remains uncertain.',
     draft.artifact,
     true,
     {
@@ -781,7 +783,13 @@ function workspace() {
       el(
         'div',
         { className: 'section-top' },
-        el('h2', {}, 'Make your thinking visible.'),
+        el(
+          'h2',
+          {},
+          selected === 'question'
+            ? 'Does this summary reflect your research interest?'
+            : 'Make your thinking visible.',
+        ),
         button(
           'Use a starter outline',
           () => {

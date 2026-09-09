@@ -80,7 +80,7 @@ Example: tell the guide, “I want to study AI use and learning, but I only have
 ## Try the complete workflow
 
 1. Choose **New project** and describe what you want to investigate.
-2. **Save a direction for your reading**, then use **Save and continue**. You can request optional mentor feedback when you need help.
+2. **Review your research starting point**: check the summary from your conversation and correct anything inaccurate. An accepted AI draft is already saved; you do not need to write it again. If you skipped the conversation, write a brief starting point yourself. Use **Save and continue** to move to the literature review.
 3. Inspect literature, save source passages, and synthesize a refined question. Save and continue to the protocol.
 4. Develop the protocol and explain the key choices. Request supervisor review and record its decision. This is a local role demonstration, not an authenticated supervisor account.
 5. Obtain and prepare data, record quality and preparation decisions, and save and continue. Revisit the protocol if methods change.
