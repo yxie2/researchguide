@@ -6,6 +6,13 @@
   color: var(--muted);
   margin-bottom: 2rem;
 }
+.demo-case-picker {
+  margin-bottom: 1.25rem;
+}
+.demo-case-picker a[aria-current='page'] {
+  background: var(--green);
+  color: var(--paper);
+}
 .demo-turn {
   padding: 1.3rem 0;
   border-bottom: 1px solid var(--line);

@@ -2179,7 +2179,7 @@ function onboardPanel() {
       el(
         'a',
         { href: '/demo', target: '_blank', rel: 'noopener' },
-        'New to research? Follow Maya’s complete fictional demo case ↗',
+        'New to research? Explore complete education and business demo cases ↗',
       ),
       ' Opens in a separate tab so you can keep your notebook here.',
     ),

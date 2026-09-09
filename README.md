@@ -21,15 +21,21 @@ This application intentionally listens on loopback only. It is a single-user loc
 
 ## Start with a conversation
 
-### Explore a complete fictional case
+### Explore complete fictional cases
 
 Choose **Explore demo case ↗** in the toolbar or use the demo link under **New project**. The walkthrough opens in a separate tab and keeps your current notebook, unsaved edits and model settings intact. It needs no API key and makes no AI calls.
+
+Use **Choose a case** to switch between **Education · Study habits** and **Business · Training and sales**. Each case has its own saved progress; restarting one does not reset the other. Link directly to the business case at `/demo?case=business`.
 
 Follow fictional PhD student Maya through all seven phases: question, evidence, design, data, analysis, interpretation and research package. Reveal the conversations exchange by exchange, inspect the accepted artifacts and explanations, and see how earlier decisions constrain later work. The example includes an unsupported causal claim, a challenging source, two missing records, explicit analysis approval, and a consistency finding followed by a corrected conclusion. Optional learning questions provide immediate feedback. Progress stays in browser storage; **Restart walkthrough** resets only that progress.
 
 All people, source excerpts, conversations and reviews are authored simulations. The bundled regression outputs were computed by the app’s actual local R runner on eight synthetic records, using six complete cases. Download the walkthrough, CSV, exact R script, selected input, figure and reproduction bundle. The small invented case teaches workflow; it is not evidence about real students or a publication-ready study. The downloads are teaching/reproduction materials, not an active-notebook import.
 
-Maintainers can regenerate the checked-in computation with `npm run build:demo`. This runs the fixed R template on synthetic data without reading the active notebook or model settings. Case content lives in `lib/demo-case.mjs`; the served artifact is `public/demo-case.json`. Run `node scripts/demo-smoke.mjs` with Playwright installed (or `PLAYWRIGHT_MODULE` configured) to verify the full walkthrough, downloads and notebook isolation.
+The business case follows fictional management PhD student **Alex Morgan** at the invented company **Northstar Office Supply**. Across all seven phases, Alex separates a managerial request for training ROI from an answerable association question, examines manager selection and territory opportunity, defines employee-level measures, handles missing records, approves the R plan and corrects an executive overclaim. The final package includes both an academic report and an executive summary.
+
+Business results come from actual R execution on 14 synthetic representatives, with 12 complete cases and two exclusions. The unadjusted slope is approximately **0.944 kUSD of booked revenue per training hour**, with a model-based 95% interval of **−0.748 to 2.636**. The interval crosses zero. The walkthrough explains why this neither establishes a training effect or ROI nor proves the absence of any benefit. Downloads contain this case’s own data, code and results.
+
+Maintainers can regenerate both checked-in computations with `npm run build:demo`. This runs the fixed R template on synthetic data without reading the active notebook or model settings. Case content lives in `lib/demo-case.mjs` and `lib/business-demo-case.mjs`; the served artifacts are `public/demo-case.json` and `public/business-demo-case.json`. Numerical placeholders in the business narrative are populated directly from R outputs. Run `node scripts/demo-smoke.mjs` and `node scripts/demo-smoke.mjs --business` with Playwright installed (or `PLAYWRIGHT_MODULE` configured) to verify both walkthroughs, downloads, separate progress and notebook isolation.
 
 ### Work on your own project
 

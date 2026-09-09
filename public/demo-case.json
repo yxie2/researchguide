@@ -269,7 +269,7 @@
     }
   ],
   "csv": "study_hours,quiz_score\n1,2\n2,4\n3,5\n4,8\n5,9\n6,12\n7,NA\n,10\n",
-  "builtAt": "2026-09-09T17:27:14.940Z",
+  "builtAt": "2026-09-09T17:44:49.376Z",
   "computation": {
     "dataset": {
       "id": "D1",
@@ -294,7 +294,7 @@
         }
       ],
       "rowCount": 8,
-      "at": "2026-09-09T17:27:11.439Z"
+      "at": "2026-09-09T17:44:46.075Z"
     },
     "plan": {
       "id": "P1",
@@ -323,24 +323,24 @@
         }
       ],
       "model": null,
-      "at": "2026-09-09T17:27:11.439Z",
+      "at": "2026-09-09T17:44:46.075Z",
       "approvals": [
         {
-          "id": "1396e796-f984-44e3-b309-6202210edce2",
-          "planHash": "c4011212a514b2c3de7f18583ae24d43d578a5a8d1a76d1fdfbd0a199b63b8c3",
+          "id": "8fc84ac0-d083-48ca-bc8c-a9787f1f4235",
+          "planHash": "e83372202e0b3275749d9aeb8dfbd81a026cd888ca483250ca340502700612f5",
           "name": "Demo build · synthetic data only",
           "note": "The tutorial author reviewed the fixed template and synthetic variable mapping. This build approval is not a real researcher or supervisor approval.",
-          "at": "2026-09-09T17:27:11.440Z",
+          "at": "2026-09-09T17:44:46.075Z",
           "authenticated": false
         }
       ],
-      "planHash": "c4011212a514b2c3de7f18583ae24d43d578a5a8d1a76d1fdfbd0a199b63b8c3"
+      "planHash": "e83372202e0b3275749d9aeb8dfbd81a026cd888ca483250ca340502700612f5"
     },
     "run": {
       "id": "R1",
       "planId": "P1",
-      "planHash": "c4011212a514b2c3de7f18583ae24d43d578a5a8d1a76d1fdfbd0a199b63b8c3",
-      "approvalId": "1396e796-f984-44e3-b309-6202210edce2",
+      "planHash": "e83372202e0b3275749d9aeb8dfbd81a026cd888ca483250ca340502700612f5",
+      "approvalId": "8fc84ac0-d083-48ca-bc8c-a9787f1f4235",
       "datasetId": "D1",
       "datasetHash": "915cec4f2b06f820cda8fc75c8647645eb5ad477f9eaf8aaebef5ea3e2cff876",
       "scriptHash": "9535d21718a770574a4b775d96f23bd501df0aad205d18d8c5c883e3b2de9583",
@@ -360,8 +360,8 @@
           "version": 1
         }
       ],
-      "startedAt": "2026-09-09T17:27:11.441Z",
-      "finishedAt": "2026-09-09T17:27:14.939Z",
+      "startedAt": "2026-09-09T17:44:46.076Z",
+      "finishedAt": "2026-09-09T17:44:49.375Z",
       "status": "succeeded",
       "engine": "webR 0.6.0",
       "rVersion": "R version 4.6.0 (2026-04-24)",

@@ -2,6 +2,8 @@
 
 ## v0.7 — Complete fictional teaching case (implemented)
 
+- v0.7.1 adds a business-school case on training and sales, a case selector, separate progress, an uncertain regression result, and aligned academic/executive reports.
+
 - Selectable seven-phase walkthrough with researcher/agent exchanges, accepted artifacts, reasoning and fictional review checkpoints.
 - Cross-phase context explanations, source passages, a corrected causal overclaim and optional learning checks.
 - Real precomputed R outputs, synthetic CSV, exact script and downloadable walkthrough/reproduction materials.

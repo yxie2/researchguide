@@ -3,7 +3,9 @@ let data,
   index = -1,
   revealed = 1,
   answer = null;
-const key = 'researchguide-teaching-case-v1';
+const business = new URLSearchParams(location.search).get('case') === 'business';
+const key = business ? 'researchguide-business-case-v1' : 'researchguide-teaching-case-v1';
+const researcher = () => data.researcher || 'Maya';
 const seen = new Set();
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
@@ -60,7 +62,7 @@ function notebook() {
           (s.sources || [])
             .map((s) => `### ${s.id}: ${s.title}\n\n> ${s.passage}\n\n${s.limitation}`)
             .join('\n\n') +
-          `\n\n### Accepted teaching artifact\n\n${s.artifact}\n\nMaya’s explanation: ${s.understanding}\n\n${s.review}\n\nCarried forward: ${s.carry}\n`,
+          `\n\n### Accepted teaching artifact\n\n${s.artifact}\n\n${researcher()}’s explanation: ${s.understanding}\n\n${s.review}\n\nCarried forward: ${s.carry}\n`,
       )
       .join('\n') +
     `\n## Reproduction\n\nR results built ${data.builtAt}. Save computation.run.inputCsv as input.csv and computation.run.script as analysis.R from the reproduction JSON, then run Rscript analysis.R in a clean directory. No external R packages are needed. This export is a teaching narrative, not an importable active notebook.\n`
@@ -79,19 +81,17 @@ function downloads() {
     el(
       'div',
       { class: 'toolbar' },
-      button('Download walkthrough (.md)', () =>
-        download('fictional-research-walkthrough.md', notebook()),
-      ),
+      button('Download walkthrough (.md)', () => download(`${data.id}-walkthrough.md`, notebook())),
       button(
         'Download synthetic CSV',
-        () => download('synthetic-study-hours.csv', data.csv, 'text/csv'),
+        () => download(data.datasetName || 'synthetic-study-hours.csv', data.csv, 'text/csv'),
         true,
       ),
       button(
         'Download reproduction bundle',
         () =>
           download(
-            'fictional-case-reproduction.json',
+            `${data.id}-reproduction.json`,
             JSON.stringify(
               {
                 disclosure: data.disclosure,
@@ -176,7 +176,7 @@ function scene() {
         el(
           'p',
           { class: 'small muted' },
-          'Authored simulation. Reveal each exchange to see Maya question, revise and accept the work.',
+          `Authored simulation. Reveal each exchange to see ${researcher()} question, revise and accept the work.`,
         ),
         el(
           'div',
@@ -186,7 +186,7 @@ function scene() {
             .map(([who, text]) =>
               el(
                 'article',
-                { class: `demo-turn ${who.startsWith('Maya') ? 'researcher' : 'mentor'}` },
+                { class: `demo-turn ${who.startsWith(researcher()) ? 'researcher' : 'mentor'}` },
                 el('p', { class: 'eyebrow' }, who),
                 el('p', {}, text),
               ),
@@ -228,7 +228,7 @@ function scene() {
           ),
           el('h2', {}, 'The accepted teaching artifact'),
           el('pre', { class: 'demo-artifact' }, s.artifact),
-          el('h3', {}, 'Maya explains her reasoning'),
+          el('h3', {}, `${researcher()} explains the reasoning`),
           el('p', {}, s.understanding),
           el('h3', {}, 'The review checkpoint'),
           el('p', {}, s.review),
@@ -236,7 +236,7 @@ function scene() {
             el(
               'details',
               {},
-              el('summary', {}, 'Inspect all eight synthetic rows'),
+              el('summary', {}, `Inspect all ${data.computation.dataset.rowCount} synthetic rows`),
               el('pre', { class: 'demo-artifact' }, data.csv),
             ),
           index === 4 && outputs(),
@@ -309,12 +309,13 @@ function overview() {
         el(
           'p',
           {},
-          'Maya begins by wanting to prove a causal claim. Follow how she narrows the question, challenges a source, chooses a protocol, handles missing data, reviews an R plan, corrects her conclusion and assembles a transparent report.',
+          data.overview ||
+            'Maya begins by wanting to prove a causal claim. Follow how she narrows the question, challenges a source, chooses a protocol, handles missing data, reviews an R plan, corrects her conclusion and assembles a transparent report.',
         ),
         el(
           'p',
           {},
-          'Choose a phase in the sidebar or reveal the conversation one exchange at a time. Each phase shows the saved artifact, Maya’s explanation, a fictional supervisor checkpoint and what carries into the next phase.',
+          `Choose a phase in the sidebar or reveal the conversation one exchange at a time. Each phase shows the saved artifact, ${researcher()}’s explanation, a fictional supervisor checkpoint and what carries into the next phase.`,
         ),
         button('Start the seven-phase walkthrough', () => go(0)),
         el(
@@ -362,7 +363,11 @@ function render() {
           'ResearchGuide',
           el('small', {}, 'Learn through a worked example'),
         ),
-        el('p', { class: 'eyebrow' }, 'Maya’s fictional first study'),
+        el(
+          'p',
+          { class: 'eyebrow' },
+          `${researcher()}’s fictional ${business ? 'business' : 'first'} study`,
+        ),
         el(
           'nav',
           { class: 'stage-nav', 'aria-label': 'Demo phases' },
@@ -402,6 +407,25 @@ function render() {
         el(
           'main',
           { id: 'main', class: 'workspace' },
+          el(
+            'nav',
+            { class: 'demo-case-picker toolbar', 'aria-label': 'Choose a demo case' },
+            el('span', { class: 'small' }, 'Choose a case:'),
+            el(
+              'a',
+              { class: 'button quiet', href: '/demo', 'aria-current': business ? null : 'page' },
+              'Education · Study habits',
+            ),
+            el(
+              'a',
+              {
+                class: 'button quiet',
+                href: '/demo?case=business',
+                'aria-current': business ? 'page' : null,
+              },
+              'Business · Training and sales',
+            ),
+          ),
           el('p', { class: 'demo-disclosure' }, data.disclosure),
           index === -1 ? overview() : scene(),
         ),
@@ -411,9 +435,10 @@ function render() {
 }
 async function load() {
   try {
-    const response = await fetch('/demo-case.json');
+    const response = await fetch(business ? '/business-demo-case.json' : '/demo-case.json');
     if (!response.ok) throw new Error('The teaching case could not be loaded.');
     data = await response.json();
+    document.title = `ResearchGuide — ${data.title}`;
     try {
       const saved = JSON.parse(localStorage.getItem(key));
       if (saved && Number.isInteger(saved.index) && saved.index >= -1 && saved.index < 7) {
