@@ -36,8 +36,8 @@ const claims = [
 ];
 const data = [
   'execution',
-  'Import and inspect your data',
-  'For a supported numeric study, import a CSV and inspect ranges and missing values.',
+  'Manage your project data workspace',
+  'Keep multiple uploaded datasets and public-data candidates together, record their origins, and inspect each CSV before analysis.',
 ];
 const analysis = [
   'execution',

@@ -853,6 +853,18 @@ details p {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.data-inventory {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.data-inventory details {
+  margin: 1rem 0;
+}
+.data-inventory summary,
+.data-inventory a {
+  overflow-wrap: anywhere;
+}
 fieldset {
   border: 1px solid var(--line);
   margin: 1rem 0;

@@ -1292,6 +1292,138 @@ function discoveryPanel() {
       {},
       'Before import: inspect the files and codebook, verify access and reuse permission, and record limitations in your Data preparation document. Download permitted data from the repository, then upload a CSV using the next task. The app does not download files automatically.',
     ),
+    button('Open project data workspace', () => {
+      tab = 'execution';
+      render();
+    }),
+  );
+}
+
+function openDataImport(search, candidate) {
+  tab = 'execution';
+  render();
+  $('#dataset-import').open = true;
+  $('#dataset-origin').value = search ? `${search.id}:${candidate.id}` : '';
+  $('#dataset-name').value = candidate?.title.slice(0, 160) || '';
+  $('#dataset-import').scrollIntoView({ block: 'start' });
+  $('#dataset-name').focus({ preventScroll: true });
+}
+
+function dataInventory() {
+  const datasets = project.datasets || [];
+  const candidates = (project.dataSearches || []).flatMap((search) =>
+    search.results
+      .filter((candidate) => candidate.shortlisted)
+      .map((candidate) => ({ search, candidate })),
+  );
+  const publicFiles = datasets.filter((d) => d.origin?.kind === 'dataverse').length;
+  return el(
+    'section',
+    { className: 'data-inventory' },
+    el('h2', {}, 'Project data workspace'),
+    el(
+      'p',
+      {},
+      `${datasets.length} stored CSVs · ${publicFiles} linked to Dataverse · ${candidates.length} shortlisted public records`,
+    ),
+    el(
+      'p',
+      { className: 'muted' },
+      'Each project has its own collection. Keep up to 20 CSVs (2 MB each; 20 MB total). Files are stored separately; selecting a dataset does not merge it with others. Project backups include all stored CSVs and source records.',
+    ),
+    button('Add another dataset', () => openDataImport()),
+    button('Find public data', () => {
+      tab = 'discovery';
+      render();
+    }),
+    !datasets.length &&
+      el(
+        'p',
+        {},
+        'No data files stored yet. Upload your own CSV or attach a permitted CSV downloaded from a public repository.',
+      ),
+    datasets.map((d) =>
+      el(
+        'details',
+        {},
+        el(
+          'summary',
+          {},
+          `${d.id} · ${d.name} · ${d.rowCount} rows · ${d.origin?.kind === 'dataverse' ? 'Dataverse file (researcher linked)' : 'Uploaded file'}`,
+        ),
+        el(
+          'p',
+          {},
+          `${d.columns.length} columns · imported ${date(d.at)} · ${d.origin?.filename || 'Original filename not recorded'}`,
+        ),
+        d.origin?.kind === 'dataverse' && [
+          el(
+            'a',
+            { href: d.origin.url, target: '_blank', rel: 'noopener noreferrer' },
+            d.origin.title,
+          ),
+          el('p', {}, d.origin.citation),
+          el('p', { className: 'muted' }, d.origin.linkage),
+        ],
+        el('p', {}, `Permission recorded by researcher: ${d.permission}`),
+        field(
+          `data-notes-${d.id}`,
+          'Workspace notes',
+          'Describe this file’s role, version or preparation status. Record methodological decisions in the Data preparation document.',
+          d.notes || '',
+          true,
+          { maxlength: 2000 },
+        ),
+        button('Save dataset notes', () => {
+          const notes = $(`#data-notes-${d.id}`).value;
+          perform(
+            () => mutate({ type: 'dataset_notes', datasetId: d.id, notes }),
+            'Dataset notes saved.',
+          );
+        }),
+        button('Select for inspection and analysis', () => {
+          analysisDatasetId = d.id;
+          analysisPlanId = null;
+          analysisDraft = { method: 'descriptive', outcome: null, predictor: null, rationale: '' };
+          render();
+          $('#analysis-dataset').scrollIntoView({ block: 'center' });
+          $('#analysis-dataset').focus({ preventScroll: true });
+        }),
+        button('Download stored CSV', () => {
+          const url = URL.createObjectURL(new Blob([d.csv], { type: 'text/csv;charset=utf-8' }));
+          const link = el('a', { href: url, download: `${d.id}.csv` });
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }),
+      ),
+    ),
+    candidates.length > 0 && el('h3', {}, 'Public records in your shortlist'),
+    candidates.map(({ search, candidate }) => {
+      const linked = datasets.filter(
+        (d) => d.origin?.searchId === search.id && d.origin?.candidateId === candidate.id,
+      );
+      return el(
+        'details',
+        {},
+        el(
+          'summary',
+          {},
+          `${candidate.title} · ${linked.length ? `${linked.length} file(s) attached` : 'No file stored yet'}`,
+        ),
+        el(
+          'a',
+          { href: candidate.url, target: '_blank', rel: 'noopener noreferrer' },
+          'Open repository to inspect and download permitted files',
+        ),
+        el('p', {}, candidate.note || 'No decision note.'),
+        el(
+          'p',
+          {},
+          'A catalogue record is a reference. Download the file yourself, check its licence, then attach the CSV here.',
+        ),
+        button('Attach CSV from this record', () => openDataImport(search, candidate)),
+      );
+    }),
   );
 }
 
@@ -1324,6 +1456,7 @@ function executionPanel() {
     el(
       'section',
       {},
+      dataInventory(),
       el('h2', {}, 'From a plan to recorded results.'),
       el(
         'p',
@@ -1332,7 +1465,7 @@ function executionPanel() {
       ),
       el(
         'details',
-        { open: !datasets.length },
+        { id: 'dataset-import', open: !datasets.length },
         el('summary', {}, 'Import a permitted CSV dataset'),
         el(
           'form',
@@ -1341,7 +1474,9 @@ function executionPanel() {
               e.preventDefault();
               const file = $('#analysis-csv').files[0],
                 name = $('#dataset-name').value,
-                permission = $('#dataset-permission').value;
+                permission = $('#dataset-permission').value,
+                notes = $('#dataset-new-notes').value,
+                [sourceSearchId, sourceCandidateId] = $('#dataset-origin').value.split(':');
               if (!file || file.size > 2 * 1024 * 1024) {
                 notice('Choose a CSV no larger than 2 MB.');
                 return;
@@ -1350,6 +1485,10 @@ function executionPanel() {
                 const r = await api('/api/analysis/datasets', {
                   name,
                   permission,
+                  notes,
+                  filename: file.name,
+                  sourceSearchId,
+                  sourceCandidateId,
                   csv: await file.text(),
                   revision: project.revision,
                 });
@@ -1366,6 +1505,34 @@ function executionPanel() {
             },
           },
           field('dataset-name', 'Dataset name', '', '', false, { required: true, maxlength: 160 }),
+          el('label', { for: 'dataset-origin' }, 'Where did this file come from?'),
+          select(
+            'dataset-origin',
+            [
+              ['', 'My own upload / another source'],
+              ...(project.dataSearches || []).flatMap((search) =>
+                search.results.map((candidate) => [
+                  `${search.id}:${candidate.id}`,
+                  `Harvard Dataverse · ${candidate.title}`,
+                ]),
+              ),
+            ],
+            '',
+            () => {},
+          ),
+          el(
+            'p',
+            { className: 'muted' },
+            'For a Dataverse file, select its saved search record. This records your source attribution; it does not verify that the file matches the repository.',
+          ),
+          field(
+            'dataset-new-notes',
+            'File role or version',
+            'For example: raw survey responses, cleaned outcomes, or comparison dataset.',
+            '',
+            true,
+            { maxlength: 2000 },
+          ),
           el('label', { for: 'analysis-csv' }, 'CSV file'),
           el('input', {
             id: 'analysis-csv',
