@@ -248,6 +248,11 @@ function topbar() {
     el(
       'div',
       { className: 'toolbar' },
+      el(
+        'a',
+        { className: 'button quiet', href: '/demo', target: '_blank', rel: 'noopener' },
+        'Explore demo case ↗',
+      ),
       button(
         'LLM settings',
         () =>
@@ -2168,6 +2173,16 @@ function onboardPanel() {
     { className: 'onboard' },
     el('p', { className: 'eyebrow' }, 'Begin a research notebook'),
     el('h1', {}, 'A good question is a place to start.'),
+    el(
+      'p',
+      {},
+      el(
+        'a',
+        { href: '/demo', target: '_blank', rel: 'noopener' },
+        'New to research? Follow Maya’s complete fictional demo case ↗',
+      ),
+      ' Opens in a separate tab so you can keep your notebook here.',
+    ),
     el(
       'p',
       { className: 'muted' },

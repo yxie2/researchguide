@@ -21,6 +21,18 @@ This application intentionally listens on loopback only. It is a single-user loc
 
 ## Start with a conversation
 
+### Explore a complete fictional case
+
+Choose **Explore demo case ↗** in the toolbar or use the demo link under **New project**. The walkthrough opens in a separate tab and keeps your current notebook, unsaved edits and model settings intact. It needs no API key and makes no AI calls.
+
+Follow fictional PhD student Maya through all seven phases: question, evidence, design, data, analysis, interpretation and research package. Reveal the conversations exchange by exchange, inspect the accepted artifacts and explanations, and see how earlier decisions constrain later work. The example includes an unsupported causal claim, a challenging source, two missing records, explicit analysis approval, and a consistency finding followed by a corrected conclusion. Optional learning questions provide immediate feedback. Progress stays in browser storage; **Restart walkthrough** resets only that progress.
+
+All people, source excerpts, conversations and reviews are authored simulations. The bundled regression outputs were computed by the app’s actual local R runner on eight synthetic records, using six complete cases. Download the walkthrough, CSV, exact R script, selected input, figure and reproduction bundle. The small invented case teaches workflow; it is not evidence about real students or a publication-ready study. The downloads are teaching/reproduction materials, not an active-notebook import.
+
+Maintainers can regenerate the checked-in computation with `npm run build:demo`. This runs the fixed R template on synthetic data without reading the active notebook or model settings. Case content lives in `lib/demo-case.mjs`; the served artifact is `public/demo-case.json`. Run `node scripts/demo-smoke.mjs` with Playwright installed (or `PLAYWRIGHT_MODULE` configured) to verify the full walkthrough, downloads and notebook isolation.
+
+### Work on your own project
+
 New projects and milestones now open **Guided conversation**. Configure Ollama or a hosted API, then click **Start guiding me**, or type what you know. You do not need to fill in an artifact first.
 
 The guide uses your project, saved work, sources, and earlier answers to choose a focused follow-up question. Later milestones carry forward earlier artifacts, explanations, review status, and the most recent 12 conversation turns per earlier milestone. The saved research brief takes precedence over the original project interest. Open “Carried forward” to inspect the earlier artifacts, then choose “Continue from earlier work”. Accepting a draft makes it available downstream; it does not grant supervisor approval. It explains gaps and can propose a complete milestone draft. Ask it to revise anything inaccurate, then click **Accept draft into notebook** when it reflects your decisions. Acceptance saves a versioned artifact; it preserves your own explanation and renews affected review requirements. Outdated proposals cannot overwrite newer artifacts.
@@ -118,7 +130,7 @@ Project text and up to 20 source records are sent to your configured endpoint. H
 
 ## Implemented versus planned
 
-| Available in v0.6                                            | Planned, not implemented                              |
+| Available in v0.7                                            | Planned, not implemented                              |
 | ------------------------------------------------------------ | ----------------------------------------------------- |
 | Seven milestone templates and worked examples                | Validated adaptive teaching and competence assessment |
 | Student explanations and supervisor checkpoints              | Authenticated roles and remote collaboration          |

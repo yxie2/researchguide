@@ -1,0 +1,91 @@
+.demo-disclosure {
+  border-block: 1px solid var(--line);
+  padding-block: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
+.demo-turn {
+  padding: 1.3rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.demo-turn.researcher {
+  padding-left: 1.4rem;
+}
+.demo-turn.mentor {
+  padding-right: 1.4rem;
+}
+.demo-turn .eyebrow {
+  margin-bottom: 0.55rem;
+}
+.demo-transcript {
+  margin-bottom: 1.5rem;
+}
+.demo-artifact {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    0.92rem/1.8 'Segoe UI',
+    sans-serif;
+  background: var(--panel);
+  padding: 1.3rem;
+  max-width: 100%;
+}
+.demo-transcript + .toolbar {
+  margin-bottom: 2rem;
+}
+.demo-source {
+  margin-block: 2rem;
+}
+.demo-source blockquote {
+  margin-inline: 0;
+  font-family: Georgia, serif;
+  font-size: 1.15rem;
+}
+.demo-challenge {
+  margin-block: 2rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1.5rem;
+}
+.demo-challenge button {
+  display: block;
+  text-align: left;
+  white-space: normal;
+  margin-bottom: 0.75rem;
+  width: 100%;
+}
+.demo-challenge button[aria-pressed='true'] {
+  background: var(--green);
+  color: var(--paper);
+}
+.demo-footer,
+.demo-downloads {
+  border-top: 1px solid var(--line);
+  margin-top: 3rem;
+  padding-top: 1.8rem;
+}
+.demo-spacing {
+  margin-top: 1.5rem;
+}
+.demo-outputs {
+  margin-top: 2rem;
+}
+#demo h1:focus {
+  outline: none;
+}
+#demo .sidebar > .button {
+  color: var(--paper);
+  margin-top: 1rem;
+}
+#demo .stage-nav > .button {
+  color: var(--paper);
+}
+@media (max-width: 600px) {
+  .demo-turn.researcher {
+    padding-left: 0.5rem;
+  }
+  .demo-artifact {
+    padding: 0.85rem;
+  }
+}

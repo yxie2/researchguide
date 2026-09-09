@@ -1,0 +1,381 @@
+{
+  "id": "maya-first-study",
+  "title": "Does studying longer mean higher quiz scores?",
+  "subtitle": "Follow Maya Chen, a fictional first-year PhD student, through her first small observational study.",
+  "disclosure": "Teaching simulation: all people, source excerpts, conversations, reviews and data are invented. Numerical results were computed by the app’s real R runner when this demo was built. Opening the demo makes no AI calls and runs no analysis.",
+  "stages": [
+    {
+      "id": "question",
+      "title": "Frame the question",
+      "where": "Guided conversation → Your workspace → Supervisor review",
+      "input": "Maya starts with an interest in study habits and an eight-row synthetic class dataset.",
+      "turns": [
+        [
+          "Maya · researcher",
+          "I want to prove that more studying improves learning. Can you write my question?"
+        ],
+        [
+          "Methods mentor · simulated agent",
+          "First, what do you actually measure, and did anyone assign the study time?"
+        ],
+        [
+          "Maya · researcher",
+          "Weekly self-reported study hours and a quiz score out of 15. Nobody assigned study hours. These are invented records for practice."
+        ],
+        [
+          "Methods mentor · simulated agent",
+          "Then ask about an association, not an improvement caused by studying. Limit the question to this sample and this quiz. A weak or negative relationship must also be an acceptable answer."
+        ],
+        [
+          "Maya · researcher",
+          "My question is: In this synthetic class sample, how are weekly study hours associated with quiz scores? Prior knowledge and motivation may explain the relationship. I accept this revised draft."
+        ]
+      ],
+      "artifact": "Research question: In this synthetic class sample, how are weekly self-reported study hours associated with quiz scores?\nPopulation: Eight fictional first-year students in one fictional class.\nExposure: Study hours in the week before the quiz.\nOutcome: Quiz score, 0–15 points.\nData: Author-created synthetic records; no real participants or personal data.\nBoundary: A descriptive, unadjusted association. No causal claim or inference about universities generally.",
+      "understanding": "My measurements can describe an association, but cannot tell me what would happen if the same student were made to study longer.",
+      "review": "Dr. Rivera · fictional supervisor: Accept the bounded question for this exercise. Real work also requires confirmation of access, ethics requirements and an adequate design.",
+      "carry": "The population, variable definitions and noncausal scope now constrain the evidence search, design and final claims.",
+      "challenge": {
+        "question": "Which question matches the available design?",
+        "choices": [
+          "Does extra studying cause better learning?",
+          "How are recorded study hours associated with quiz scores?"
+        ],
+        "correct": 1,
+        "feedback": "The second question matches an observational comparison. Writing a causal question does not make the data causal."
+      }
+    },
+    {
+      "id": "evidence",
+      "title": "Read and challenge the evidence",
+      "where": "Sources → Claims & evidence → Your workspace",
+      "input": "The saved question determines the concepts to search: study time, quiz performance and observational university studies.",
+      "turns": [
+        [
+          "Maya · researcher",
+          "I found an example passage saying students who study more score higher. Can I cite it as proof that studying works?"
+        ],
+        [
+          "Evidence mentor · simulated agent",
+          "Inspect the exact passage and its design. Link a narrow claim to the source and record evidence that challenges your expectation."
+        ],
+        [
+          "Maya · researcher",
+          "Teaching source S1 reports an association, but no random assignment. S2 says that accounting for prior achievement weakened the association. Both are fictional teaching excerpts, not publications."
+        ],
+        [
+          "Evidence checker · simulated agent",
+          "S1 supports a reported association in its sample. It does not establish causation or support a claim about every student. S2 motivates confounding as a design limitation."
+        ],
+        [
+          "Maya · researcher",
+          "I reject my causal claim. I record a narrower claim and mark its support as limited to the quoted teaching passage. A real project needs verified papers and a documented search."
+        ]
+      ],
+      "sources": [
+        {
+          "id": "S1",
+          "title": "Teaching excerpt A — unadjusted study-time association (fictional)",
+          "passage": "In this fictional observational class sample, students reporting more weekly study hours tended to have higher quiz scores. Study time was not randomly assigned.",
+          "limitation": "No causal identification; narrow setting; self-reported exposure."
+        },
+        {
+          "id": "S2",
+          "title": "Teaching excerpt B — prior achievement matters (fictional)",
+          "passage": "In this fictional example, the association between study time and quiz performance weakened after prior achievement was included in the model.",
+          "limitation": "Illustrates a competing explanation; it is not real empirical evidence."
+        }
+      ],
+      "artifact": "Search plan for real work: Search appropriate scholarly databases for (study time OR study hours) AND (quiz OR academic performance) AND university; record database, date, query and inclusion decisions. No real search was performed in this demo.\nS1: A fictional unadjusted association; inspected passage does not justify causation.\nS2: A fictional example challenging the simple story through prior-achievement adjustment.\nClaim C1: S1 describes an association in its fictional sample. Decision: Accept this narrow reading only.\nRejected claim: S1 proves study hours improve learning.\nGap: This exercise explores a small dataset; it establishes no novel literature gap.",
+      "understanding": "Counting positive passages is not an evidence synthesis. Design differences and competing explanations matter more than whether a passage agrees with me.",
+      "review": "Fictional supervisor: The evidence logic is adequate for a tutorial. These excerpts cannot be cited in a real manuscript; conduct and verify a real literature search.",
+      "carry": "Possible confounding becomes an explicit protocol limitation and later reappears in the interpretation."
+    },
+    {
+      "id": "design",
+      "title": "Choose the design before the result",
+      "where": "Guided conversation → Your workspace → Supervisor review",
+      "input": "The saved question asks for an association; the evidence map identifies prior achievement as a possible confounder.",
+      "turns": [
+        ["Maya · researcher", "Which analysis will give the most significant result?"],
+        [
+          "Methods mentor · simulated agent",
+          "Choose the analysis from the question before inspecting the estimate. What is the observational unit, missing-data rule and scope of the model?"
+        ],
+        [
+          "Maya · researcher",
+          "One row is one fictional student. I will fit quiz_score ~ study_hours using rows with both values. I will report how many rows are excluded."
+        ],
+        [
+          "Methods mentor · simulated agent",
+          "That is a simple unadjusted regression supported by this app. Check linearity, residual patterns and influential observations. The small sample makes these checks weak; no prior-achievement variable is available."
+        ],
+        [
+          "Maya · researcher",
+          "I accept that limitation and freeze the plan. This is an authored teaching sequence, not a timestamped preregistration. A real analysis must disclose prior exposure to results."
+        ]
+      ],
+      "artifact": "Design: Small observational secondary analysis of synthetic records. Unit: One fictional student per row.\nModel: quiz_score = intercept + slope × study_hours + error.\nPrimary quantity: Unadjusted slope in quiz points per additional reported study hour, with a model-based 95% confidence interval.\nMissing data: Complete cases on the two selected variables; report total, included and excluded rows. No imputation.\nDiagnostics: Inspect fitted values and residuals; assess linearity and unequal variance cautiously. Influence and sensitivity analyses require further work.\nAssumptions: Independent observations, an adequate linear conditional mean, and model assumptions for interval estimation.\nConfounding: Prior achievement and motivation are unmeasured; no causal interpretation.\nPrior exposure: Authored synthetic tutorial, constructed with known results; not preregistered research.\nEthics: No real people; real studies require institution-specific ethics and data-access checks.",
+      "understanding": "Selecting a method to obtain a small p-value would change the question after seeing the answer. Missingness can also select a biased subset.",
+      "review": "Fictional supervisor: Approve this limited teaching protocol. Do not present eight invented observations as a powered study or preregistration.",
+      "carry": "The exact variables, complete-case rule and noncausal interpretation guide profiling, execution approval and consistency checks."
+    },
+    {
+      "id": "data",
+      "title": "Inspect the data and document exclusions",
+      "where": "Run analysis → Import a permitted CSV dataset → Your workspace",
+      "input": "The protocol specifies two numeric variables and complete-case analysis.",
+      "turns": [
+        [
+          "Maya · researcher",
+          "I have uploaded the synthetic CSV. Should I replace blanks with zero?"
+        ],
+        [
+          "Data mentor · simulated agent",
+          "No. A missing quiz is not a zero quiz score. Inspect missingness, units, ranges and provenance before running the planned analysis."
+        ],
+        [
+          "Maya · researcher",
+          "There are eight records, one missing study-hours value and one missing quiz score on different rows. Six rows have both variables. Recorded hours range from 1 to 7; recorded scores from 2 to 12."
+        ],
+        [
+          "Data mentor · simulated agent",
+          "Keep the original CSV and its hash. Report why two rows are excluded and what is unknown about missingness. A numeric profile alone cannot establish that each row is a unique eligible person."
+        ],
+        [
+          "Maya · researcher",
+          "The tutorial author defines each row as a distinct fictional student. I retain NA and blank cells, use the planned six complete cases, and document that no missingness mechanism is known."
+        ]
+      ],
+      "artifact": "Dataset D1: synthetic-study-hours.csv; eight author-created rows, two numeric columns.\nDictionary: study_hours = weekly hours, nonnegative; quiz_score = points, 0–15.\nObserved ranges: Hours 1–7; quiz scores 2–12. No recorded out-of-range value.\nMissingness: Row 7 has no quiz score; row 8 has no study-hours value. Six complete cases; two excluded from regression.\nIdentity: Exact CSV preserved and SHA-256 recorded with the execution bundle.\nDuplicates and eligibility: All rows are distinct by tutorial construction; no real participant identity verification was performed.\nCleaning: No value replacement or imputation.\nProtocol deviations: None. Unknown missingness mechanism limits interpretation.",
+      "understanding": "Replacing a blank with zero would invent a measurement and change the slope. Exclusion counts alone do not prove missingness is harmless.",
+      "review": "Fictional supervisor: The missing-data decision matches the protocol. Retain the original rows and report the reduced analysis sample.",
+      "carry": "The dataset hash and variable mappings bind the approved plan to the exact input used in R.",
+      "challenge": {
+        "question": "How many rows should the planned regression use?",
+        "choices": [
+          "All 8, replacing missing values with zero",
+          "6 complete rows, reporting the 2 exclusions"
+        ],
+        "correct": 1,
+        "feedback": "Six rows match the planned complete-case rule. Zero replacement would invent data and deviate from the protocol."
+      }
+    },
+    {
+      "id": "analysis",
+      "title": "Approve the plan and inspect real outputs",
+      "where": "Run analysis → Propose a plan → Review script → Approve → Run",
+      "input": "The saved question, design and data report constrain the plan. The dataset has six complete cases.",
+      "turns": [
+        [
+          "Maya · researcher",
+          "Please propose the analysis using my saved protocol and dataset profile."
+        ],
+        [
+          "Analysis mentor · simulated agent",
+          "Use the fixed simple linear regression template: outcome quiz_score, predictor study_hours. Omit incomplete rows as planned. This estimates an unadjusted association."
+        ],
+        [
+          "Maya · researcher",
+          "I review the variable mapping, complete-case rule and exact R script. I approve this plan for these synthetic data and run it."
+        ],
+        [
+          "Local R runner · recorded computation",
+          "The attached execution record contains the actual numerical outputs from the app’s R template, including coefficients, confidence intervals, residuals, counts and session information."
+        ],
+        [
+          "Maya · researcher",
+          "Six rows were used and two excluded. The slope is about 1.943 quiz points per hour, with a model-based 95% interval of 1.568 to 2.318. The residuals are small in this constructed dataset, but six observations cannot establish that the assumptions hold."
+        ],
+        [
+          "Analysis mentor · simulated agent",
+          "Keep the code, input and outputs together. If the question, design or data report changes, review a new current plan before rerunning; an old output cannot silently answer a revised question."
+        ]
+      ],
+      "artifact": "Execution: R1, computed from synthetic data using the app’s fixed local R template.\nModel: quiz_score ~ study_hours, six complete cases from eight rows.\nSlope: 1.942857 quiz points/hour; model-based 95% CI 1.567972 to 2.317742.\nIntercept: -0.133333 quiz points.\nReproduction: Save input.csv and analysis.R from the bundle in a clean directory, then run Rscript analysis.R. Exact versions are in session.txt.\nDiagnostics: Inspect diagnostics.csv. The exact fitted values and residuals are in the attached output; estimates may be sensitive to individual rows. No comprehensive influence or sensitivity assessment was performed.\nInterpretation limits: Constructed sample; tiny n; missingness; no adjustment; model-based interval is not protection against bias.\nExploratory analyses: None.",
+      "understanding": "The language model proposed a plan; R computed the numbers. Approval records a deliberate decision, not proof that the chosen model is scientifically adequate.",
+      "review": "Fictional supervisor: The run is reproducible. Keep the limitations visible and do not mistake a narrow model interval for reliable evidence about real students.",
+      "carry": "Recorded estimates and exclusions feed the claims and consistency review. The original input, exact script and environment accompany the research package."
+    },
+    {
+      "id": "interpretation",
+      "title": "Catch an unsupported conclusion",
+      "where": "Your workspace → Consistency review → Researcher response",
+      "input": "The question and protocol are noncausal. R1 estimates an unadjusted slope from six synthetic complete cases.",
+      "turns": [
+        [
+          "Maya · researcher",
+          "My conclusion is: Each extra hour of study improves students’ quiz scores by 1.94 points."
+        ],
+        [
+          "Consistency reviewer · simulated agent",
+          "Mismatch: the protocol says “no causal interpretation,” but “improves” implies causation. The output is an unadjusted association in six synthetic records."
+        ],
+        [
+          "Maya · researcher",
+          "I accept that finding. I revise the claim: In six complete synthetic records, one additional reported study hour was associated with an estimated 1.94-point higher quiz score."
+        ],
+        [
+          "Critical reviewer · simulated agent",
+          "Add uncertainty and plausible alternatives. Prior achievement, motivation and selective missingness remain unresolved. The fictional sources do not independently validate the result."
+        ],
+        [
+          "Maya · researcher",
+          "I save the corrected interpretation and rerun the consistency review so it checks the current version. The scripted follow-up finds no remaining causal wording mismatch; that is not a certification of quality."
+        ]
+      ],
+      "artifact": "Claim linked to R1: In six complete synthetic records, one additional reported study hour was associated with an estimated 1.94-point higher quiz score (model-based 95% CI 1.57–2.32).\nRejected wording: “Each extra hour improves scores.”\nAlternative explanations: Prior achievement, motivation, reporting error and missingness.\nLimits: Tiny constructed sample; no confounder adjustment; no causal identification or external generalizability.\nConsistency response: Accepted the causal-language finding and revised the artifact. A new scripted review checks the revised version; the previous review remains historical.\nUnknown: Whether a similar association exists in a real population or changing study time causes any benefit.",
+      "understanding": "A fitted slope does not show what an intervention would do. A consistency check can detect contradictions but cannot supply missing data or validate the study.",
+      "review": "Fictional supervisor: The revised wording matches the design and output. It remains a demonstration, not an empirical finding for publication.",
+      "carry": "The corrected claim, uncertainty, competing explanations and unresolved limitations must all remain in the final manuscript.",
+      "challenge": {
+        "question": "Does a clean consistency review establish that this study is rigorous?",
+        "choices": [
+          "Yes; all scientific problems are resolved",
+          "No; aligned claims still need sound data, methods and expert review"
+        ],
+        "correct": 1,
+        "feedback": "Consistency is one check. It cannot establish source truth, adequate power, valid assumptions or freedom from bias."
+      }
+    },
+    {
+      "id": "writing",
+      "title": "Assemble the complete research package",
+      "where": "Your workspace → Supervisor review → Export notebook / JSON; Run analysis → Download reproduction bundle",
+      "input": "The final package combines the bounded question, source limitations, frozen decisions, actual R outputs and revised interpretation.",
+      "turns": [
+        ["Maya · researcher", "Can we turn this into a paper now?"],
+        [
+          "Writing mentor · simulated agent",
+          "For this exercise, create a clearly labeled teaching report. Include methods, exclusions, results and limitations, and attach the data and script. Do not present invented citations or observations as real research."
+        ],
+        [
+          "Maya · researcher",
+          "I export the walkthrough, source excerpts, synthetic CSV, exact R script, run outputs and session information. I disclose the scripted agent assistance and my responsibility for each decision."
+        ],
+        [
+          "Dr. Rivera · fictional supervisor",
+          "The teaching package is complete for this bounded example. For real research, verify literature, permissions, study adequacy and diagnostics with qualified supervision before submission."
+        ],
+        [
+          "Maya · researcher",
+          "I now understand the cycle: discuss, inspect, revise, explain, review and carry the accepted decisions forward. I still need to make and defend the scientific choices myself."
+        ]
+      ],
+      "artifact": "TEACHING REPORT — synthetic data; no real empirical claims\nTitle: Study hours and quiz scores in a fictional class: a reproducible demonstration.\nQuestion: How are weekly study hours associated with quiz scores in this synthetic sample?\nMethods: Eight constructed records; unadjusted simple linear regression; six complete cases, two excluded. No imputation. No preregistration or real literature search.\nResults: Estimated slope 1.94 quiz points/hour (model-based 95% CI 1.57–2.32). The exact computation, input and environment are attached.\nDiscussion: This illustrates workflow continuity and reproducibility. The result establishes nothing about real students and cannot support an intervention recommendation.\nLimitations: Invented sources and observations; tiny sample; missingness; unmeasured confounding; incomplete diagnostic assessment.\nTransparency: Conversations and reviews are authored simulations. Numerical outputs come from actual local R execution. All teaching materials are labeled fictional.\nPackage: Walkthrough and decision record, two teaching excerpts, original CSV, selected R input, fixed script, coefficients, diagnostics, figure, log and session information.\nNext real-world step: Develop an adequate study with verified literature and expert supervision.",
+      "understanding": "A complete package lets another person inspect what I did and why. Reproducibility is necessary, but does not make a weak or fictional study valid.",
+      "review": "Fictional supervisor: Teaching walkthrough complete. No real supervisor approval, ethics approval or publication readiness is implied.",
+      "carry": "Download the materials below, then return to your notebook. To practice execution, import the synthetic CSV under Run analysis and review your own plan before running it."
+    }
+  ],
+  "csv": "study_hours,quiz_score\n1,2\n2,4\n3,5\n4,8\n5,9\n6,12\n7,NA\n,10\n",
+  "builtAt": "2026-09-09T17:27:14.940Z",
+  "computation": {
+    "dataset": {
+      "id": "D1",
+      "name": "synthetic-study-hours.csv",
+      "permission": "Author-created fictional observations for a public teaching demonstration; no real participants.",
+      "csv": "study_hours,quiz_score\n1,2\n2,4\n3,5\n4,8\n5,9\n6,12\n7,NA\n,10\n",
+      "sha256": "915cec4f2b06f820cda8fc75c8647645eb5ad477f9eaf8aaebef5ea3e2cff876",
+      "columns": [
+        {
+          "index": 0,
+          "name": "study_hours",
+          "numeric": true,
+          "missing": 1,
+          "observed": 7
+        },
+        {
+          "index": 1,
+          "name": "quiz_score",
+          "numeric": true,
+          "missing": 1,
+          "observed": 7
+        }
+      ],
+      "rowCount": 8,
+      "at": "2026-09-09T17:27:11.439Z"
+    },
+    "plan": {
+      "id": "P1",
+      "datasetId": "D1",
+      "datasetHash": "915cec4f2b06f820cda8fc75c8647645eb5ad477f9eaf8aaebef5ea3e2cff876",
+      "method": "linear",
+      "outcome": 1,
+      "predictor": 0,
+      "rationale": "Estimate the unadjusted association between study hours and quiz scores in synthetic records. Omit incomplete cases; no causal interpretation or confounder adjustment.",
+      "missingPolicy": "complete_cases",
+      "script": "# ResearchGuide analysis template v1; input.csv uses y (outcome) and optional x (predictor).\n# Complete-case analysis: blank/NA values are excluded and counts are recorded.\noptions(warn=1)\nd <- read.csv('input.csv', na.strings='NA', check.names=FALSE)\noriginal_n <- nrow(d)\nd <- d[complete.cases(d), , drop=FALSE]\nif (nrow(d) < 3) stop('Too few complete observations.')\nwrite.csv(data.frame(total=original_n, used=nrow(d), excluded=original_n-nrow(d)), 'counts.csv', row.names=FALSE)\ndescribe <- function(v) c(n=length(v), mean=mean(v), sd=sd(v), median=median(v), min=min(v), max=max(v))\nwrite.csv(data.frame(variable=names(d), t(vapply(d,describe,numeric(6))), check.names=FALSE), 'descriptives.csv', row.names=FALSE)\nif (length(unique(d$x)) < 2 || length(unique(d$y)) < 2) stop('Regression requires variation in both variables.')\nfit <- lm(y ~ x, data=d)\nif (fit$rank < 2) stop('The regression design is rank deficient.')\nsm <- summary(fit)\nci <- confint(fit,level=0.95)\nwrite.csv(data.frame(term=rownames(sm$coefficients), estimate=sm$coefficients[,1], std_error=sm$coefficients[,2], statistic=sm$coefficients[,3], p_value=sm$coefficients[,4], lower_95=ci[,1], upper_95=ci[,2]), 'coefficients.csv', row.names=FALSE)\nwrite.csv(data.frame(n=nrow(d), r_squared=sm$r.squared, residual_sd=sm$sigma, residual_df=df.residual(fit)), 'fit.csv', row.names=FALSE)\nwrite.csv(data.frame(fitted=fitted(fit), residual=residuals(fit)), 'diagnostics.csv', row.names=FALSE)\nprint(sm)\nprint(ci)\n\n# A reproducible SVG histogram generated from R-computed bin counts.\nh <- hist(d$y, plot=FALSE)\nheight <- 240; width <- 480\nbars <- vapply(seq_along(h$counts), function(i) {\n bh <- if(max(h$counts)>0) h$counts[i]/max(h$counts)*180 else 0\n sprintf('<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"#214f42\"/>', 40+(i-1)*400/length(h$counts), 200-bh, 390/length(h$counts),bh)\n}, character(1))\nsvg <- paste0('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 480 240\"><rect width=\"480\" height=\"240\" fill=\"#f7f5ed\"/><text x=\"40\" y=\"20\">Outcome distribution (complete cases)</text>',paste(bars,collapse=''),sprintf('<text x=\"40\" y=\"225\">Range: %.4g to %.4g; n = %d</text>',min(d$y),max(d$y),nrow(d)),'</svg>')\nwriteLines(svg,'figure.svg')\nwrite.csv(data.frame(lower=head(h$breaks,-1), upper=tail(h$breaks,-1), count=h$counts),'histogram.csv',row.names=FALSE)\nwriteLines(capture.output(sessionInfo()),'session.txt')\nprint(data.frame(total=original_n,used=nrow(d),excluded=original_n-nrow(d)))\n",
+      "scriptHash": "9535d21718a770574a4b775d96f23bd501df0aad205d18d8c5c883e3b2de9583",
+      "templateVersion": 1,
+      "contextVersions": [
+        {
+          "id": "question",
+          "version": 1
+        },
+        {
+          "id": "design",
+          "version": 1
+        },
+        {
+          "id": "data",
+          "version": 1
+        }
+      ],
+      "model": null,
+      "at": "2026-09-09T17:27:11.439Z",
+      "approvals": [
+        {
+          "id": "1396e796-f984-44e3-b309-6202210edce2",
+          "planHash": "c4011212a514b2c3de7f18583ae24d43d578a5a8d1a76d1fdfbd0a199b63b8c3",
+          "name": "Demo build · synthetic data only",
+          "note": "The tutorial author reviewed the fixed template and synthetic variable mapping. This build approval is not a real researcher or supervisor approval.",
+          "at": "2026-09-09T17:27:11.440Z",
+          "authenticated": false
+        }
+      ],
+      "planHash": "c4011212a514b2c3de7f18583ae24d43d578a5a8d1a76d1fdfbd0a199b63b8c3"
+    },
+    "run": {
+      "id": "R1",
+      "planId": "P1",
+      "planHash": "c4011212a514b2c3de7f18583ae24d43d578a5a8d1a76d1fdfbd0a199b63b8c3",
+      "approvalId": "1396e796-f984-44e3-b309-6202210edce2",
+      "datasetId": "D1",
+      "datasetHash": "915cec4f2b06f820cda8fc75c8647645eb5ad477f9eaf8aaebef5ea3e2cff876",
+      "scriptHash": "9535d21718a770574a4b775d96f23bd501df0aad205d18d8c5c883e3b2de9583",
+      "script": "# ResearchGuide analysis template v1; input.csv uses y (outcome) and optional x (predictor).\n# Complete-case analysis: blank/NA values are excluded and counts are recorded.\noptions(warn=1)\nd <- read.csv('input.csv', na.strings='NA', check.names=FALSE)\noriginal_n <- nrow(d)\nd <- d[complete.cases(d), , drop=FALSE]\nif (nrow(d) < 3) stop('Too few complete observations.')\nwrite.csv(data.frame(total=original_n, used=nrow(d), excluded=original_n-nrow(d)), 'counts.csv', row.names=FALSE)\ndescribe <- function(v) c(n=length(v), mean=mean(v), sd=sd(v), median=median(v), min=min(v), max=max(v))\nwrite.csv(data.frame(variable=names(d), t(vapply(d,describe,numeric(6))), check.names=FALSE), 'descriptives.csv', row.names=FALSE)\nif (length(unique(d$x)) < 2 || length(unique(d$y)) < 2) stop('Regression requires variation in both variables.')\nfit <- lm(y ~ x, data=d)\nif (fit$rank < 2) stop('The regression design is rank deficient.')\nsm <- summary(fit)\nci <- confint(fit,level=0.95)\nwrite.csv(data.frame(term=rownames(sm$coefficients), estimate=sm$coefficients[,1], std_error=sm$coefficients[,2], statistic=sm$coefficients[,3], p_value=sm$coefficients[,4], lower_95=ci[,1], upper_95=ci[,2]), 'coefficients.csv', row.names=FALSE)\nwrite.csv(data.frame(n=nrow(d), r_squared=sm$r.squared, residual_sd=sm$sigma, residual_df=df.residual(fit)), 'fit.csv', row.names=FALSE)\nwrite.csv(data.frame(fitted=fitted(fit), residual=residuals(fit)), 'diagnostics.csv', row.names=FALSE)\nprint(sm)\nprint(ci)\n\n# A reproducible SVG histogram generated from R-computed bin counts.\nh <- hist(d$y, plot=FALSE)\nheight <- 240; width <- 480\nbars <- vapply(seq_along(h$counts), function(i) {\n bh <- if(max(h$counts)>0) h$counts[i]/max(h$counts)*180 else 0\n sprintf('<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"#214f42\"/>', 40+(i-1)*400/length(h$counts), 200-bh, 390/length(h$counts),bh)\n}, character(1))\nsvg <- paste0('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 480 240\"><rect width=\"480\" height=\"240\" fill=\"#f7f5ed\"/><text x=\"40\" y=\"20\">Outcome distribution (complete cases)</text>',paste(bars,collapse=''),sprintf('<text x=\"40\" y=\"225\">Range: %.4g to %.4g; n = %d</text>',min(d$y),max(d$y),nrow(d)),'</svg>')\nwriteLines(svg,'figure.svg')\nwrite.csv(data.frame(lower=head(h$breaks,-1), upper=tail(h$breaks,-1), count=h$counts),'histogram.csv',row.names=FALSE)\nwriteLines(capture.output(sessionInfo()),'session.txt')\nprint(data.frame(total=original_n,used=nrow(d),excluded=original_n-nrow(d)))\n",
+      "inputCsv": "y,x\n2,1\n4,2\n5,3\n8,4\n9,5\n12,6\nNA,7\n10,NA\n",
+      "contextVersions": [
+        {
+          "id": "question",
+          "version": 1
+        },
+        {
+          "id": "design",
+          "version": 1
+        },
+        {
+          "id": "data",
+          "version": 1
+        }
+      ],
+      "startedAt": "2026-09-09T17:27:11.441Z",
+      "finishedAt": "2026-09-09T17:27:14.939Z",
+      "status": "succeeded",
+      "engine": "webR 0.6.0",
+      "rVersion": "R version 4.6.0 (2026-04-24)",
+      "log": "\nCall:\nlm(formula = y ~ x, data = d)\n\nResiduals:\n      1       2       3       4       5       6 \n 0.1905  0.2476 -0.6952  0.3619 -0.5810  0.4762 \n\nCoefficients:\n            Estimate Std. Error t value Pr(>|t|)    \n(Intercept)  -0.1333     0.5258  -0.254 0.812333    \nx             1.9429     0.1350  14.389 0.000136 ***\n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\nResidual standard error: 0.5648 on 4 degrees of freedom\nMultiple R-squared:  0.981,\tAdjusted R-squared:  0.9763 \nF-statistic:   207 on 1 and 4 DF,  p-value: 0.0001356\n\n                2.5 %   97.5 %\n(Intercept) -1.593300 1.326633\nx            1.567972 2.317742\n  total used excluded\n1     8    6        2",
+      "files": {
+        "counts.csv": "\"total\",\"used\",\"excluded\"\n8,6,2\n",
+        "descriptives.csv": "\"variable\",\"n\",\"mean\",\"sd\",\"median\",\"min\",\"max\"\n\"y\",6,6.66666666666667,3.66969571853944,6.5,2,12\n\"x\",6,3.5,1.87082869338697,3.5,1,6\n",
+        "histogram.csv": "\"lower\",\"upper\",\"count\"\n2,4,2\n4,6,1\n6,8,1\n8,10,1\n10,12,1\n",
+        "figure.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 480 240\"><rect width=\"480\" height=\"240\" fill=\"#f7f5ed\"/><text x=\"40\" y=\"20\">Outcome distribution (complete cases)</text><rect x=\"40.00\" y=\"20.00\" width=\"78.00\" height=\"180.00\" fill=\"#214f42\"/><rect x=\"120.00\" y=\"110.00\" width=\"78.00\" height=\"90.00\" fill=\"#214f42\"/><rect x=\"200.00\" y=\"110.00\" width=\"78.00\" height=\"90.00\" fill=\"#214f42\"/><rect x=\"280.00\" y=\"110.00\" width=\"78.00\" height=\"90.00\" fill=\"#214f42\"/><rect x=\"360.00\" y=\"110.00\" width=\"78.00\" height=\"90.00\" fill=\"#214f42\"/><text x=\"40\" y=\"225\">Range: 2 to 12; n = 6</text></svg>\n",
+        "session.txt": "R version 4.6.0 (2026-04-24)\nPlatform: wasm32-unknown-emscripten (32-bit)\nRunning under: emscripten\n\nMatrix products: default\n  LAPACK version 3.12.1\n\nlocale:\n[1] en_US.UTF-8 C           en_US.UTF-8 en_US.UTF-8 en_US.UTF-8 C          \n\ntime zone: America/New_York\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n[1] webr_0.6.0\n",
+        "coefficients.csv": "\"term\",\"estimate\",\"std_error\",\"statistic\",\"p_value\",\"lower_95\",\"upper_95\"\n\"(Intercept)\",-0.133333333333334,0.525840219560977,-0.253562448008738,0.812333170336603,-1.59329983704954,1.32663317038287\n\"x\",1.94285714285714,0.135023303607217,14.3890505635154,0.000135570944100301,1.56797235246925,2.31774193324504\n",
+        "fit.csv": "\"n\",\"r_squared\",\"residual_sd\",\"residual_df\"\n6,0.981046676096181,0.564843003893665,4\n",
+        "diagnostics.csv": "\"fitted\",\"residual\"\n1.80952380952381,0.190476190476191\n3.75238095238095,0.247619047619046\n5.69523809523809,-0.695238095238095\n7.63809523809524,0.361904761904762\n9.58095238095238,-0.580952380952381\n11.5238095238095,0.476190476190476\n"
+      }
+    }
+  }
+}

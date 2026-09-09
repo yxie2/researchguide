@@ -1,5 +1,13 @@
 # From prototype to research pilot
 
+## v0.7 — Complete fictional teaching case (implemented)
+
+- Selectable seven-phase walkthrough with researcher/agent exchanges, accepted artifacts, reasoning and fictional review checkpoints.
+- Cross-phase context explanations, source passages, a corrected causal overclaim and optional learning checks.
+- Real precomputed R outputs, synthetic CSV, exact script and downloadable walkthrough/reproduction materials.
+- Separate browser tab, local progress and restart; no model calls or active-project changes.
+- This is an authored tutorial, not adaptive tutoring or evidence that research competence has improved.
+
 ## v0.1 — Local demonstrator (implemented)
 
 - Seven milestones with explanations, examples, and artifact templates.

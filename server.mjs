@@ -433,6 +433,10 @@ export async function createApp({
         throw new WorkflowError('Method not allowed.', 405);
       const allowed = {
         '/': 'index.html',
+        '/demo': 'demo.html',
+        '/demo.js': 'demo.js',
+        '/demo.css': 'demo.css',
+        '/demo-case.json': 'demo-case.json',
         '/app.js': 'app.js',
         '/style.css': 'style.css',
         '/favicon.svg': 'favicon.svg',
@@ -440,6 +444,7 @@ export async function createApp({
       if (!allowed[pathname]) throw new WorkflowError('Page not found.', 404);
       const file = path.join(root, 'public', allowed[pathname]);
       const types = {
+        '.json': 'application/json; charset=utf-8',
         '.html': 'text/html; charset=utf-8',
         '.js': 'text/javascript; charset=utf-8',
         '.css': 'text/css; charset=utf-8',
