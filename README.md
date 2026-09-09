@@ -51,6 +51,8 @@ Run `node scripts/unified-smoke.mjs` with Playwright configured to check task na
 
 ### Explore complete fictional cases
 
+The interface uses locally served Source Sans 3 and Newsreader fonts, larger controls, grouped project actions and responsive research navigation. See the [interface review and visual comparison](docs/interface-review.md) for the design changes, accessibility checks and screenshots. Run `node scripts/interface-smoke.mjs` with Playwright configured to check the research tools, project pages and demos at five screen widths.
+
 Choose **Explore demo case ↗** in the toolbar or use the demo link under **New project**. The walkthrough opens in a separate tab and keeps your current notebook, unsaved edits and model settings intact. It needs no API key and makes no AI calls.
 
 Use **Choose a case** to switch between **Education · Study habits** and **Business · Training and sales**. Each case has its own saved progress; restarting one does not reset the other. Link directly to the business case at `/demo?case=business`.

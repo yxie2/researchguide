@@ -182,7 +182,7 @@ function heading() {
     el(
       'p',
       { className: 'eyebrow' },
-      `Your research notebook / Milestone ${String(index + 1).padStart(2, '0')}`,
+      `Research workflow / Step ${String(index + 1).padStart(2, '0')}`,
     ),
     el('h1', {}, s.title),
     el('p', {}, s.purpose),
@@ -268,40 +268,48 @@ function sidebar() {
 function topbar() {
   return el(
     'div',
-    { className: 'topbar' },
-    el(
-      'span',
-      { className: 'mode' },
-      mode === 'demo'
-        ? '◌ Demo guide · No AI calls'
-        : `● ${mode === 'ollama' ? 'Ollama' : 'LLM API'} · ${model}`,
-    ),
+    { className: 'topbar app-topbar' },
     el(
       'div',
-      { className: 'toolbar' },
+      { className: 'service-bar' },
       el(
-        'a',
-        { className: 'button quiet', href: '/demo', target: '_blank', rel: 'noopener' },
-        'Explore demo case ↗',
+        'span',
+        { className: 'mode' },
+        mode === 'demo'
+          ? '◌ Demo guide · No AI calls'
+          : `● ${mode === 'ollama' ? 'Ollama' : 'LLM API'} · ${model}`,
       ),
-      button(
-        'LLM settings',
-        () =>
-          perform(async () => {
-            const data = await api('/api/settings');
-            modelSettings = data.settings;
-            mode = modelSettings.provider;
-            model = modelSettings.model;
-            settingsDraft = null;
-            tab = 'settings';
-            projectView = null;
-            newProject = false;
-            selectedPaperId = null;
-            selectedPaperPage = 1;
-            claimEditor = { claim: '', sourceIds: [] };
-          }),
-        'quiet',
+      el(
+        'div',
+        { className: 'toolbar' },
+        el(
+          'a',
+          { className: 'button quiet', href: '/demo', target: '_blank', rel: 'noopener' },
+          'Explore demo case ↗',
+        ),
+        button(
+          'LLM settings',
+          () =>
+            perform(async () => {
+              const data = await api('/api/settings');
+              modelSettings = data.settings;
+              mode = modelSettings.provider;
+              model = modelSettings.model;
+              settingsDraft = null;
+              tab = 'settings';
+              projectView = null;
+              newProject = false;
+              selectedPaperId = null;
+              selectedPaperPage = 1;
+              claimEditor = { claim: '', sourceIds: [] };
+            }),
+          'quiet',
+        ),
       ),
+    ),
+    el(
+      'nav',
+      { className: 'project-toolbar', 'aria-label': 'Project actions' },
       button(
         'New project',
         () => {
@@ -1272,7 +1280,12 @@ function outputTable(csv) {
     .map((row) => row.split(',').map((v) => v.replace(/^"|"$/g, '')));
   return el(
     'div',
-    { className: 'table-scroll' },
+    {
+      className: 'table-scroll',
+      tabindex: '0',
+      role: 'region',
+      'aria-label': 'Analysis table, scroll horizontally if needed',
+    },
     el(
       'table',
       {},
@@ -2138,7 +2151,11 @@ function executionPanel() {
           'details',
           {},
           el('summary', {}, 'Review the exact R script'),
-          el('pre', { className: 'code-review' }, el('code', {}, plan.script)),
+          el(
+            'pre',
+            { className: 'code-review', tabindex: '0', 'aria-label': 'Analysis code or output' },
+            el('code', {}, plan.script),
+          ),
           el('p', { className: 'small hash' }, `Script SHA-256 ${plan.scriptHash}`),
         ),
         current &&
@@ -2271,10 +2288,22 @@ function executionPanel() {
               'details',
               {},
               el('summary', {}, 'Execution log and environment'),
-              el('pre', { className: 'code-review' }, run.log),
               el(
                 'pre',
-                { className: 'code-review' },
+                {
+                  className: 'code-review',
+                  tabindex: '0',
+                  'aria-label': 'Analysis code or output',
+                },
+                run.log,
+              ),
+              el(
+                'pre',
+                {
+                  className: 'code-review',
+                  tabindex: '0',
+                  'aria-label': 'Analysis code or output',
+                },
                 run.files['session.txt'] || 'No environment record was returned.',
               ),
             ),
@@ -3688,7 +3717,7 @@ function render() {
         topbar(),
         el(
           'main',
-          { id: 'main', className: 'workspace', 'aria-busy': busy },
+          { id: 'main', className: 'workspace', tabindex: '-1', 'aria-busy': busy },
           projectView
             ? projectPanel()
             : newProject

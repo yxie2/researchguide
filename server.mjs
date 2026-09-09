@@ -644,6 +644,8 @@ export async function createApp({
         '/style.css': 'style.css',
         '/favicon.svg': 'favicon.svg',
         '/researchguide-logo.png': 'researchguide-logo.png',
+        '/fonts/newsreader-latin.woff2': 'fonts/newsreader-latin.woff2',
+        '/fonts/source-sans-3-latin.woff2': 'fonts/source-sans-3-latin.woff2',
       };
       if (!allowed[pathname]) throw new WorkflowError('Page not found.', 404);
       const file = path.join(root, 'public', allowed[pathname]);
@@ -654,6 +656,7 @@ export async function createApp({
         '.css': 'text/css; charset=utf-8',
         '.svg': 'image/svg+xml',
         '.png': 'image/png',
+        '.woff2': 'font/woff2',
       };
       res.writeHead(200, {
         'Content-Type': types[path.extname(file)],

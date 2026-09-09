@@ -596,7 +596,7 @@ function render() {
         ),
         el(
           'main',
-          { id: 'main', class: 'workspace' },
+          { id: 'main', class: 'workspace', tabindex: '-1' },
           el(
             'nav',
             { class: 'demo-case-picker toolbar', 'aria-label': 'Choose a demo case' },

@@ -1,7 +1,7 @@
 .demo-disclosure {
   border-block: 1px solid var(--line);
   padding-block: 1rem;
-  font-size: 0.85rem;
+  font-size: 0.9375rem;
   line-height: 1.65;
   color: var(--muted);
   margin-bottom: 2rem;
@@ -32,9 +32,7 @@
 .demo-artifact {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font:
-    0.92rem/1.8 'Segoe UI',
-    sans-serif;
+  font: 1rem/1.7 var(--font-body);
   background: var(--panel);
   padding: 1.3rem;
   max-width: 100%;
@@ -47,7 +45,7 @@
 }
 .demo-source blockquote {
   margin-inline: 0;
-  font-family: Georgia, serif;
+  font-family: var(--font-heading);
   font-size: 1.15rem;
 }
 .demo-challenge {
@@ -86,8 +84,8 @@
   padding-block: 1rem;
 }
 .demo-task-sequence summary {
-  font-family: Georgia, serif;
-  font-size: 1.2rem;
+  font-family: var(--font-body);
+  font-size: 1.1875rem;
 }
 .demo-task-sequence details p {
   margin-top: 0.8rem;
