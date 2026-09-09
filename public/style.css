@@ -205,6 +205,14 @@ p {
   font-size: 0.82rem;
   line-height: 1.5;
 }
+.headline .step-project-title {
+  max-width: none;
+  margin: 0 0 1rem;
+  color: var(--ink);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.15em;

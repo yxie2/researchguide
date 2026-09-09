@@ -175,6 +175,12 @@ function heading() {
     { className: 'headline' },
     el(
       'p',
+      { className: 'step-project-title' },
+      el('span', {}, 'Project: '),
+      el('strong', {}, project.title),
+    ),
+    el(
+      'p',
       { className: 'eyebrow' },
       `Your research notebook / Milestone ${String(index + 1).padStart(2, '0')}`,
     ),
