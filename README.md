@@ -8,7 +8,7 @@ ResearchGuide is an early, local-first prototype for beginning PhD students and 
 
 ## Run locally
 
-Requires **Node.js 22.13 or newer**. Run `npm ci` once to install the pinned PDF.js dependency and its dependencies. There is no build step.
+Requires **Node.js 22.13 or newer**. Run `npm ci` once to install the pinned PDF.js, CSV parser, and webR dependencies. There is no build step.
 
 ```bash
 npm ci
@@ -66,7 +66,24 @@ The model looks for mismatched populations or measurements, causal claims unsupp
 
 Inspect the quoted passages, open their linked milestone workspaces, and record agreement, disagreement, or unresolved status with your own explanation. A researcher response does not automatically fix a finding or grant supervisor approval. Edit the relevant artifacts and run a fresh review. Changes to any reviewed artifact or explanation make an old report outdated; unrelated source changes or recording a response do not. Decisions can be added only to the newest report while it still matches the saved work.
 
-Reports preserve the reviewed text and versions, model information, findings, and local unauthenticated researcher responses. History remains visible and is included in Markdown/JSON exports. Conversational guidance receives the latest report, labeled current or outdated. Limits: 20 reports per notebook and 20 responses per finding. Each run makes one model call and sends the six milestone artifacts and explanations to the configured provider. It does not inspect external documents, execute code, validate calculations, or guarantee an exhaustive audit.
+Reports preserve the reviewed text and versions, model information, findings, and local unauthenticated researcher responses. History remains visible and is included in Markdown/JSON exports. Conversational guidance receives the latest report, labeled current or outdated. Limits: 20 reports per notebook and 20 responses per finding. Each run makes one model call and sends the six milestone artifacts and explanations to the configured provider. It does not inspect external documents or independently rerun calculations. When available, it also compares the latest three recorded successful R output summaries; it does not guarantee an exhaustive audit.
+
+## Run a reproducible analysis
+
+Open **Run analysis** from any milestone. No native R or Docker installation is required: the pinned [webR runtime](https://docs.r-wasm.org/webr/latest/) runs R locally.
+
+1. Import a permitted CSV and describe its license, permission, or synthetic origin. Limits: 2 MB, 2–10,000 rows, 1–50 uniquely named columns, and five dataset versions. The app records a SHA-256 of the stored UTF-8 CSV and profiles numeric values and missingness.
+2. Ask the model to propose a plan, or choose one manually. Supported methods are descriptive statistics for one numeric outcome and unadjusted simple linear regression with one numeric predictor. Column profiles and the saved question/design/data text are sent for AI planning; row-level observations are not.
+3. Review the rationale, variable mapping, missing-data policy, and exact generated R script. Blank cells and NA are treated as missing; complete-case omission is counted. Enter an explicit local execution approval with your reasoning. This is not an authenticated supervisor sign-off.
+4. Run the approved plan. Only reviewed templates execute; AI responses cannot supply executable R. Changing the question, design, or data report requires a new plan and approval. Dataset, plan, and script hashes are checked before execution.
+5. Inspect actual R tables, 95% regression intervals, fitted values/residuals, a histogram, execution log, and `sessionInfo()`. Failed runs have a failure record and are never shown as successful results. Regression does not establish causation, adjust for extra confounders, or automatically validate assumptions.
+6. Download the reproduction bundle (JSON), or individual `analysis.R`, `input.csv`, tables, SVG, and session file. To rerun externally, save the script and normalized input in a clean directory and run `Rscript analysis.R`. The recorded R and package versions describe the original environment. Bundles include the original dataset, plan, approval record, and normalized numeric input; **they contain row-level data**.
+
+Use run IDs such as R1 in the Analysis and Interpretation artifacts. Conversation and consistency review receive summaries of the latest three successful runs, labeled current or historical. Consistency findings can quote recorded execution output. Running a new analysis makes prior consistency reports outdated; no artifact is silently rewritten.
+
+Each execution starts a separate short-lived Node/webR process with an in-memory R filesystem, no mounted host directories, and an empty inherited environment. Only a method enum and normalized numeric CSV are passed in; API keys and arbitrary R code are not passed. Limits: 30 seconds, bounded output, 256 MB V8 heap, and 512 MB per WebAssembly memory. These are not a total-process RAM quota or an operating-system sandbox for arbitrary code. No network calls or package installation are made by the fixed templates; dependencies and runtime assets are installed beforehand with npm. Do not extend the runner to accept free-form R without designing a stronger isolation boundary.
+
+This release supports 30 plans and 30 run records per notebook. Advanced models, categorical predictors, imputation, arbitrary code, automated diagnostics interpretation, and native RStudio integration remain future work. Runtime licensing is documented in [THIRD_PARTY.md](THIRD_PARTY.md).
 
 ## Choose a local model or hosted API
 
@@ -101,17 +118,17 @@ Project text and up to 20 source records are sent to your configured endpoint. H
 
 ## Implemented versus planned
 
-| Available in v0.5                                            | Planned, not implemented                              |
+| Available in v0.6                                            | Planned, not implemented                              |
 | ------------------------------------------------------------ | ----------------------------------------------------- |
 | Seven milestone templates and worked examples                | Validated adaptive teaching and competence assessment |
 | Student explanations and supervisor checkpoints              | Authenticated roles and remote collaboration          |
 | Deterministic workflow coordinator                           | Autonomous tool selection and bounded replanning      |
 | Optional specialist/reviewer/coordinator model sequence      | Literature search and source verification             |
 | PDF passages and claim assessments with researcher decisions | OCR, automated retrieval and full-paper verification  |
-| Versioned artifacts and dependency invalidation              | Dataset profiling and isolated R execution            |
+| Versioned artifacts and dependency invalidation              | Advanced models and unrestricted-code isolation       |
 | Atomic local saves, history, Markdown/JSON export            | RStudio integration and institutional storage         |
 
-This is a working foundation for an agentic research guide. It is not an autonomous scientist, a scientific-quality certification system, or a replacement for supervision. The initial guidance focuses on quantitative secondary-data studies. Work in the data and analysis milestones is currently performed in the researcher's own tools and documented here.
+This is a working foundation for an agentic research guide. It is not an autonomous scientist, a scientific-quality certification system, or a replacement for supervision. The initial guidance focuses on quantitative secondary-data studies. Basic CSV profiling and approved descriptive/simple-regression execution are available locally; other analyses are performed in the researcher's own tools and documented here.
 
 ## Architecture
 
@@ -127,6 +144,7 @@ Node HTTP server (loopback only)
   └── versioned notebook export
 ```
 
+- `lib/analysis.mjs` and `lib/r-*.mjs`: CSV profiles, bound plans/approvals, fixed R templates, and bounded local execution.
 - `lib/consistency.mjs`: cross-milestone comparisons, exact-quotation checks, and version-bound researcher responses.
 - `lib/evidence.mjs` and `lib/pdf-worker.mjs`: local PDF extraction, page matching, and bounded claim assessments.
 - `lib/workflow.mjs`: milestone definitions, transitions, approval gates, invalidation, and export.
@@ -166,6 +184,7 @@ node scripts/browser-smoke.mjs
 node scripts/settings-smoke.mjs
 node scripts/evidence-smoke.mjs
 node scripts/consistency-smoke.mjs
+node scripts/analysis-smoke.mjs
 ```
 
 It uses temporary data, walks project creation through review, checks export and revision invalidation, verifies mobile overflow, and regenerates the screenshots. The settings smoke test checks provider configuration, masked keys, connection testing, and guidance against a mock API; no real API credentials are required. Browser checks are not currently included in CI. `PLAYWRIGHT_MODULE` can point to an existing Playwright module URL instead of installing it here.

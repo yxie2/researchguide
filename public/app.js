@@ -12,7 +12,9 @@ let project,
   busy = false,
   newProject = false,
   noticeTimer;
-let selectedConsistencyId;
+let selectedConsistencyId, analysisDatasetId, analysisPlanId;
+let analysisManualOpen = false;
+let analysisDraft = { method: 'descriptive', outcome: null, predictor: null, rationale: '' };
 let selectedPaperId,
   selectedPaperPage = 1,
   claimEditor = { claim: '', sourceIds: [] };
@@ -853,20 +855,514 @@ function paperLibrary() {
     ],
   );
 }
+function outputTable(csv) {
+  const rows = csv
+    .trim()
+    .split('\n')
+    .map((row) => row.split(',').map((v) => v.replace(/^"|"$/g, '')));
+  return el(
+    'div',
+    { className: 'table-scroll' },
+    el(
+      'table',
+      {},
+      el(
+        'thead',
+        {},
+        el(
+          'tr',
+          {},
+          rows[0].map((v) => el('th', { scope: 'col' }, v)),
+        ),
+      ),
+      el(
+        'tbody',
+        {},
+        rows.slice(1, 25).map((row) =>
+          el(
+            'tr',
+            {},
+            row.map((v) => el('td', {}, v)),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+function executionPanel() {
+  const datasets = project.datasets || [],
+    plans = project.analysisPlans || [],
+    runs = project.analysisRuns || [];
+  const dataset = datasets.find((d) => d.id === analysisDatasetId) || datasets.at(-1);
+  const availablePlans = plans.filter((p) => p.datasetId === dataset?.id);
+  const plan = availablePlans.find((p) => p.id === analysisPlanId) || availablePlans.at(-1);
+  const current =
+    plan &&
+    plan.contextVersions.every(
+      (s) => project.milestones.find((m) => m.id === s.id).version === s.version,
+    );
+  const approval = plan?.approvals.at(-1);
+  const select = (id, values, value, onChange) => {
+    const node = el(
+      'select',
+      { id, disabled: busy, onChange },
+      values.map(([v, label]) => el('option', { value: v }, label)),
+    );
+    node.value = value;
+    return node;
+  };
+  const numeric = dataset?.columns.filter((c) => c.numeric && c.observed >= 2) || [];
+  const outcome =
+    numeric.find((c) => c.index === analysisDraft.outcome)?.index ?? numeric[0]?.index;
+  const predictor =
+    numeric.find((c) => c.index === analysisDraft.predictor)?.index ?? numeric[1]?.index;
+  return el(
+    'div',
+    { className: 'columns' },
+    el(
+      'section',
+      {},
+      el('h2', {}, 'From a plan to recorded results.'),
+      el(
+        'p',
+        { className: 'muted' },
+        'Run descriptive statistics or simple linear regression in a local R runtime. Review the plan and exact script before execution. Tables and figures come from R, not from the language model.',
+      ),
+      el(
+        'details',
+        { open: !datasets.length },
+        el('summary', {}, 'Import a permitted CSV dataset'),
+        el(
+          'form',
+          {
+            onSubmit: (e) => {
+              e.preventDefault();
+              const file = $('#analysis-csv').files[0],
+                name = $('#dataset-name').value,
+                permission = $('#dataset-permission').value;
+              if (!file || file.size > 2 * 1024 * 1024) {
+                notice('Choose a CSV no larger than 2 MB.');
+                return;
+              }
+              perform(async () => {
+                const r = await api('/api/analysis/datasets', {
+                  name,
+                  permission,
+                  csv: await file.text(),
+                  revision: project.revision,
+                });
+                project = r.project;
+                analysisDatasetId = project.datasets.at(-1).id;
+                analysisPlanId = null;
+                analysisDraft = {
+                  method: 'descriptive',
+                  outcome: null,
+                  predictor: null,
+                  rationale: '',
+                };
+              }, 'Dataset version saved locally. Review its profile before choosing an analysis.');
+            },
+          },
+          field('dataset-name', 'Dataset name', '', '', false, { required: true, maxlength: 160 }),
+          el('label', { for: 'analysis-csv' }, 'CSV file'),
+          el('input', {
+            id: 'analysis-csv',
+            type: 'file',
+            accept: '.csv,text/csv',
+            required: true,
+            disabled: busy,
+          }),
+          field(
+            'dataset-permission',
+            'Why may you use these data?',
+            'Describe the license, permission, or synthetic-data origin. At least 20 characters.',
+            '',
+            true,
+            { required: true, minlength: 20, maxlength: 2000 },
+          ),
+          el(
+            'p',
+            { className: 'small muted' },
+            'CSV files stay on this computer and are included in JSON exports and reproduction bundles. Plan generation sends column names, types, counts, and saved question/design/data text to your model; individual rows are not sent for planning.',
+          ),
+          el('button', { type: 'submit', className: 'button', disabled: busy }, 'Import CSV'),
+        ),
+      ),
+      dataset && [
+        el('label', { for: 'analysis-dataset' }, 'Dataset version'),
+        select(
+          'analysis-dataset',
+          datasets.map((d) => [d.id, `${d.id} · ${d.name} · ${d.rowCount} rows`]),
+          dataset.id,
+          (e) => {
+            analysisDatasetId = e.target.value;
+            analysisPlanId = null;
+            analysisDraft = {
+              method: 'descriptive',
+              outcome: null,
+              predictor: null,
+              rationale: '',
+            };
+            render();
+          },
+        ),
+        el(
+          'details',
+          {},
+          el('summary', {}, 'Column profile and dataset identity'),
+          el('p', { className: 'small hash' }, `SHA-256 ${dataset.sha256}`),
+          el(
+            'ul',
+            {},
+            dataset.columns.map((c) =>
+              el(
+                'li',
+                {},
+                `${c.name}: ${c.numeric ? 'numeric' : 'not wholly numeric'}; ${c.observed} numeric values, ${c.missing} missing`,
+              ),
+            ),
+          ),
+        ),
+        el('h3', {}, 'Propose an analysis'),
+        button(
+          'Ask AI to propose a plan',
+          () =>
+            perform(async () => {
+              if (isDirty()) await saveDraft();
+              const r = await api('/api/analysis/propose', {
+                datasetId: dataset.id,
+                revision: project.revision,
+                settingsRevision: modelSettings.revision,
+              });
+              project = r.project;
+              analysisPlanId = project.analysisPlans.at(-1).id;
+            }, 'Proposed plan saved. Review its rationale, limitations, and R script before approving.'),
+          '',
+          { disabled: busy || mode === 'demo' },
+        ),
+        el(
+          'details',
+          { open: analysisManualOpen },
+          el(
+            'summary',
+            {
+              onClick: () => {
+                analysisManualOpen = !analysisManualOpen;
+              },
+            },
+            'Choose a plan manually',
+          ),
+          el(
+            'form',
+            {
+              onSubmit: (e) => {
+                e.preventDefault();
+                const values = {
+                  method: analysisDraft.method,
+                  outcome,
+                  predictor,
+                  rationale: analysisDraft.rationale,
+                };
+                perform(async () => {
+                  if (isDirty()) await saveDraft();
+                  await mutate({ type: 'analysis_plan', datasetId: dataset.id, ...values });
+                  analysisPlanId = project.analysisPlans.at(-1).id;
+                }, 'Analysis plan saved for review.');
+              },
+            },
+            el('label', { for: 'analysis-method' }, 'Analysis method'),
+            select(
+              'analysis-method',
+              [
+                ['descriptive', 'Descriptive statistics'],
+                ['linear', 'Simple linear regression'],
+              ],
+              analysisDraft.method,
+              (e) => {
+                analysisDraft.method = e.target.value;
+                render();
+              },
+            ),
+            el('label', { for: 'analysis-outcome' }, 'Outcome variable'),
+            select(
+              'analysis-outcome',
+              numeric.map((c) => [c.index, c.name]),
+              outcome,
+              (e) => {
+                analysisDraft.outcome = Number(e.target.value);
+                render();
+              },
+            ),
+            analysisDraft.method === 'linear' && [
+              el('label', { for: 'analysis-predictor' }, 'Predictor variable'),
+              select(
+                'analysis-predictor',
+                numeric.map((c) => [c.index, c.name]),
+                predictor,
+                (e) => {
+                  analysisDraft.predictor = Number(e.target.value);
+                  render();
+                },
+              ),
+            ],
+            field(
+              'analysis-rationale',
+              'Why does this analysis fit the question?',
+              'Explain assumptions and limitations. At least 40 characters.',
+              analysisDraft.rationale,
+              true,
+              {
+                required: true,
+                minlength: 40,
+                maxlength: 3000,
+                onInput: (e) => {
+                  analysisDraft.rationale = e.target.value;
+                },
+              },
+            ),
+            el(
+              'button',
+              { type: 'submit', className: 'button', disabled: busy || !numeric.length },
+              'Save analysis plan',
+            ),
+          ),
+        ),
+      ],
+      plan && [
+        el('h3', {}, `Review ${plan.id}`),
+        select(
+          'analysis-plan',
+          availablePlans.map((p) => [p.id, `${p.id} · ${p.method} · ${date(p.at)}`]),
+          plan.id,
+          (e) => {
+            analysisPlanId = e.target.value;
+            render();
+          },
+        ),
+        el(
+          'p',
+          { className: 'status' },
+          current
+            ? 'Matches question, design and data report'
+            : 'Outdated — create a new plan after reviewing your changes',
+        ),
+        el(
+          'p',
+          {},
+          `Outcome (y): ${dataset.columns[plan.outcome].name}${plan.method === 'linear' ? `; predictor (x): ${dataset.columns[plan.predictor].name}` : ''}. Missing values: complete-case omission. No automatic confounder adjustment.`,
+        ),
+        el('p', { className: 'prewrap' }, plan.rationale),
+        el(
+          'details',
+          {},
+          el('summary', {}, 'Review the exact R script'),
+          el('pre', { className: 'code-review' }, el('code', {}, plan.script)),
+          el('p', { className: 'small hash' }, `Script SHA-256 ${plan.scriptHash}`),
+        ),
+        current &&
+          el(
+            'details',
+            {},
+            el('summary', {}, 'Approve this plan and script'),
+            el(
+              'form',
+              {
+                onSubmit: (e) => {
+                  e.preventDefault();
+                  const name = $('#analysis-reviewer').value,
+                    note = $('#analysis-approval-note').value,
+                    reviewed = $('#analysis-reviewed').checked;
+                  perform(
+                    () =>
+                      mutate({
+                        type: 'analysis_approve',
+                        planId: plan.id,
+                        planHash: plan.planHash,
+                        name,
+                        note,
+                        reviewed,
+                      }),
+                    'Execution approval recorded. You can now run this exact plan.',
+                  );
+                },
+              },
+              field('analysis-reviewer', 'Reviewer name', '', '', false, {
+                required: true,
+                maxlength: 100,
+              }),
+              field(
+                'analysis-approval-note',
+                'Why is this plan appropriate?',
+                'At least 40 characters. This is a local, unauthenticated execution approval.',
+                '',
+                true,
+                { required: true, minlength: 40, maxlength: 2000 },
+              ),
+              el(
+                'label',
+                { className: 'checkbox-label' },
+                el('input', {
+                  id: 'analysis-reviewed',
+                  type: 'checkbox',
+                  required: true,
+                  disabled: busy,
+                }),
+                'I reviewed the dataset, variable mapping, missing-data policy, rationale and exact script.',
+              ),
+              el(
+                'button',
+                { type: 'submit', className: 'button', disabled: busy },
+                'Approve for execution',
+              ),
+            ),
+          ),
+        approval &&
+          el(
+            'p',
+            { className: 'small' },
+            `Execution approval: ${approval.name} · ${date(approval.at)}`,
+          ),
+        button(
+          'Run approved R analysis',
+          () =>
+            perform(async () => {
+              if (isDirty()) await saveDraft();
+              const r = await api('/api/analysis/run', {
+                planId: plan.id,
+                approvalId: approval.id,
+                revision: project.revision,
+              });
+              project = r.project;
+              const run = project.analysisRuns.at(-1);
+              notice(
+                run.status === 'succeeded'
+                  ? `Run ${run.id} completed. Inspect the recorded outputs below.`
+                  : `Run ${run.id} failed. The failure log is saved below.`,
+              );
+            }),
+          '',
+          { disabled: busy || !current || !approval },
+        ),
+      ],
+      el('h3', {}, 'Execution records'),
+      !runs.length &&
+        el(
+          'p',
+          { className: 'empty' },
+          'No computations have run yet. Plan generation and approval do not execute R.',
+        ),
+      runs
+        .slice()
+        .reverse()
+        .map((run) =>
+          el(
+            'article',
+            { className: 'claim-record' },
+            el('h3', {}, `${run.id} · ${run.status} · ${run.planId} / ${run.datasetId}`),
+            el(
+              'p',
+              { className: 'small' },
+              `${run.rVersion || run.engine} · ${date(run.finishedAt)}`,
+            ),
+            !run.contextVersions.every(
+              (s) => project.milestones.find((m) => m.id === s.id).version === s.version,
+            ) &&
+              el(
+                'p',
+                { className: 'note warn' },
+                'Question, design or data report changed since this plan. This is a historical run.',
+              ),
+            run.status === 'succeeded' && [
+              el('h4', {}, 'Observation counts'),
+              outputTable(run.files['counts.csv']),
+              el('h4', {}, 'Descriptive statistics'),
+              outputTable(run.files['descriptives.csv']),
+              run.files['coefficients.csv'] && [
+                el('h4', {}, 'Regression coefficients and 95% intervals'),
+                outputTable(run.files['coefficients.csv']),
+              ],
+              el('img', {
+                src: `/api/analysis/runs/${run.id}/figure.svg`,
+                alt: 'Histogram of the selected outcome among complete observations',
+                className: 'analysis-figure',
+              }),
+            ],
+            el(
+              'details',
+              {},
+              el('summary', {}, 'Execution log and environment'),
+              el('pre', { className: 'code-review' }, run.log),
+              el(
+                'pre',
+                { className: 'code-review' },
+                run.files['session.txt'] || 'No environment record was returned.',
+              ),
+            ),
+            el(
+              'a',
+              { href: `/api/analysis/runs/${run.id}`, className: 'button quiet' },
+              'Download reproduction bundle',
+            ),
+            el(
+              'div',
+              { className: 'form-actions' },
+              ['analysis.R', 'input.csv', ...Object.keys(run.files)].map((file) =>
+                el('a', { href: `/api/analysis/runs/${run.id}/${file}` }, file),
+              ),
+            ),
+            el(
+              'p',
+              { className: 'small muted' },
+              `Cite run ${run.id} in your Analysis and Interpretation artifacts. Recorded output summaries are available to the conversational guide and consistency review.`,
+            ),
+          ),
+        ),
+    ),
+    el(
+      'aside',
+      { className: 'guide-aside' },
+      el('h2', {}, 'A bounded first analysis'),
+      el(
+        'p',
+        {},
+        'Descriptive statistics summarize one numeric variable. Simple regression estimates an unadjusted association between two numeric variables. Neither choice establishes causality.',
+      ),
+      el(
+        'p',
+        {},
+        'Rows missing a selected variable are omitted and counted. Numeric variables only; categorical predictors, imputation, multivariable models, and arbitrary R scripts are not supported in this version.',
+      ),
+      el(
+        'p',
+        {},
+        'A separate local webR process uses an in-memory filesystem, a 30-second deadline, bounded outputs, a 256 MB JavaScript heap limit, and a 512 MB limit per WebAssembly memory. The process receives numeric input only, without API keys or host filesystem mounts.',
+      ),
+      el(
+        'p',
+        { className: 'small muted' },
+        'This is a constrained template runner, not a sandbox for arbitrary uploaded code. Only the reviewed templates execute. Downloads and JSON backups include row-level data. Inspect diagnostics and discuss assumptions with your supervisor.',
+      ),
+    ),
+  );
+}
 function consistencyPanel() {
   const ids = ['question', 'design', 'data', 'analysis', 'interpretation', 'writing'];
   const reports = project.consistencyReports || [];
   const report = reports.find((r) => r.id === selectedConsistencyId) || reports.at(-1);
   const currentReport =
     report &&
+    Boolean(report.snapshot.find((s) => s.id === 'execution')) ===
+      Boolean((project.analysisRuns || []).some((r) => r.status === 'succeeded')) &&
     report.snapshot.every((s) => {
+      if (s.id === 'execution') return s.version === project.analysisRuns.length;
       const m = project.milestones.find((m) => m.id === s.id);
       return (
         m.version === s.version && m.artifact === s.artifact && m.explanation === s.explanation
       );
     });
   const canDecide = currentReport && report === reports.at(-1) && !isDirty();
-  const name = (id) => stages.find((s) => s.id === id).short;
+  const name = (id) =>
+    id === 'execution' ? 'Recorded R outputs' : stages.find((s) => s.id === id).short;
   return el(
     'div',
     { className: 'columns' },
@@ -903,7 +1399,7 @@ function consistencyPanel() {
         { className: 'small muted' },
         mode === 'demo'
           ? 'Connect a model in LLM settings to run a review.'
-          : `This sends the six saved milestone artifacts and explanations to ${modelSettings.baseUrl}. Unsaved workspace edits will be saved first. No source PDFs or external files are inspected.`,
+          : `This sends the six saved milestone artifacts and explanations to ${modelSettings.baseUrl}. Unsaved workspace edits will be saved first. Recorded R output summaries are included when available. No source PDFs or external files are inspected.`,
       ),
       !report &&
         el(
@@ -948,6 +1444,11 @@ function consistencyPanel() {
                 button(
                   `${name(ref.stageId)} · v${ref.version} · ${ref.field}`,
                   () => {
+                    if (ref.stageId === 'execution') {
+                      tab = 'execution';
+                      render();
+                      return;
+                    }
                     navigate(ref.stageId);
                     if (selected === ref.stageId) {
                       tab = 'workspace';
@@ -1639,13 +2140,13 @@ function aboutPanel() {
     el(
       'p',
       {},
-      'Seven guided milestones, editable artifacts, understanding prompts, source records, version history, local review decisions, dependency invalidation, exports, PDF text extraction, a claim–evidence ledger, cross-milestone consistency reviews with quoted findings and researcher decisions, and optional guidance using Ollama or an OpenAI-compatible API.',
+      'Seven guided milestones, editable artifacts, understanding prompts, source records, version history, local review decisions, dependency invalidation, exports, PDF text extraction, a claim–evidence ledger, cross-milestone consistency reviews, approved local R analyses with recorded outputs, and researcher decisions, and optional guidance using Ollama or an OpenAI-compatible API.',
     ),
     el('h3', {}, 'What is still ahead'),
     el(
       'p',
       {},
-      'Authenticated collaboration, literature retrieval, full-paper verification, OCR, dataset inspection, sandboxed R execution, and validated assessments of research competence. The analysis milestone currently records work you perform in your own analysis environment.',
+      'Authenticated collaboration, literature retrieval, full-paper verification, OCR, advanced statistical models, unrestricted-code isolation, and validated assessments of research competence. Basic CSV profiling and reviewed R template execution are available under Run analysis.',
     ),
     el('h3', {}, 'Choose your model'),
     el(
@@ -1965,6 +2466,7 @@ function render() {
     sources: sourcesPanel,
     claims: claimsPanel,
     consistency: consistencyPanel,
+    execution: executionPanel,
     review: reviewPanel,
     activity: activityPanel,
     about: aboutPanel,
@@ -1977,6 +2479,7 @@ function render() {
     ['sources', 'Sources'],
     ['claims', 'Claims & evidence'],
     ['consistency', 'Consistency review'],
+    ['execution', 'Run analysis'],
     ['review', 'Supervisor review'],
     ['activity', 'History'],
   ];

@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { proposeAnalysis, executeAnalysis } from './lib/analysis.mjs';
 import { reviewConsistency, appendConsistency } from './lib/consistency.mjs';
 import { extractPaper, assessClaim } from './lib/evidence.mjs';
 import { converse, appendConversation } from './lib/conversation.mjs';
@@ -7,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import {
   createProject,
+  analysisUpdated,
   evidenceUpdated,
   applyAction,
   appendGuide,
@@ -94,6 +96,63 @@ export async function createApp({
       if (req.headers.origin && req.headers.origin !== `http://${host}`)
         throw new WorkflowError('Cross-origin requests are not allowed.', 403);
       const pathname = new URL(req.url, `http://${host}`).pathname;
+      if (pathname.startsWith('/api/analysis/runs/') && req.method === 'GET') {
+        const parts = pathname.slice('/api/analysis/runs/'.length).split('/');
+        const run = (project.analysisRuns || []).find((r) => r.id === parts[0]);
+        if (!run) throw new WorkflowError('Execution record not found.', 404);
+        const plan = project.analysisPlans.find((p) => p.id === run.planId);
+        if (parts.length === 1) {
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Content-Disposition': `attachment; filename="${run.id}-reproduction.json"`,
+            'Cache-Control': 'no-store',
+          });
+          return res.end(
+            JSON.stringify(
+              {
+                run,
+                plan,
+                reproduce:
+                  'Save run.inputCsv as input.csv and run.script as analysis.R, then run Rscript analysis.R in a clean directory. Package and R versions are in session.txt. Column mappings are stored in the plan; this bundle contains selected row-level numeric data.',
+                dataset: project.datasets.find((d) => d.id === run.datasetId),
+              },
+              null,
+              2,
+            ),
+          );
+        }
+        const filename = parts[1];
+        const content =
+          filename === 'analysis.R'
+            ? run.script
+            : filename === 'input.csv'
+              ? run.inputCsv
+              : run.files[filename];
+        if (
+          parts.length !== 2 ||
+          ![
+            'analysis.R',
+            'input.csv',
+            'counts.csv',
+            'descriptives.csv',
+            'coefficients.csv',
+            'fit.csv',
+            'diagnostics.csv',
+            'histogram.csv',
+            'figure.svg',
+            'session.txt',
+          ].includes(filename) ||
+          typeof content !== 'string'
+        )
+          throw new WorkflowError('Run output not found.', 404);
+        res.writeHead(200, {
+          'Content-Type': filename === 'figure.svg' ? 'image/svg+xml' : 'text/plain; charset=utf-8',
+          'Content-Disposition':
+            filename === 'figure.svg' ? 'inline' : `attachment; filename="${filename}"`,
+          'Cache-Control': 'no-store',
+        });
+        return res.end(content);
+      }
       if (pathname.startsWith('/api/papers/') && req.method === 'GET') {
         const id = pathname.slice('/api/papers/'.length);
         const paper = (project.papers || []).find((p) => p.id === id);
@@ -140,10 +199,56 @@ export async function createApp({
           throw new WorkflowError('Content-Type must be application/json.', 415);
         const payload = await body(
           req,
-          pathname === '/api/papers' ? 7 * 1024 * 1024 + 4096 : 128 * 1024,
+          pathname === '/api/papers'
+            ? 7 * 1024 * 1024 + 4096
+            : pathname === '/api/analysis/datasets'
+              ? 3 * 1024 * 1024
+              : 128 * 1024,
         );
         if (!payload || typeof payload !== 'object' || Array.isArray(payload))
           throw new WorkflowError('Request must be a JSON object.');
+        if (
+          ['/api/analysis/datasets', '/api/analysis/propose', '/api/analysis/run'].includes(
+            pathname,
+          )
+        ) {
+          if (writing || guiding)
+            throw new WorkflowError('Wait for the current operation to finish.', 409);
+          if (payload.revision !== project.revision)
+            throw new WorkflowError('Project changed. Reload before continuing.', 409);
+          if (pathname === '/api/analysis/propose' && payload.settingsRevision !== settingsRevision)
+            throw new WorkflowError('Model settings changed. Reload before proposing a plan.', 409);
+          guiding = true;
+          try {
+            if (pathname === '/api/analysis/datasets')
+              await persist(applyAction(project, { ...payload, type: 'analysis_dataset' }));
+            else if (pathname === '/api/analysis/propose') {
+              const next = structuredClone(project);
+              await proposeAnalysis(next, payload.datasetId, { ...settings });
+              await persist(
+                analysisUpdated(
+                  next,
+                  'AI proposed a constrained analysis plan; no execution or approval occurred.',
+                ),
+              );
+            } else {
+              const run = await executeAnalysis(project, payload.planId, payload.approvalId);
+              const next = structuredClone(project);
+              next.analysisRuns ||= [];
+              next.analysisRuns.push(run);
+              await persist(
+                analysisUpdated(
+                  next,
+                  `R execution ${run.id} ${run.status}; outputs preserved for inspection.`,
+                  true,
+                ),
+              );
+            }
+            return send(200, { project });
+          } finally {
+            guiding = false;
+          }
+        }
         if (pathname === '/api/consistency') {
           if (writing || guiding)
             throw new WorkflowError('Wait for the current operation to finish.', 409);

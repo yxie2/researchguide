@@ -751,3 +751,36 @@ fieldset {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.table-scroll {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.table-scroll table {
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.table-scroll td,
+.table-scroll th {
+  border-bottom: 1px solid var(--line);
+  padding: 0.65rem;
+  text-align: left;
+}
+.code-review {
+  overflow: auto;
+  max-height: 28rem;
+  padding: 1rem;
+  background: #eeeee3;
+  font-size: 0.8rem;
+}
+.hash {
+  overflow-wrap: anywhere;
+}
+.analysis-figure {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+}
+.columns > section,
+.columns > aside {
+  min-width: 0;
+}

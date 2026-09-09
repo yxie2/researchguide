@@ -36,6 +36,14 @@
 - Record researcher responses without granting approval; include reports in exports and guidance context.
 - Computational validation, exhaustive error detection, and research-quality evaluation remain future work.
 
+## v0.6 — Reproducible local R analysis (implemented)
+
+- Versioned CSV import, permission statements, numeric profiles and dataset hashes.
+- Manual or model-proposed descriptive/simple-regression plans, fixed scripts, and explicit execution approval.
+- Bounded local webR execution with actual tables, figures, diagnostics, logs and session versions.
+- Reproduction downloads and execution-backed conversation/consistency context.
+- Arbitrary code, advanced models and stronger general-purpose execution isolation remain future work.
+
 ## Next — A real pilot in one discipline
 
 Recruit beginning PhD students and supervisors before increasing scope. Review the templates with a domain-methods specialist. Choose a licensed public dataset and a narrow, answerable question.
@@ -50,7 +58,7 @@ Recruit beginning PhD students and supervisors before increasing scope. Review t
 
 - Retrieve authorized literature and record source provenance and scope limits.
 - Profile a supported public dataset without treating its contents as instructions.
-- Execute an approved R analysis in an isolated, resource-limited environment.
+- Extend the constrained R runner with reviewed advanced methods and stronger isolation for custom code.
 - Store executable artifacts and compare results with manuscript claims.
 - Add coordinator tool selection and replanning with software-enforced approvals.
 

@@ -1,6 +1,6 @@
 {
   "name": "researchguide",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "A guided research workspace for beginning PhD students and their supervisors.",
@@ -11,9 +11,11 @@
     "start": "node --env-file-if-exists=.env server.mjs",
     "dev": "node --watch --env-file-if-exists=.env server.mjs",
     "test": "node --test",
-    "check": "node --check server.mjs && node --check lib/workflow.mjs && node --check lib/guide.mjs && node --check public/app.js && node --check lib/llm.mjs && node --check lib/conversation.mjs && node --check lib/evidence.mjs && node --check lib/pdf-worker.mjs && node --check lib/consistency.mjs"
+    "check": "node --check server.mjs && node --check lib/workflow.mjs && node --check lib/guide.mjs && node --check public/app.js && node --check lib/llm.mjs && node --check lib/conversation.mjs && node --check lib/evidence.mjs && node --check lib/pdf-worker.mjs && node --check lib/consistency.mjs && node --check lib/analysis.mjs && node --check lib/r-runner.mjs && node --check lib/r-template.mjs"
   },
   "dependencies": {
-    "pdfjs-dist": "6.3.289"
+    "csv-parse": "7.0.2",
+    "pdfjs-dist": "6.3.289",
+    "webr": "0.6.0"
   }
 }
