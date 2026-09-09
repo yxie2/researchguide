@@ -21,7 +21,7 @@ const sources = [
 const data = [
   'execution',
   'Manage your project data workspace',
-  'Keep multiple uploaded datasets and public-data candidates together, record their origins, and inspect each CSV before analysis.',
+  'Keep multiple uploaded datasets and public-data candidates together, record their origins, and inspect each CSV before analysis. Collect new data outside the app under your protocol and permissions.',
 ];
 const analysis = [
   'execution',

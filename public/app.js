@@ -1,6 +1,5 @@
 import {
   workflowFor,
-  recommendTask,
   studyContextCurrent,
   requiresSupervisorReview,
   milestoneFinished,
@@ -3485,7 +3484,6 @@ function settingsPanel() {
 }
 function unifiedWorkflow(panels) {
   const tasks = workflowFor(selected);
-  const suggestion = recommendTask(project, selected, mode);
   const prior = project.milestones.slice(
     0,
     stages.findIndex((s) => s.id === selected),
@@ -3544,43 +3542,6 @@ function unifiedWorkflow(panels) {
   const activeShared = !tasks.some(([id]) => id === tab) && shared.find(([id]) => id === tab);
   const nextIndex = tasks.findIndex(([id]) => id === tab) + 1;
   return [
-    el(
-      'section',
-      { className: 'workflow-direction' },
-      el('p', { className: 'eyebrow' }, 'Your next action'),
-      el(
-        'h2',
-        {},
-        suggestion.id === 'continue'
-          ? 'Continue to the next research step'
-          : tasks.find(([id]) => id === suggestion.id)?.[1] ||
-              shared.find(([id]) => id === suggestion.id)?.[1],
-      ),
-      el('p', {}, suggestion.reason),
-      el(
-        'p',
-        { className: 'small' },
-        selected === 'question'
-          ? 'Save a provisional direction and move into reading. A final question and supervisor sign-off are not required at this stage.'
-          : selected === 'evidence'
-            ? 'Here, literature means prior studies and theory—not results from your own study. Save your refined question in this document before planning the study.'
-            : 'Research is iterative: revisit earlier steps when reading, feasibility or findings justify a change. Writing can develop throughout.',
-      ),
-      button('Go to suggested action', () => selectTask(suggestion.id), 'quiet'),
-      selected === 'evidence' &&
-        button('Revisit the initial direction', () => navigate('question'), 'quiet'),
-      selected === 'data' &&
-        el(
-          'p',
-          { className: 'small' },
-          'Obtain or collect data outside the app under your protocol and permissions. CSV profiling is available here; interviews, fieldwork and advanced preparation are not automated.',
-        ),
-      el(
-        'p',
-        { className: 'small muted' },
-        'Use the tasks your study needs. Mentor feedback is optional and available in Project materials. Save and continue through routine work; supervisor review is required for the protocol and final report. You can draft ahead and revisit earlier steps.',
-      ),
-    ),
     prior.length > 0 &&
       el(
         'details',
@@ -3591,6 +3552,13 @@ function unifiedWorkflow(panels) {
           { className: 'small' },
           'The guide receives saved documents, explanations, review status and the latest 12 conversation turns from each earlier step. Saved drafts carry forward before supervisor approval.',
         ),
+        el(
+          'p',
+          { className: 'small' },
+          'Revisit earlier steps when reading, feasibility or findings justify a change. Writing can develop throughout.',
+        ),
+        selected === 'evidence' &&
+          button('Revisit the initial direction', () => navigate('question'), 'quiet'),
         prior.map((m) =>
           el(
             'section',

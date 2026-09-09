@@ -13,19 +13,6 @@
   background: var(--paper);
   font-synthesis: none;
 }
-.workflow-direction {
-  padding: 1.5rem 1.8rem;
-  background: var(--panel);
-  margin-bottom: 1.5rem;
-}
-.workflow-direction h2 {
-  font-size: 1.7rem;
-  margin-bottom: 0.7rem;
-}
-.workflow-direction > p:last-child {
-  margin-top: 1rem;
-  margin-bottom: 0;
-}
 .workflow-context,
 .workflow-materials {
   padding-block: 1rem;
@@ -82,11 +69,6 @@
   padding-block: 2rem;
   border-top: 2px solid var(--green);
   scroll-margin-top: 1rem;
-}
-@media (max-width: 600px) {
-  .workflow-direction {
-    padding: 1.2rem;
-  }
 }
 .project-manager {
   max-width: 960px;

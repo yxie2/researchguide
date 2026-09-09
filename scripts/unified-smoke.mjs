@@ -18,7 +18,7 @@ try {
   await page.locator('.workflow-sequence').waitFor();
   assert.equal(await page.locator('.tabs').count(), 0);
   assert.equal(await page.locator('.workflow-task').count(), 2);
-  await page.getByRole('button', { name: 'Go to suggested action', exact: true }).click();
+  await openTask(page, 'workspace');
   await page
     .getByLabel('Research direction')
     .fill(
