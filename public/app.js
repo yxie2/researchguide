@@ -760,7 +760,7 @@ function workspace() {
     {
       className: 'artifact',
       maxlength: 20000,
-      placeholder: s.template,
+      placeholder: selected === 'design' ? 'Your study plan appears here' : s.template,
       onInput: (e) => {
         draft.artifact = e.target.value;
         updateSaveLabel();
@@ -815,6 +815,26 @@ function workspace() {
           'text-button',
         ),
       ),
+      selected === 'design' &&
+        el(
+          'details',
+          {},
+          el('summary', {}, 'What to include in your protocol'),
+          el(
+            'p',
+            {},
+            'Use these prompts to write your study plan. They describe parts of the protocol, not additional workflow steps.',
+          ),
+          el(
+            'ul',
+            { className: 'checklist' },
+            s.template
+              .split('\n')
+              .map((line) => line.trim())
+              .filter(Boolean)
+              .map((line) => el('li', {}, line.replace(/:$/, ''))),
+          ),
+        ),
       artifact,
       explanation,
       el(
