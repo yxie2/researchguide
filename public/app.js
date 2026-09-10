@@ -752,7 +752,9 @@ function workspace() {
     s.deliverable,
     selected === 'question'
       ? 'Check your topic, motivation, tentative scope and what you want to learn. If you accepted an AI draft, it is already saved here. If you skipped the conversation, write a brief starting point yourself.'
-      : 'Record your decisions, supporting evidence, and what remains uncertain.',
+      : selected === 'design'
+        ? 'Review and save your study plan: design, sample, measures, analysis, and safeguards. Explain key choices and flag unresolved decisions. Use literature and methodological reasoning to justify the plan; findings from your own study are not expected yet. If you accepted an AI draft, it is already saved here—review and refine it rather than write it again.'
+        : 'Record your decisions, supporting evidence, and what remains uncertain.',
     draft.artifact,
     true,
     {
